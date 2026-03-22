@@ -1,0 +1,14 @@
+services:
+  db:
+    container_name: netflix_db
+    image: postgres:18-alpine
+    ports:
+      - ${DB_PORT}:5432
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    volumes:
+      - postgres-data:/var/lib/postgresql/18/data
+volumes:
+  postgres-data:
