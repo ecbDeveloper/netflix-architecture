@@ -66,6 +66,11 @@ type Episode struct {
 	Reviews         []*Review `json:"reviews"`
 }
 
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type Movie struct {
 	ID              string    `json:"id"`
 	Title           string    `json:"title"`
