@@ -112,7 +112,7 @@ func (s *Service) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
 func toGraphQLModel(e sqlc.Episode) *model.Episode {
 	return &model.Episode{
 		ID:              e.ID.String(),
-		SeriesID:        e.SerieID.Int32,
+		SeriesID:        e.SeriesID.Int32,
 		Season:          e.Season,
 		EpisodeNumber:   e.EpisodeNumber,
 		Title:           e.Title,
