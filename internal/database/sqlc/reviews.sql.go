@@ -137,3 +137,63 @@ func (q *Queries) ListReviewsByMovie(ctx context.Context, movieID pgtype.UUID) (
 	}
 	return items, nil
 }
+
+const listReviewsByProfile = `-- name: ListReviewsByProfile :many
+SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at FROM reviews WHERE profile_id = $1 ORDER BY created_at DESC
+`
+
+func (q *Queries) ListReviewsByProfile(ctx context.Context, profileID pgtype.UUID) ([]Review, error) {
+	rows, err := q.db.Query(ctx, listReviewsByProfile, profileID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Review
+	for rows.Next() {
+		var i Review
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProfileID,
+			&i.MovieID,
+			&i.EpisodeID,
+			&i.Rating,
+			&i.Comment,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateReview = `-- name: UpdateReview :one
+UPDATE reviews
+SET rating = $2, comment = $3
+WHERE id = $1
+RETURNING id, profile_id, movie_id, episode_id, rating, comment, created_at
+`
+
+type UpdateReviewParams struct {
+	ID      int32       `json:"id"`
+	Rating  int32       `json:"rating"`
+	Comment pgtype.Text `json:"comment"`
+}
+
+func (q *Queries) UpdateReview(ctx context.Context, arg UpdateReviewParams) (Review, error) {
+	row := q.db.QueryRow(ctx, updateReview, arg.ID, arg.Rating, arg.Comment)
+	var i Review
+	err := row.Scan(
+		&i.ID,
+		&i.ProfileID,
+		&i.MovieID,
+		&i.EpisodeID,
+		&i.Rating,
+		&i.Comment,
+		&i.CreatedAt,
+	)
+	return i, err
+}
