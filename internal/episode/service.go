@@ -2,6 +2,7 @@ package episode
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
@@ -34,7 +35,7 @@ func (s *Service) CreateEpisode(ctx context.Context, input model.CreateEpisodeIn
 		DurationMinutes: input.DurationMinutes,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create episode: %w", err)
 	}
 
 	return toGraphQLModel(ep), nil
@@ -43,7 +44,7 @@ func (s *Service) CreateEpisode(ctx context.Context, input model.CreateEpisodeIn
 func (s *Service) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error) {
 	ep, err := s.Queries.GetEpisode(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get episode by id: %w", err)
 	}
 
 	return toGraphQLModel(ep), nil
@@ -55,7 +56,7 @@ func (s *Service) ListEpisodes(ctx context.Context, serieID int32) ([]*model.Epi
 		Valid: true,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list episodes: %w", err)
 	}
 
 	result := make([]*model.Episode, len(episodes))
@@ -68,7 +69,7 @@ func (s *Service) ListEpisodes(ctx context.Context, serieID int32) ([]*model.Epi
 func (s *Service) UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error) {
 	current, err := s.Queries.GetEpisode(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get episode to update: %w", err)
 	}
 
 	params := sqlc.UpdateEpisodeParams{
@@ -94,14 +95,18 @@ func (s *Service) UpdateEpisode(ctx context.Context, id uuid.UUID, input model.U
 
 	ep, err := s.Queries.UpdateEpisode(ctx, params)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to update episode: %w", err)
 	}
 
 	return toGraphQLModel(ep), nil
 }
 
 func (s *Service) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
-	return s.Queries.DeleteEpisode(ctx, id)
+	if err := s.Queries.DeleteEpisode(ctx, id); err != nil {
+		return fmt.Errorf("failed to delete episode: %w", err)
+	}
+
+	return nil
 }
 
 func toGraphQLModel(e sqlc.Episode) *model.Episode {

@@ -42,7 +42,7 @@ func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput)
 		ContentUrl:     input.ContentURL,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create movie: %w", err)
 	}
 
 	return toGraphQLModel(movie), nil
@@ -51,7 +51,7 @@ func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput)
 func (s *Service) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error) {
 	movie, err := s.Queries.GetMovie(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get movie: %w", err)
 	}
 
 	return toGraphQLModel(movie), nil
@@ -60,7 +60,7 @@ func (s *Service) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, err
 func (s *Service) ListMovies(ctx context.Context) ([]*model.Movie, error) {
 	movies, err := s.Queries.ListMovies(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list movies: %w", err)
 	}
 
 	result := make([]*model.Movie, len(movies))
@@ -73,7 +73,7 @@ func (s *Service) ListMovies(ctx context.Context) ([]*model.Movie, error) {
 func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.UpdateMovieInput) (*model.Movie, error) {
 	current, err := s.Queries.GetMovie(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get movie to update: %w", err)
 	}
 
 	params := sqlc.UpdateMovieParams{
@@ -118,7 +118,10 @@ func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.Upd
 }
 
 func (s *Service) DeleteMovie(ctx context.Context, id uuid.UUID) error {
-	return s.Queries.DeleteMovie(ctx, id)
+	if err := s.Queries.DeleteMovie(ctx, id); err != nil {
+		return fmt.Errorf("failed to delete movie: %w", err)
+	}
+	return nil
 }
 
 func toGraphQLModel(m sqlc.Movie) *model.Movie {

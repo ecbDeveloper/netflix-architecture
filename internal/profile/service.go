@@ -2,6 +2,7 @@ package profile
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
@@ -42,7 +43,7 @@ func (s *Service) CreateProfile(ctx context.Context, input model.CreateProfileIn
 		HasParentalControls: hasParentalControls,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create profile: %w", err)
 	}
 
 	return toGraphQLModel(p), nil
@@ -51,7 +52,7 @@ func (s *Service) CreateProfile(ctx context.Context, input model.CreateProfileIn
 func (s *Service) GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error) {
 	p, err := s.Queries.GetProfile(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get profile: %w", err)
 	}
 
 	return toGraphQLModel(p), nil
@@ -63,7 +64,7 @@ func (s *Service) ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.
 		Valid: true,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list profiles: %w", err)
 	}
 
 	result := make([]*model.Profile, len(profiles))
@@ -76,7 +77,7 @@ func (s *Service) ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.
 func (s *Service) UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error) {
 	current, err := s.Queries.GetProfile(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get profile to update: %w", err)
 	}
 
 	params := sqlc.UpdateProfileParams{
@@ -94,14 +95,17 @@ func (s *Service) UpdateProfile(ctx context.Context, id uuid.UUID, input model.U
 
 	p, err := s.Queries.UpdateProfile(ctx, params)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to update profile: %w", err)
 	}
 
 	return toGraphQLModel(p), nil
 }
 
 func (s *Service) DeleteProfile(ctx context.Context, id uuid.UUID) error {
-	return s.Queries.DeleteProfile(ctx, id)
+	if err := s.Queries.DeleteProfile(ctx, id); err != nil {
+		return fmt.Errorf("failed to delete profile: %w", err)
+	}
+	return nil
 }
 
 func toGraphQLModel(p sqlc.Profile) *model.Profile {

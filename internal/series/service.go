@@ -42,7 +42,7 @@ func (s *Service) CreateSeries(ctx context.Context, input model.CreateSeriesInpu
 
 	serie, err := s.Queries.CreateSerie(ctx, params)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create series: %w", err)
 	}
 
 	return toGraphQLModel(serie), nil
@@ -51,7 +51,7 @@ func (s *Service) CreateSeries(ctx context.Context, input model.CreateSeriesInpu
 func (s *Service) GetSeries(ctx context.Context, id int32) (*model.Series, error) {
 	serie, err := s.Queries.GetSerie(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get series: %w", err)
 	}
 
 	return toGraphQLModel(serie), nil
@@ -60,7 +60,7 @@ func (s *Service) GetSeries(ctx context.Context, id int32) (*model.Series, error
 func (s *Service) ListSeries(ctx context.Context) ([]*model.Series, error) {
 	seriesList, err := s.Queries.ListSeries(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list series: %w", err)
 	}
 
 	result := make([]*model.Series, len(seriesList))
@@ -73,7 +73,7 @@ func (s *Service) ListSeries(ctx context.Context) ([]*model.Series, error) {
 func (s *Service) UpdateSeries(ctx context.Context, id int32, input model.UpdateSeriesInput) (*model.Series, error) {
 	current, err := s.Queries.GetSerie(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get series to update: %w", err)
 	}
 
 	params := sqlc.UpdateSerieParams{
@@ -103,14 +103,17 @@ func (s *Service) UpdateSeries(ctx context.Context, id int32, input model.Update
 
 	serie, err := s.Queries.UpdateSerie(ctx, params)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to update series: %w", err)
 	}
 
 	return toGraphQLModel(serie), nil
 }
 
 func (s *Service) DeleteSeries(ctx context.Context, id int32) error {
-	return s.Queries.DeleteSerie(ctx, id)
+	if err := s.Queries.DeleteSerie(ctx, id); err != nil {
+		return fmt.Errorf("failed to delete series: %w", err)
+	}
+	return nil
 }
 
 func toGraphQLModel(s sqlc.Series) *model.Series {

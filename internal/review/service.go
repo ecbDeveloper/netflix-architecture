@@ -54,7 +54,7 @@ func (s *Service) CreateReview(ctx context.Context, input model.CreateReviewInpu
 
 	r, err := s.Queries.CreateReview(ctx, params)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create review: %w", err)
 	}
 
 	return toGraphQLModel(r), nil
@@ -63,7 +63,7 @@ func (s *Service) CreateReview(ctx context.Context, input model.CreateReviewInpu
 func (s *Service) GetReview(ctx context.Context, id int32) (*model.Review, error) {
 	r, err := s.Queries.GetReview(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get review: %w", err)
 	}
 
 	return toGraphQLModel(r), nil
@@ -75,7 +75,7 @@ func (s *Service) ListReviews(ctx context.Context, profileID uuid.UUID) ([]*mode
 		Valid: true,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list reviews: %w", err)
 	}
 
 	result := make([]*model.Review, len(reviews))
@@ -88,7 +88,7 @@ func (s *Service) ListReviews(ctx context.Context, profileID uuid.UUID) ([]*mode
 func (s *Service) UpdateReview(ctx context.Context, id int32, input model.UpdateReviewInput) (*model.Review, error) {
 	current, err := s.Queries.GetReview(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get review to update: %w", err)
 	}
 
 	params := sqlc.UpdateReviewParams{
@@ -106,14 +106,17 @@ func (s *Service) UpdateReview(ctx context.Context, id int32, input model.Update
 
 	r, err := s.Queries.UpdateReview(ctx, params)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to update review: %w", err)
 	}
 
 	return toGraphQLModel(r), nil
 }
 
 func (s *Service) DeleteReview(ctx context.Context, id int32) error {
-	return s.Queries.DeleteReview(ctx, id)
+	if err := s.Queries.DeleteReview(ctx, id); err != nil {
+		return fmt.Errorf("failed to delete review: %w", err)
+	}
+	return nil
 }
 
 func toGraphQLModel(r sqlc.Review) *model.Review {

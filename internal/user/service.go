@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	// For context
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
@@ -22,11 +23,10 @@ func NewService(queries *sqlc.Queries) *Service {
 
 func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
 	userID := uuid.New()
-	salt := uuid.New().String()
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	user, err := s.Queries.CreateUser(ctx, sqlc.CreateUserParams{
@@ -35,10 +35,9 @@ func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (
 		Name:     input.Name,
 		Cpf:      input.Cpf,
 		Password: string(hashedPassword),
-		Salt:     salt,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
 	return toGraphQLModel(user), nil
@@ -47,7 +46,7 @@ func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (
 func (s *Service) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
 	user, err := s.Queries.GetUser(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
 	return toGraphQLModel(user), nil
@@ -56,7 +55,7 @@ func (s *Service) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error
 func (s *Service) ListUsers(ctx context.Context) ([]*model.User, error) {
 	users, err := s.Queries.ListUsers(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list users: %w", err)
 	}
 
 	modelUsers := make([]*model.User, len(users))
@@ -78,27 +77,24 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, input model.Upda
 		updateParams.Name = *input.Name
 	}
 	if input.Password != nil {
-		salt := uuid.New().String() // Generate new salt for new password
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*input.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to hash password: %w", err)
 		}
 		updateParams.Password = string(hashedPassword)
-		updateParams.Salt = salt
 	}
 
 	user, err := s.Queries.UpdateUser(ctx, updateParams)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
 
 	return toGraphQLModel(user), nil
 }
 
 func (s *Service) DeleteUser(ctx context.Context, id uuid.UUID) error {
-	err := s.Queries.DeleteUser(ctx, id)
-	if err != nil {
-		return err
+	if err := s.Queries.DeleteUser(ctx, id); err != nil {
+		return fmt.Errorf("failed to delete user: %w", err)
 	}
 
 	return nil
