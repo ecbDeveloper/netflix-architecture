@@ -64,7 +64,6 @@ type User struct {
 	Name      string    `json:"name"`
 	Cpf       string    `json:"cpf"`
 	Password  string    `json:"password"`
-	Salt      string    `json:"salt"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
