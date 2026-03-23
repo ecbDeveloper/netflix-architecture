@@ -3,7 +3,15 @@ package graph
 import (
 	"log/slog"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
+	"github.com/ecbDeveloper/netflix-architecture/internal/episode"
+	"github.com/ecbDeveloper/netflix-architecture/internal/movie"
+	"github.com/ecbDeveloper/netflix-architecture/internal/profile"
+	"github.com/ecbDeveloper/netflix-architecture/internal/review"
+	"github.com/ecbDeveloper/netflix-architecture/internal/series"
+	"github.com/ecbDeveloper/netflix-architecture/internal/user"
+	"github.com/ecbDeveloper/netflix-architecture/internal/watchhistory"
 )
 
 // This file will not be regenerated automatically.
@@ -12,6 +20,15 @@ import (
 // here.
 
 type Resolver struct {
-	Queries *sqlc.Queries
-	Logger  *slog.Logger
+	Queries  *sqlc.Queries
+	Logger   *slog.Logger
+	Sessions *scs.SessionManager
+
+	UserService         *user.Service
+	EpisodeService      *episode.Service
+	MovieService        *movie.Service
+	ProfileService      *profile.Service
+	ReviewService       *review.Service
+	SeriesService       *series.Service
+	WatchhistoryService *watchhistory.Service
 }
