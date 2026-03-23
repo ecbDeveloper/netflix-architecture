@@ -37,7 +37,7 @@ func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (
 		Password: string(hashedPassword),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create user: %w", err)
+		return nil, fmt.Errorf("failed to insert user on database: %w", err)
 	}
 
 	return toGraphQLModel(user), nil
@@ -46,7 +46,7 @@ func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (
 func (s *Service) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
 	user, err := s.Queries.GetUser(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, fmt.Errorf("failed to fetch user %v from database: %w", id, err)
 	}
 
 	return toGraphQLModel(user), nil
@@ -55,7 +55,7 @@ func (s *Service) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error
 func (s *Service) ListUsers(ctx context.Context) ([]*model.User, error) {
 	users, err := s.Queries.ListUsers(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list users: %w", err)
+		return nil, fmt.Errorf("failed to fetch all users from database: %w", err)
 	}
 
 	modelUsers := make([]*model.User, len(users))
@@ -86,7 +86,7 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, input model.Upda
 
 	user, err := s.Queries.UpdateUser(ctx, updateParams)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update user: %w", err)
+		return nil, fmt.Errorf("failed to update user %v from database: %w", id, err)
 	}
 
 	return toGraphQLModel(user), nil
@@ -94,7 +94,7 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, input model.Upda
 
 func (s *Service) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteUser(ctx, id); err != nil {
-		return fmt.Errorf("failed to delete user: %w", err)
+		return fmt.Errorf("failed to delete user %v from database: %w", id, err)
 	}
 
 	return nil

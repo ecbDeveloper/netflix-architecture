@@ -42,7 +42,7 @@ func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput)
 		ContentUrl:     input.ContentURL,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create movie: %w", err)
+		return nil, fmt.Errorf("failed to insert movie on database: %w", err)
 	}
 
 	return toGraphQLModel(movie), nil
@@ -51,7 +51,7 @@ func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput)
 func (s *Service) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error) {
 	movie, err := s.Queries.GetMovie(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get movie: %w", err)
+		return nil, fmt.Errorf("failed to fetch movie %v from database: %w", id, err)
 	}
 
 	return toGraphQLModel(movie), nil
@@ -60,7 +60,7 @@ func (s *Service) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, err
 func (s *Service) ListMovies(ctx context.Context) ([]*model.Movie, error) {
 	movies, err := s.Queries.ListMovies(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list movies: %w", err)
+		return nil, fmt.Errorf("failed to fetch all movies from database: %w", err)
 	}
 
 	result := make([]*model.Movie, len(movies))
@@ -73,7 +73,7 @@ func (s *Service) ListMovies(ctx context.Context) ([]*model.Movie, error) {
 func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.UpdateMovieInput) (*model.Movie, error) {
 	current, err := s.Queries.GetMovie(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get movie to update: %w", err)
+		return nil, fmt.Errorf("failed to get movie %v to update from database: %w", id, err)
 	}
 
 	params := sqlc.UpdateMovieParams{
@@ -111,7 +111,7 @@ func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.Upd
 
 	movie, err := s.Queries.UpdateMovie(ctx, params)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to update movie %v from database: %w", id, err)
 	}
 
 	return toGraphQLModel(movie), nil
@@ -119,7 +119,7 @@ func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.Upd
 
 func (s *Service) DeleteMovie(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteMovie(ctx, id); err != nil {
-		return fmt.Errorf("failed to delete movie: %w", err)
+		return fmt.Errorf("failed to delete movie %v from database: %w", id, err)
 	}
 	return nil
 }

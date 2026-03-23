@@ -59,7 +59,7 @@ func (s *Service) CreateWatchHistory(ctx context.Context, input model.CreateWatc
 
 	wh, err := s.Queries.CreateWatchHistory(ctx, params)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create watch history: %w", err)
+		return nil, fmt.Errorf("failed to insert watch history on database: %w", err)
 	}
 
 	return toGraphQLModel(wh), nil
@@ -68,7 +68,7 @@ func (s *Service) CreateWatchHistory(ctx context.Context, input model.CreateWatc
 func (s *Service) GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error) {
 	wh, err := s.Queries.GetWatchHistory(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get watch history: %w", err)
+		return nil, fmt.Errorf("failed to fetch watch history %v from database: %w", id, err)
 	}
 
 	return toGraphQLModel(wh), nil
@@ -80,7 +80,7 @@ func (s *Service) ListWatchHistories(ctx context.Context, profileID uuid.UUID) (
 		Valid: true,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to list watch histories: %w", err)
+		return nil, fmt.Errorf("failed to fetch all watch histories from database: %w", err)
 	}
 
 	result := make([]*model.WatchHistory, len(histories))
@@ -93,7 +93,7 @@ func (s *Service) ListWatchHistories(ctx context.Context, profileID uuid.UUID) (
 func (s *Service) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
 	current, err := s.Queries.GetWatchHistory(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get watch history to update: %w", err)
+		return nil, fmt.Errorf("failed to get watch history %v to update from database: %w", id, err)
 	}
 
 	params := sqlc.UpdateWatchProgressParams{
@@ -111,7 +111,7 @@ func (s *Service) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input mo
 
 	wh, err := s.Queries.UpdateWatchProgress(ctx, params)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update watch history: %w", err)
+		return nil, fmt.Errorf("failed to update watch history %v from database: %w", id, err)
 	}
 
 	return toGraphQLModel(wh), nil
@@ -119,7 +119,7 @@ func (s *Service) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input mo
 
 func (s *Service) DeleteWatchHistory(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteWatchHistory(ctx, id); err != nil {
-		return fmt.Errorf("failed to delete watch history: %w", err)
+		return fmt.Errorf("failed to delete watch history %v from database: %w", id, err)
 	}
 	return nil
 }
