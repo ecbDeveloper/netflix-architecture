@@ -1,0 +1,39 @@
+type Movie {
+  id: ID!
+  title: String!
+  description: String!
+  durationMinutes: Int!
+  releaseDate: String!
+  maturityRating: String!
+  contentUrl: String!
+  reviews: [Review!]!
+}
+
+input CreateMovieInput {
+  title: String!
+  description: String!
+  durationMinutes: Int!
+  releaseDate: String!
+  maturityRating: String!
+  contentUrl: String!
+}
+
+input UpdateMovieInput {
+  title: String
+  description: String
+  durationMinutes: Int
+  releaseDate: String
+  maturityRating: String
+  contentUrl: String
+}
+
+extend type Query {
+  getMovie(id: ID!): Movie
+  listMovies: [Movie!]!
+}
+
+extend type Mutation {
+  createMovie(input: CreateMovieInput!): Movie!
+  updateMovie(id: ID!, input: UpdateMovieInput!): Movie!
+  deleteMovie(id: ID!): Boolean!
+}

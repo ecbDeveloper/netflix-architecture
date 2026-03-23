@@ -1,0 +1,32 @@
+type Profile {
+  id: ID!
+  userId: ID!
+  name: String!
+  hasParentalControls: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  reviews: [Review!]!
+  watchHistories: [WatchHistory!]!
+}
+
+input CreateProfileInput {
+  userId: ID!
+  name: String!
+  hasParentalControls: Boolean
+}
+
+input UpdateProfileInput {
+  name: String
+  hasParentalControls: Boolean
+}
+
+extend type Query {
+  getProfile(id: ID!): Profile
+  listProfiles(userId: ID!): [Profile!]!
+}
+
+extend type Mutation {
+  createProfile(input: CreateProfileInput!): Profile!
+  updateProfile(id: ID!, input: UpdateProfileInput!): Profile!
+  deleteProfile(id: ID!): Boolean!
+}

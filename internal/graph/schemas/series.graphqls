@@ -1,0 +1,33 @@
+type Series {
+  id: ID!
+  title: String!
+  description: String
+  releaseDate: String
+  maturityRating: String
+  episodes: [Episode!]!
+}
+
+input CreateSeriesInput {
+  title: String!
+  description: String
+  releaseDate: String
+  maturityRating: String
+}
+
+input UpdateSeriesInput {
+  title: String
+  description: String
+  releaseDate: String
+  maturityRating: String
+}
+
+extend type Query {
+  getSeries(id: ID!): Series
+  listSeries: [Series!]!
+}
+
+extend type Mutation {
+  createSeries(input: CreateSeriesInput!): Series!
+  updateSeries(id: ID!, input: UpdateSeriesInput!): Series!
+  deleteSeries(id: ID!): Boolean!
+}

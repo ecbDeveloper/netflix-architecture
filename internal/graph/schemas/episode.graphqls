@@ -1,0 +1,36 @@
+type Episode {
+  id: ID!
+  serieId: Int!
+  season: Int!
+  episodeNumber: Int!
+  title: String!
+  durationMinutes: Int!
+  createdAt: String!
+  reviews: [Review!]!
+}
+
+input CreateEpisodeInput {
+  serieId: Int!
+  season: Int!
+  episodeNumber: Int!
+  title: String!
+  durationMinutes: Int!
+}
+
+input UpdateEpisodeInput {
+  season: Int
+  episodeNumber: Int
+  title: String
+  durationMinutes: Int
+}
+
+extend type Query {
+  getEpisode(id: ID!): Episode
+  listEpisodes(serieId: Int!): [Episode!]!
+}
+
+extend type Mutation {
+  createEpisode(input: CreateEpisodeInput!): Episode!
+  updateEpisode(id: ID!, input: UpdateEpisodeInput!): Episode!
+  deleteEpisode(id: ID!): Boolean!
+}

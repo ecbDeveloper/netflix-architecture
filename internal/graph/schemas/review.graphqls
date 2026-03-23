@@ -1,0 +1,33 @@
+type Review {
+  id: ID!
+  profileId: ID!
+  movieId: ID
+  episodeId: ID
+  rating: Int!
+  comment: String
+  createdAt: String!
+}
+
+input CreateReviewInput {
+  profileId: ID!
+  movieId: ID
+  episodeId: ID
+  rating: Int!
+  comment: String
+}
+
+input UpdateReviewInput {
+  rating: Int
+  comment: String
+}
+
+extend type Query {
+  getReview(id: ID!): Review
+  listReviews(profileId: ID!): [Review!]!
+}
+
+extend type Mutation {
+  createReview(input: CreateReviewInput!): Review!
+  updateReview(id: ID!, input: UpdateReviewInput!): Review!
+  deleteReview(id: ID!): Boolean!
+}

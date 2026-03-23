@@ -1,0 +1,33 @@
+type WatchHistory {
+  id: ID!
+  profileId: ID!
+  movieId: ID
+  episodeId: ID
+  watchedAt: String!
+  lastPositionSeconds: Int
+  isCompleted: Boolean
+}
+
+input CreateWatchHistoryInput {
+  profileId: ID!
+  movieId: ID
+  episodeId: ID
+  lastPositionSeconds: Int
+  isCompleted: Boolean
+}
+
+input UpdateWatchHistoryInput {
+  lastPositionSeconds: Int
+  isCompleted: Boolean
+}
+
+extend type Query {
+  getWatchHistory(id: ID!): WatchHistory
+  listWatchHistories(profileId: ID!): [WatchHistory!]!
+}
+
+extend type Mutation {
+  createWatchHistory(input: CreateWatchHistoryInput!): WatchHistory!
+  updateWatchHistory(id: ID!, input: UpdateWatchHistoryInput!): WatchHistory!
+  deleteWatchHistory(id: ID!): Boolean!
+}
