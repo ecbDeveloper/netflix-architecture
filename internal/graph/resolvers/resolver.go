@@ -1,4 +1,4 @@
-package graph
+package resolvers
 
 import (
 	"log/slog"
@@ -7,6 +7,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/internal/auth"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/episode"
+	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/movie"
 	"github.com/ecbDeveloper/netflix-architecture/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/internal/review"
@@ -34,3 +35,12 @@ type Resolver struct {
 	WatchhistoryService *watchhistory.Service
 	AuthService         *auth.Service
 }
+
+// Mutation returns graph.MutationResolver implementation.
+func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
+
+// Query returns graph.QueryResolver implementation.
+func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
+
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }

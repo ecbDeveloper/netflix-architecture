@@ -15,9 +15,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/alexedwards/scs/pgxstore"
 	"github.com/alexedwards/scs/v2"
+	"github.com/ecbDeveloper/netflix-architecture/internal/auth"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/episode"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
+	"github.com/ecbDeveloper/netflix-architecture/internal/graph/resolvers"
 	"github.com/ecbDeveloper/netflix-architecture/internal/movie"
 	"github.com/ecbDeveloper/netflix-architecture/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/internal/review"
@@ -48,7 +50,7 @@ func main() {
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_PASS"),
 		os.Getenv("DB_NAME"),
 	)
 
@@ -72,10 +74,11 @@ func main() {
 	reviewService := review.NewService(queries)
 	seriesService := series.NewService(queries)
 	watchhistoryService := watchhistory.NewService(queries)
+	authService := auth.NewService(queries)
 
 	router.Use(s.LoadAndSave)
 
-	graphConfig := graph.Config{Resolvers: &graph.Resolver{
+	graphConfig := graph.Config{Resolvers: &resolvers.Resolver{
 		Queries:             queries,
 		Logger:              logger,
 		Sessions:            s,
@@ -86,6 +89,7 @@ func main() {
 		ReviewService:       reviewService,
 		SeriesService:       seriesService,
 		WatchhistoryService: watchhistoryService,
+		AuthService:         authService,
 	}}
 
 	srv := handler.New(graph.NewExecutableSchema(graphConfig))
