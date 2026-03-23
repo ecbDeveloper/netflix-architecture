@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/ecbDeveloper/netflix-architecture/internal/auth"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/episode"
 	"github.com/ecbDeveloper/netflix-architecture/internal/movie"
@@ -31,4 +32,5 @@ type Resolver struct {
 	ReviewService       *review.Service
 	SeriesService       *series.Service
 	WatchhistoryService *watchhistory.Service
+	AuthService         *auth.Service
 }
