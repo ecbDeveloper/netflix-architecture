@@ -29,7 +29,7 @@ func (s *Service) Login(ctx context.Context, input model.LoginInput) (uuid.UUID,
 			return uuid.UUID{}, fmt.Errorf("user not found: %w", err)
 		}
 
-		return uuid.UUID{}, fmt.Errorf("failed to get user by id: %w", err)
+		return uuid.UUID{}, fmt.Errorf("failed to fetch user by email from database: %w", err)
 
 	}
 
