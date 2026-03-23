@@ -12,14 +12,179 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 )
 
-// CreateFodo is the resolver for the createFodo field.
-func (r *mutationResolver) CreateFodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateFodo - createFodo"))
+// CreateUser is the resolver for the createUser field.
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+// UpdateUser is the resolver for the updateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input model.UpdateUserInput) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: UpdateUser - updateUser"))
+}
+
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+}
+
+// CreateProfile is the resolver for the createProfile field.
+func (r *mutationResolver) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
+	panic(fmt.Errorf("not implemented: CreateProfile - createProfile"))
+}
+
+// UpdateProfile is the resolver for the updateProfile field.
+func (r *mutationResolver) UpdateProfile(ctx context.Context, id string, input model.UpdateProfileInput) (*model.Profile, error) {
+	panic(fmt.Errorf("not implemented: UpdateProfile - updateProfile"))
+}
+
+// DeleteProfile is the resolver for the deleteProfile field.
+func (r *mutationResolver) DeleteProfile(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteProfile - deleteProfile"))
+}
+
+// CreateMovie is the resolver for the createMovie field.
+func (r *mutationResolver) CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error) {
+	panic(fmt.Errorf("not implemented: CreateMovie - createMovie"))
+}
+
+// UpdateMovie is the resolver for the updateMovie field.
+func (r *mutationResolver) UpdateMovie(ctx context.Context, id string, input model.UpdateMovieInput) (*model.Movie, error) {
+	panic(fmt.Errorf("not implemented: UpdateMovie - updateMovie"))
+}
+
+// DeleteMovie is the resolver for the deleteMovie field.
+func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteMovie - deleteMovie"))
+}
+
+// CreateSeries is the resolver for the createSeries field.
+func (r *mutationResolver) CreateSeries(ctx context.Context, input model.CreateSeriesInput) (*model.Series, error) {
+	panic(fmt.Errorf("not implemented: CreateSeries - createSeries"))
+}
+
+// UpdateSeries is the resolver for the updateSeries field.
+func (r *mutationResolver) UpdateSeries(ctx context.Context, id string, input model.UpdateSeriesInput) (*model.Series, error) {
+	panic(fmt.Errorf("not implemented: UpdateSeries - updateSeries"))
+}
+
+// DeleteSeries is the resolver for the deleteSeries field.
+func (r *mutationResolver) DeleteSeries(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteSeries - deleteSeries"))
+}
+
+// CreateEpisode is the resolver for the createEpisode field.
+func (r *mutationResolver) CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error) {
+	panic(fmt.Errorf("not implemented: CreateEpisode - createEpisode"))
+}
+
+// UpdateEpisode is the resolver for the updateEpisode field.
+func (r *mutationResolver) UpdateEpisode(ctx context.Context, id string, input model.UpdateEpisodeInput) (*model.Episode, error) {
+	panic(fmt.Errorf("not implemented: UpdateEpisode - updateEpisode"))
+}
+
+// DeleteEpisode is the resolver for the deleteEpisode field.
+func (r *mutationResolver) DeleteEpisode(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteEpisode - deleteEpisode"))
+}
+
+// CreateReview is the resolver for the createReview field.
+func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error) {
+	panic(fmt.Errorf("not implemented: CreateReview - createReview"))
+}
+
+// UpdateReview is the resolver for the updateReview field.
+func (r *mutationResolver) UpdateReview(ctx context.Context, id string, input model.UpdateReviewInput) (*model.Review, error) {
+	panic(fmt.Errorf("not implemented: UpdateReview - updateReview"))
+}
+
+// DeleteReview is the resolver for the deleteReview field.
+func (r *mutationResolver) DeleteReview(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteReview - deleteReview"))
+}
+
+// CreateWatchHistory is the resolver for the createWatchHistory field.
+func (r *mutationResolver) CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
+	panic(fmt.Errorf("not implemented: CreateWatchHistory - createWatchHistory"))
+}
+
+// UpdateWatchHistory is the resolver for the updateWatchHistory field.
+func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id string, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
+	panic(fmt.Errorf("not implemented: UpdateWatchHistory - updateWatchHistory"))
+}
+
+// DeleteWatchHistory is the resolver for the deleteWatchHistory field.
+func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteWatchHistory - deleteWatchHistory"))
+}
+
+// GetUser is the resolver for the getUser field.
+func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: GetUser - getUser"))
+}
+
+// ListUsers is the resolver for the listUsers field.
+func (r *queryResolver) ListUsers(ctx context.Context) ([]*model.User, error) {
+	panic(fmt.Errorf("not implemented: ListUsers - listUsers"))
+}
+
+// GetProfile is the resolver for the getProfile field.
+func (r *queryResolver) GetProfile(ctx context.Context, id string) (*model.Profile, error) {
+	panic(fmt.Errorf("not implemented: GetProfile - getProfile"))
+}
+
+// ListProfiles is the resolver for the listProfiles field.
+func (r *queryResolver) ListProfiles(ctx context.Context, userID string) ([]*model.Profile, error) {
+	panic(fmt.Errorf("not implemented: ListProfiles - listProfiles"))
+}
+
+// GetMovie is the resolver for the getMovie field.
+func (r *queryResolver) GetMovie(ctx context.Context, id string) (*model.Movie, error) {
+	panic(fmt.Errorf("not implemented: GetMovie - getMovie"))
+}
+
+// ListMovies is the resolver for the listMovies field.
+func (r *queryResolver) ListMovies(ctx context.Context) ([]*model.Movie, error) {
+	panic(fmt.Errorf("not implemented: ListMovies - listMovies"))
+}
+
+// GetSeries is the resolver for the getSeries field.
+func (r *queryResolver) GetSeries(ctx context.Context, id string) (*model.Series, error) {
+	panic(fmt.Errorf("not implemented: GetSeries - getSeries"))
+}
+
+// ListSeries is the resolver for the listSeries field.
+func (r *queryResolver) ListSeries(ctx context.Context) ([]*model.Series, error) {
+	panic(fmt.Errorf("not implemented: ListSeries - listSeries"))
+}
+
+// GetEpisode is the resolver for the getEpisode field.
+func (r *queryResolver) GetEpisode(ctx context.Context, id string) (*model.Episode, error) {
+	panic(fmt.Errorf("not implemented: GetEpisode - getEpisode"))
+}
+
+// ListEpisodes is the resolver for the listEpisodes field.
+func (r *queryResolver) ListEpisodes(ctx context.Context, serieID int32) ([]*model.Episode, error) {
+	panic(fmt.Errorf("not implemented: ListEpisodes - listEpisodes"))
+}
+
+// GetReview is the resolver for the getReview field.
+func (r *queryResolver) GetReview(ctx context.Context, id string) (*model.Review, error) {
+	panic(fmt.Errorf("not implemented: GetReview - getReview"))
+}
+
+// ListReviews is the resolver for the listReviews field.
+func (r *queryResolver) ListReviews(ctx context.Context, profileID string) ([]*model.Review, error) {
+	panic(fmt.Errorf("not implemented: ListReviews - listReviews"))
+}
+
+// GetWatchHistory is the resolver for the getWatchHistory field.
+func (r *queryResolver) GetWatchHistory(ctx context.Context, id string) (*model.WatchHistory, error) {
+	panic(fmt.Errorf("not implemented: GetWatchHistory - getWatchHistory"))
+}
+
+// ListWatchHistories is the resolver for the listWatchHistories field.
+func (r *queryResolver) ListWatchHistories(ctx context.Context, profileID string) ([]*model.WatchHistory, error) {
+	panic(fmt.Errorf("not implemented: ListWatchHistories - listWatchHistories"))
 }
 
 // Mutation returns MutationResolver implementation.
@@ -32,15 +197,3 @@ type (
 	mutationResolver struct{ *Resolver }
 	queryResolver    struct{ *Resolver }
 )
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
-}
-*/

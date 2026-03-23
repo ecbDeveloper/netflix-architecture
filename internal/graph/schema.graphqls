@@ -1,28 +1,221 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
-}
-
 type User {
   id: ID!
+  email: String!
   name: String!
+  cpf: String!
+  createdAt: String!
+  updatedAt: String!
+  profiles: [Profile!]!
+}
+
+type Profile {
+  id: ID!
+  userId: ID!
+  name: String!
+  hasParentalControls: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  reviews: [Review!]!
+  watchHistories: [WatchHistory!]!
+}
+
+type Movie {
+  id: ID!
+  title: String!
+  description: String!
+  durationMinutes: Int!
+  releaseDate: String!
+  maturityRating: String!
+  contentUrl: String!
+  reviews: [Review!]!
+}
+
+type Series {
+  id: ID!
+  title: String!
+  description: String
+  releaseDate: String
+  maturityRating: String
+  episodes: [Episode!]!
+}
+
+type Episode {
+  id: ID!
+  serieId: Int!
+  season: Int!
+  episodeNumber: Int!
+  title: String!
+  durationMinutes: Int!
+  createdAt: String!
+  reviews: [Review!]!
+}
+
+type Review {
+  id: ID!
+  profileId: ID!
+  movieId: ID
+  episodeId: ID
+  rating: Int!
+  comment: String
+  createdAt: String!
+}
+
+type WatchHistory {
+  id: ID!
+  profileId: ID!
+  movieId: ID
+  episodeId: ID
+  watchedAt: String!
+  lastPositionSeconds: Int
+  isCompleted: Boolean
+}
+
+input CreateUserInput {
+  email: String!
+  name: String!
+  cpf: String!
+  password: String!
+}
+
+input UpdateUserInput {
+  email: String
+  name: String
+  password: String
+}
+
+input CreateProfileInput {
+  userId: ID!
+  name: String!
+  hasParentalControls: Boolean
+}
+
+input UpdateProfileInput {
+  name: String
+  hasParentalControls: Boolean
+}
+
+input CreateMovieInput {
+  title: String!
+  description: String!
+  durationMinutes: Int!
+  releaseDate: String!
+  maturityRating: String!
+  contentUrl: String!
+}
+
+input UpdateMovieInput {
+  title: String
+  description: String
+  durationMinutes: Int
+  releaseDate: String
+  maturityRating: String
+  contentUrl: String
+}
+
+input CreateSeriesInput {
+  title: String!
+  description: String
+  releaseDate: String
+  maturityRating: String
+}
+
+input UpdateSeriesInput {
+  title: String
+  description: String
+  releaseDate: String
+  maturityRating: String
+}
+
+input CreateEpisodeInput {
+  serieId: Int!
+  season: Int!
+  episodeNumber: Int!
+  title: String!
+  durationMinutes: Int!
+}
+
+input UpdateEpisodeInput {
+  season: Int
+  episodeNumber: Int
+  title: String
+  durationMinutes: Int
+}
+
+input CreateReviewInput {
+  profileId: ID!
+  movieId: ID
+  episodeId: ID
+  rating: Int!
+  comment: String
+}
+
+input UpdateReviewInput {
+  rating: Int
+  comment: String
+}
+
+input CreateWatchHistoryInput {
+  profileId: ID!
+  movieId: ID
+  episodeId: ID
+  lastPositionSeconds: Int
+  isCompleted: Boolean
+}
+
+input UpdateWatchHistoryInput {
+  lastPositionSeconds: Int
+  isCompleted: Boolean
 }
 
 type Query {
-  todos: [Todo!]!
-}
+  getUser(id: ID!): User
+  listUsers: [User!]!
 
-input NewTodo {
-  text: String!
-  userId: String!
+  getProfile(id: ID!): Profile
+  listProfiles(userId: ID!): [Profile!]!
+
+  getMovie(id: ID!): Movie
+  listMovies: [Movie!]!
+
+  getSeries(id: ID!): Series
+  listSeries: [Series!]!
+
+  getEpisode(id: ID!): Episode
+  listEpisodes(serieId: Int!): [Episode!]!
+
+  getReview(id: ID!): Review
+  listReviews(profileId: ID!): [Review!]!
+
+  getWatchHistory(id: ID!): WatchHistory
+  listWatchHistories(profileId: ID!): [WatchHistory!]!
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+  deleteUser(id: ID!): Boolean!
+
+  createProfile(input: CreateProfileInput!): Profile!
+  updateProfile(id: ID!, input: UpdateProfileInput!): Profile!
+  deleteProfile(id: ID!): Boolean!
+
+  createMovie(input: CreateMovieInput!): Movie!
+  updateMovie(id: ID!, input: UpdateMovieInput!): Movie!
+  deleteMovie(id: ID!): Boolean!
+
+  createSeries(input: CreateSeriesInput!): Series!
+  updateSeries(id: ID!, input: UpdateSeriesInput!): Series!
+  deleteSeries(id: ID!): Boolean!
+
+  createEpisode(input: CreateEpisodeInput!): Episode!
+  updateEpisode(id: ID!, input: UpdateEpisodeInput!): Episode!
+  deleteEpisode(id: ID!): Boolean!
+
+  createReview(input: CreateReviewInput!): Review!
+  updateReview(id: ID!, input: UpdateReviewInput!): Review!
+  deleteReview(id: ID!): Boolean!
+
+  createWatchHistory(input: CreateWatchHistoryInput!): WatchHistory!
+  updateWatchHistory(id: ID!, input: UpdateWatchHistoryInput!): WatchHistory!
+  deleteWatchHistory(id: ID!): Boolean!
 }

@@ -2,25 +2,177 @@
 
 package model
 
+type CreateEpisodeInput struct {
+	SerieID         int32  `json:"serieId"`
+	Season          int32  `json:"season"`
+	EpisodeNumber   int32  `json:"episodeNumber"`
+	Title           string `json:"title"`
+	DurationMinutes int32  `json:"durationMinutes"`
+}
+
+type CreateMovieInput struct {
+	Title           string `json:"title"`
+	Description     string `json:"description"`
+	DurationMinutes int32  `json:"durationMinutes"`
+	ReleaseDate     string `json:"releaseDate"`
+	MaturityRating  string `json:"maturityRating"`
+	ContentURL      string `json:"contentUrl"`
+}
+
+type CreateProfileInput struct {
+	UserID              string `json:"userId"`
+	Name                string `json:"name"`
+	HasParentalControls *bool  `json:"hasParentalControls,omitempty"`
+}
+
+type CreateReviewInput struct {
+	ProfileID string  `json:"profileId"`
+	MovieID   *string `json:"movieId,omitempty"`
+	EpisodeID *string `json:"episodeId,omitempty"`
+	Rating    int32   `json:"rating"`
+	Comment   *string `json:"comment,omitempty"`
+}
+
+type CreateSeriesInput struct {
+	Title          string  `json:"title"`
+	Description    *string `json:"description,omitempty"`
+	ReleaseDate    *string `json:"releaseDate,omitempty"`
+	MaturityRating *string `json:"maturityRating,omitempty"`
+}
+
+type CreateUserInput struct {
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Cpf      string `json:"cpf"`
+	Password string `json:"password"`
+}
+
+type CreateWatchHistoryInput struct {
+	ProfileID           string  `json:"profileId"`
+	MovieID             *string `json:"movieId,omitempty"`
+	EpisodeID           *string `json:"episodeId,omitempty"`
+	LastPositionSeconds *int32  `json:"lastPositionSeconds,omitempty"`
+	IsCompleted         *bool   `json:"isCompleted,omitempty"`
+}
+
+type Episode struct {
+	ID              string    `json:"id"`
+	SerieID         int32     `json:"serieId"`
+	Season          int32     `json:"season"`
+	EpisodeNumber   int32     `json:"episodeNumber"`
+	Title           string    `json:"title"`
+	DurationMinutes int32     `json:"durationMinutes"`
+	CreatedAt       string    `json:"createdAt"`
+	Reviews         []*Review `json:"reviews"`
+}
+
+type Movie struct {
+	ID              string    `json:"id"`
+	Title           string    `json:"title"`
+	Description     string    `json:"description"`
+	DurationMinutes int32     `json:"durationMinutes"`
+	ReleaseDate     string    `json:"releaseDate"`
+	MaturityRating  string    `json:"maturityRating"`
+	ContentURL      string    `json:"contentUrl"`
+	Reviews         []*Review `json:"reviews"`
+}
+
 type Mutation struct {
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type Profile struct {
+	ID                  string          `json:"id"`
+	UserID              string          `json:"userId"`
+	Name                string          `json:"name"`
+	HasParentalControls bool            `json:"hasParentalControls"`
+	CreatedAt           string          `json:"createdAt"`
+	UpdatedAt           string          `json:"updatedAt"`
+	Reviews             []*Review       `json:"reviews"`
+	WatchHistories      []*WatchHistory `json:"watchHistories"`
 }
 
 type Query struct {
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type Review struct {
+	ID        string  `json:"id"`
+	ProfileID string  `json:"profileId"`
+	MovieID   *string `json:"movieId,omitempty"`
+	EpisodeID *string `json:"episodeId,omitempty"`
+	Rating    int32   `json:"rating"`
+	Comment   *string `json:"comment,omitempty"`
+	CreatedAt string  `json:"createdAt"`
+}
+
+type Series struct {
+	ID             string     `json:"id"`
+	Title          string     `json:"title"`
+	Description    *string    `json:"description,omitempty"`
+	ReleaseDate    *string    `json:"releaseDate,omitempty"`
+	MaturityRating *string    `json:"maturityRating,omitempty"`
+	Episodes       []*Episode `json:"episodes"`
+}
+
+type UpdateEpisodeInput struct {
+	Season          *int32  `json:"season,omitempty"`
+	EpisodeNumber   *int32  `json:"episodeNumber,omitempty"`
+	Title           *string `json:"title,omitempty"`
+	DurationMinutes *int32  `json:"durationMinutes,omitempty"`
+}
+
+type UpdateMovieInput struct {
+	Title           *string `json:"title,omitempty"`
+	Description     *string `json:"description,omitempty"`
+	DurationMinutes *int32  `json:"durationMinutes,omitempty"`
+	ReleaseDate     *string `json:"releaseDate,omitempty"`
+	MaturityRating  *string `json:"maturityRating,omitempty"`
+	ContentURL      *string `json:"contentUrl,omitempty"`
+}
+
+type UpdateProfileInput struct {
+	Name                *string `json:"name,omitempty"`
+	HasParentalControls *bool   `json:"hasParentalControls,omitempty"`
+}
+
+type UpdateReviewInput struct {
+	Rating  *int32  `json:"rating,omitempty"`
+	Comment *string `json:"comment,omitempty"`
+}
+
+type UpdateSeriesInput struct {
+	Title          *string `json:"title,omitempty"`
+	Description    *string `json:"description,omitempty"`
+	ReleaseDate    *string `json:"releaseDate,omitempty"`
+	MaturityRating *string `json:"maturityRating,omitempty"`
+}
+
+type UpdateUserInput struct {
+	Email    *string `json:"email,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Password *string `json:"password,omitempty"`
+}
+
+type UpdateWatchHistoryInput struct {
+	LastPositionSeconds *int32 `json:"lastPositionSeconds,omitempty"`
+	IsCompleted         *bool  `json:"isCompleted,omitempty"`
 }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID        string     `json:"id"`
+	Email     string     `json:"email"`
+	Name      string     `json:"name"`
+	Cpf       string     `json:"cpf"`
+	CreatedAt string     `json:"createdAt"`
+	UpdatedAt string     `json:"updatedAt"`
+	Profiles  []*Profile `json:"profiles"`
+}
+
+type WatchHistory struct {
+	ID                  string  `json:"id"`
+	ProfileID           string  `json:"profileId"`
+	MovieID             *string `json:"movieId,omitempty"`
+	EpisodeID           *string `json:"episodeId,omitempty"`
+	WatchedAt           string  `json:"watchedAt"`
+	LastPositionSeconds *int32  `json:"lastPositionSeconds,omitempty"`
+	IsCompleted         *bool   `json:"isCompleted,omitempty"`
 }
