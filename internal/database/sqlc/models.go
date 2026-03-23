@@ -13,7 +13,7 @@ import (
 
 type Episode struct {
 	ID              uuid.UUID   `json:"id"`
-	SerieID         pgtype.Int4 `json:"serie_id"`
+	SeriesID        pgtype.Int4 `json:"series_id"`
 	Season          int32       `json:"season"`
 	EpisodeNumber   int32       `json:"episode_number"`
 	Title           string      `json:"title"`

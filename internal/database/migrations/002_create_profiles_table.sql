@@ -7,7 +7,7 @@ CREATE TABLE profiles (
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-  UNIQUE (user_id, profile_name)
+  UNIQUE (user_id, name)
 );
 ---- create above / drop below ----
 IF EXISTS DROP TABLE profiles;

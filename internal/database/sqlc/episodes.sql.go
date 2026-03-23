@@ -13,14 +13,14 @@ import (
 )
 
 const createEpisode = `-- name: CreateEpisode :one
-INSERT INTO episodes (id, serie_id, season, episode_number, title, duration_minutes)
+INSERT INTO episodes (id, series_id, season, episode_number, title, duration_minutes)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, serie_id, season, episode_number, title, duration_minutes, created_at
+RETURNING id, series_id, season, episode_number, title, duration_minutes, created_at
 `
 
 type CreateEpisodeParams struct {
 	ID              uuid.UUID   `json:"id"`
-	SerieID         pgtype.Int4 `json:"serie_id"`
+	SeriesID        pgtype.Int4 `json:"series_id"`
 	Season          int32       `json:"season"`
 	EpisodeNumber   int32       `json:"episode_number"`
 	Title           string      `json:"title"`
@@ -30,7 +30,7 @@ type CreateEpisodeParams struct {
 func (q *Queries) CreateEpisode(ctx context.Context, arg CreateEpisodeParams) (Episode, error) {
 	row := q.db.QueryRow(ctx, createEpisode,
 		arg.ID,
-		arg.SerieID,
+		arg.SeriesID,
 		arg.Season,
 		arg.EpisodeNumber,
 		arg.Title,
@@ -39,7 +39,7 @@ func (q *Queries) CreateEpisode(ctx context.Context, arg CreateEpisodeParams) (E
 	var i Episode
 	err := row.Scan(
 		&i.ID,
-		&i.SerieID,
+		&i.SeriesID,
 		&i.Season,
 		&i.EpisodeNumber,
 		&i.Title,
@@ -59,7 +59,7 @@ func (q *Queries) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
 }
 
 const getEpisode = `-- name: GetEpisode :one
-SELECT id, serie_id, season, episode_number, title, duration_minutes, created_at FROM episodes WHERE id = $1
+SELECT id, series_id, season, episode_number, title, duration_minutes, created_at FROM episodes WHERE id = $1
 `
 
 func (q *Queries) GetEpisode(ctx context.Context, id uuid.UUID) (Episode, error) {
@@ -67,7 +67,7 @@ func (q *Queries) GetEpisode(ctx context.Context, id uuid.UUID) (Episode, error)
 	var i Episode
 	err := row.Scan(
 		&i.ID,
-		&i.SerieID,
+		&i.SeriesID,
 		&i.Season,
 		&i.EpisodeNumber,
 		&i.Title,
@@ -78,11 +78,11 @@ func (q *Queries) GetEpisode(ctx context.Context, id uuid.UUID) (Episode, error)
 }
 
 const listEpisodesBySerie = `-- name: ListEpisodesBySerie :many
-SELECT id, serie_id, season, episode_number, title, duration_minutes, created_at FROM episodes WHERE serie_id = $1 ORDER BY season, episode_number
+SELECT id, series_id, season, episode_number, title, duration_minutes, created_at FROM episodes WHERE series_id = $1 ORDER BY season, episode_number
 `
 
-func (q *Queries) ListEpisodesBySerie(ctx context.Context, serieID pgtype.Int4) ([]Episode, error) {
-	rows, err := q.db.Query(ctx, listEpisodesBySerie, serieID)
+func (q *Queries) ListEpisodesBySerie(ctx context.Context, seriesID pgtype.Int4) ([]Episode, error) {
+	rows, err := q.db.Query(ctx, listEpisodesBySerie, seriesID)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (q *Queries) ListEpisodesBySerie(ctx context.Context, serieID pgtype.Int4) 
 		var i Episode
 		if err := rows.Scan(
 			&i.ID,
-			&i.SerieID,
+			&i.SeriesID,
 			&i.Season,
 			&i.EpisodeNumber,
 			&i.Title,
@@ -113,7 +113,7 @@ const updateEpisode = `-- name: UpdateEpisode :one
 UPDATE episodes
 SET season = $2, episode_number = $3, title = $4, duration_minutes = $5
 WHERE id = $1
-RETURNING id, serie_id, season, episode_number, title, duration_minutes, created_at
+RETURNING id, series_id, season, episode_number, title, duration_minutes, created_at
 `
 
 type UpdateEpisodeParams struct {
@@ -135,7 +135,7 @@ func (q *Queries) UpdateEpisode(ctx context.Context, arg UpdateEpisodeParams) (E
 	var i Episode
 	err := row.Scan(
 		&i.ID,
-		&i.SerieID,
+		&i.SeriesID,
 		&i.Season,
 		&i.EpisodeNumber,
 		&i.Title,

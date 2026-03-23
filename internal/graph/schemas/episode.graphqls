@@ -1,6 +1,6 @@
 type Episode {
   id: ID!
-  serieId: Int!
+  seriesId: Int!
   season: Int!
   episodeNumber: Int!
   title: String!
@@ -10,7 +10,7 @@ type Episode {
 }
 
 input CreateEpisodeInput {
-  serieId: Int!
+  seriesId: Int!
   season: Int!
   episodeNumber: Int!
   title: String!

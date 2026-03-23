@@ -1,5 +1,5 @@
 -- name: CreateEpisode :one
-INSERT INTO episodes (id, serie_id, season, episode_number, title, duration_minutes)
+INSERT INTO episodes (id, series_id, season, episode_number, title, duration_minutes)
 VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
@@ -7,7 +7,7 @@ RETURNING *;
 SELECT * FROM episodes WHERE id = $1;
 
 -- name: ListEpisodesBySerie :many
-SELECT * FROM episodes WHERE serie_id = $1 ORDER BY season, episode_number;
+SELECT * FROM episodes WHERE series_id = $1 ORDER BY season, episode_number;
 
 -- name: UpdateEpisode :one
 UPDATE episodes

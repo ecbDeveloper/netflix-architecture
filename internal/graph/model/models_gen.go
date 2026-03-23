@@ -3,7 +3,7 @@
 package model
 
 type CreateEpisodeInput struct {
-	SerieID         int32  `json:"serieId"`
+	SeriesID        int32  `json:"seriesId"`
 	Season          int32  `json:"season"`
 	EpisodeNumber   int32  `json:"episodeNumber"`
 	Title           string `json:"title"`
@@ -57,7 +57,7 @@ type CreateWatchHistoryInput struct {
 
 type Episode struct {
 	ID              string    `json:"id"`
-	SerieID         int32     `json:"serieId"`
+	SeriesID        int32     `json:"seriesId"`
 	Season          int32     `json:"season"`
 	EpisodeNumber   int32     `json:"episodeNumber"`
 	Title           string    `json:"title"`

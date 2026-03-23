@@ -1,12 +1,12 @@
 -- Write your migrate up statements here
 CREATE TABLE episodes (
   id UUID PRIMARY KEY,
-  serie_id INT REFERENCES series(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  series_id INT REFERENCES series(id) ON DELETE CASCADE ON UPDATE CASCADE,
   season INT NOT NULL,
   episode_number INT NOT NULL,
   title VARCHAR(255) NOT NULL,
   duration_minutes INT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
   UNIQUE (series_id, season, episode_number)
 );

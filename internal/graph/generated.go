@@ -43,7 +43,7 @@ type ComplexityRoot struct {
 		ID              func(childComplexity int) int
 		Reviews         func(childComplexity int) int
 		Season          func(childComplexity int) int
-		SerieID         func(childComplexity int) int
+		SeriesID        func(childComplexity int) int
 		Title           func(childComplexity int) int
 	}
 
@@ -242,12 +242,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Episode.Season(childComplexity), true
-	case "Episode.serieId":
-		if e.ComplexityRoot.Episode.SerieID == nil {
+	case "Episode.seriesId":
+		if e.ComplexityRoot.Episode.SeriesID == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Episode.SerieID(childComplexity), true
+		return e.ComplexityRoot.Episode.SeriesID(childComplexity), true
 	case "Episode.title":
 		if e.ComplexityRoot.Episode.Title == nil {
 			break
@@ -1517,14 +1517,14 @@ func (ec *executionContext) fieldContext_Episode_id(_ context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _Episode_serieId(ctx context.Context, field graphql.CollectedField, obj *model.Episode) (ret graphql.Marshaler) {
+func (ec *executionContext) _Episode_seriesId(ctx context.Context, field graphql.CollectedField, obj *model.Episode) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Episode_serieId,
+		ec.fieldContext_Episode_seriesId,
 		func(ctx context.Context) (any, error) {
-			return obj.SerieID, nil
+			return obj.SeriesID, nil
 		},
 		nil,
 		ec.marshalNInt2int32,
@@ -1533,7 +1533,7 @@ func (ec *executionContext) _Episode_serieId(ctx context.Context, field graphql.
 	)
 }
 
-func (ec *executionContext) fieldContext_Episode_serieId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Episode_seriesId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Episode",
 		Field:      field,
@@ -2207,8 +2207,8 @@ func (ec *executionContext) fieldContext_Mutation_createEpisode(ctx context.Cont
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Episode_id(ctx, field)
-			case "serieId":
-				return ec.fieldContext_Episode_serieId(ctx, field)
+			case "seriesId":
+				return ec.fieldContext_Episode_seriesId(ctx, field)
 			case "season":
 				return ec.fieldContext_Episode_season(ctx, field)
 			case "episodeNumber":
@@ -2266,8 +2266,8 @@ func (ec *executionContext) fieldContext_Mutation_updateEpisode(ctx context.Cont
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Episode_id(ctx, field)
-			case "serieId":
-				return ec.fieldContext_Episode_serieId(ctx, field)
+			case "seriesId":
+				return ec.fieldContext_Episode_seriesId(ctx, field)
 			case "season":
 				return ec.fieldContext_Episode_season(ctx, field)
 			case "episodeNumber":
@@ -3511,8 +3511,8 @@ func (ec *executionContext) fieldContext_Query_getEpisode(ctx context.Context, f
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Episode_id(ctx, field)
-			case "serieId":
-				return ec.fieldContext_Episode_serieId(ctx, field)
+			case "seriesId":
+				return ec.fieldContext_Episode_seriesId(ctx, field)
 			case "season":
 				return ec.fieldContext_Episode_season(ctx, field)
 			case "episodeNumber":
@@ -3570,8 +3570,8 @@ func (ec *executionContext) fieldContext_Query_listEpisodes(ctx context.Context,
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Episode_id(ctx, field)
-			case "serieId":
-				return ec.fieldContext_Episode_serieId(ctx, field)
+			case "seriesId":
+				return ec.fieldContext_Episode_seriesId(ctx, field)
 			case "season":
 				return ec.fieldContext_Episode_season(ctx, field)
 			case "episodeNumber":
@@ -4634,8 +4634,8 @@ func (ec *executionContext) fieldContext_Series_episodes(_ context.Context, fiel
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Episode_id(ctx, field)
-			case "serieId":
-				return ec.fieldContext_Episode_serieId(ctx, field)
+			case "seriesId":
+				return ec.fieldContext_Episode_seriesId(ctx, field)
 			case "season":
 				return ec.fieldContext_Episode_season(ctx, field)
 			case "episodeNumber":
@@ -6536,20 +6536,20 @@ func (ec *executionContext) unmarshalInputCreateEpisodeInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"serieId", "season", "episodeNumber", "title", "durationMinutes"}
+	fieldsInOrder := [...]string{"seriesId", "season", "episodeNumber", "title", "durationMinutes"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "serieId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("serieId"))
+		case "seriesId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("seriesId"))
 			data, err := ec.unmarshalNInt2int32(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.SerieID = data
+			it.SeriesID = data
 		case "season":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("season"))
 			data, err := ec.unmarshalNInt2int32(ctx, v)
@@ -7293,8 +7293,8 @@ func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "serieId":
-			out.Values[i] = ec._Episode_serieId(ctx, field, obj)
+		case "seriesId":
+			out.Values[i] = ec._Episode_seriesId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

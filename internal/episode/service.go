@@ -25,8 +25,8 @@ func (s *Service) CreateEpisode(ctx context.Context, input model.CreateEpisodeIn
 
 	ep, err := s.Queries.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
 		ID: episodeID,
-		SerieID: pgtype.Int4{
-			Int32: input.SerieID,
+		SeriesID: pgtype.Int4{
+			Int32: input.SeriesID,
 			Valid: true,
 		},
 		Season:          input.Season,
@@ -112,7 +112,7 @@ func (s *Service) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
 func toGraphQLModel(e sqlc.Episode) *model.Episode {
 	return &model.Episode{
 		ID:              e.ID.String(),
-		SerieID:         e.SerieID.Int32,
+		SeriesID:        e.SerieID.Int32,
 		Season:          e.Season,
 		EpisodeNumber:   e.EpisodeNumber,
 		Title:           e.Title,
