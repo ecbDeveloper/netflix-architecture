@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/gob"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -27,9 +28,14 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/internal/user"
 	"github.com/ecbDeveloper/netflix-architecture/internal/watchhistory"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/vektah/gqlparser/v2/ast"
 )
+
+func init() {
+	gob.Register(uuid.UUID{})
+}
 
 const defaultPort = "8080"
 

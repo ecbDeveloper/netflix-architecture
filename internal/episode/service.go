@@ -35,7 +35,7 @@ func (s *Service) CreateEpisode(ctx context.Context, input model.CreateEpisodeIn
 		DurationMinutes: input.DurationMinutes,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create episode: %w", err)
+		return nil, fmt.Errorf("failed to insert episode on database: %w", err)
 	}
 
 	return toGraphQLModel(ep), nil
@@ -44,19 +44,19 @@ func (s *Service) CreateEpisode(ctx context.Context, input model.CreateEpisodeIn
 func (s *Service) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error) {
 	ep, err := s.Queries.GetEpisode(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get episode by id: %w", err)
+		return nil, fmt.Errorf("failed to fetch episode %v from database: %w", id, err)
 	}
 
 	return toGraphQLModel(ep), nil
 }
 
-func (s *Service) ListEpisodes(ctx context.Context, serieID int32) ([]*model.Episode, error) {
+func (s *Service) ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error) {
 	episodes, err := s.Queries.ListEpisodesBySerie(ctx, pgtype.Int4{
-		Int32: serieID,
+		Int32: seriesID,
 		Valid: true,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to list episodes: %w", err)
+		return nil, fmt.Errorf("failed to fetch all episodes from series %v from database: %w", seriesID, err)
 	}
 
 	result := make([]*model.Episode, len(episodes))
@@ -69,7 +69,7 @@ func (s *Service) ListEpisodes(ctx context.Context, serieID int32) ([]*model.Epi
 func (s *Service) UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error) {
 	current, err := s.Queries.GetEpisode(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get episode to update: %w", err)
+		return nil, fmt.Errorf("failed to get episode %v to update from database: %w", id, err)
 	}
 
 	params := sqlc.UpdateEpisodeParams{
@@ -95,7 +95,7 @@ func (s *Service) UpdateEpisode(ctx context.Context, id uuid.UUID, input model.U
 
 	ep, err := s.Queries.UpdateEpisode(ctx, params)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update episode: %w", err)
+		return nil, fmt.Errorf("failed to update episode %v from database: %w", id, err)
 	}
 
 	return toGraphQLModel(ep), nil
@@ -103,7 +103,7 @@ func (s *Service) UpdateEpisode(ctx context.Context, id uuid.UUID, input model.U
 
 func (s *Service) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteEpisode(ctx, id); err != nil {
-		return fmt.Errorf("failed to delete episode: %w", err)
+		return fmt.Errorf("failed to delete episode %v from database: %w", id, err)
 	}
 
 	return nil
