@@ -6,14 +6,25 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/alexedwards/scs/pgxstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
+	"github.com/ecbDeveloper/netflix-architecture/internal/episode"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
+	"github.com/ecbDeveloper/netflix-architecture/internal/movie"
+	"github.com/ecbDeveloper/netflix-architecture/internal/profile"
+	"github.com/ecbDeveloper/netflix-architecture/internal/review"
+	"github.com/ecbDeveloper/netflix-architecture/internal/series"
+	"github.com/ecbDeveloper/netflix-architecture/internal/user"
+	"github.com/ecbDeveloper/netflix-architecture/internal/watchhistory"
+	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -25,6 +36,8 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+
+	router := chi.NewRouter()
 
 	loggerHandler := slog.NewJSONHandler(os.Stdout, nil)
 	logger := slog.New(loggerHandler)
@@ -46,9 +59,33 @@ func main() {
 	}
 	queries := sqlc.New(pool)
 
+	s := scs.New()
+	s.Store = pgxstore.New(pool)
+	s.Lifetime = 24 * time.Hour
+	s.Cookie.HttpOnly = true
+	s.Cookie.SameSite = http.SameSiteLaxMode
+
+	userService := user.NewService(queries)
+	episodeService := episode.NewService(queries)
+	movieService := movie.NewService(queries)
+	profileService := profile.NewService(queries)
+	reviewService := review.NewService(queries)
+	seriesService := series.NewService(queries)
+	watchhistoryService := watchhistory.NewService(queries)
+
+	router.Use(s.LoadAndSave)
+
 	graphConfig := graph.Config{Resolvers: &graph.Resolver{
-		Queries: queries,
-		Logger:  logger,
+		Queries:             queries,
+		Logger:              logger,
+		Sessions:            s,
+		UserService:         userService,
+		EpisodeService:      episodeService,
+		MovieService:        movieService,
+		ProfileService:      profileService,
+		ReviewService:       reviewService,
+		SeriesService:       seriesService,
+		WatchhistoryService: watchhistoryService,
 	}}
 
 	srv := handler.New(graph.NewExecutableSchema(graphConfig))
@@ -64,11 +101,11 @@ func main() {
 		Cache: lru.New[string](100),
 	})
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", srv)
 
-	logger.Info("connect to http://localhost:%s/ for GraphQL playground", slog.String("port", port))
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	logger.Info("server initialized successfully", slog.String("url", "http://localhost:"+port+"/query"))
+	if err := http.ListenAndServe(":"+port, router); err != nil {
 		logger.Error("failed to start application", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
