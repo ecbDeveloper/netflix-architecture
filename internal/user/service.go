@@ -41,12 +41,7 @@ func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (
 		return nil, err
 	}
 
-	return &model.User{
-		ID:    user.ID.String(),
-		Email: user.Email,
-		Name:  user.Name,
-		Cpf:   user.Cpf,
-	}, nil
+	return toGraphQLModel(user), nil
 }
 
 func (s *Service) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
@@ -55,14 +50,7 @@ func (s *Service) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error
 		return nil, err
 	}
 
-	return &model.User{
-		ID:        user.ID.String(),
-		Email:     user.Email,
-		Name:      user.Name,
-		Cpf:       user.Cpf,
-		CreatedAt: user.CreatedAt.String(),
-		UpdatedAt: user.UpdatedAt.String(),
-	}, nil
+	return toGraphQLModel(user), nil
 }
 
 func (s *Service) ListUsers(ctx context.Context) ([]*model.User, error) {
@@ -73,14 +61,7 @@ func (s *Service) ListUsers(ctx context.Context) ([]*model.User, error) {
 
 	modelUsers := make([]*model.User, len(users))
 	for i, user := range users {
-		modelUsers[i] = &model.User{
-			ID:        user.ID.String(),
-			Email:     user.Email,
-			Name:      user.Name,
-			Cpf:       user.Cpf,
-			CreatedAt: user.CreatedAt.String(),
-			UpdatedAt: user.UpdatedAt.String(),
-		}
+		modelUsers[i] = toGraphQLModel(user)
 	}
 	return modelUsers, nil
 }
@@ -111,10 +92,7 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, input model.Upda
 		return nil, err
 	}
 
-	return &model.User{
-		ID:        user.ID.String(),
-		CreatedAt: user.CreatedAt.String(),
-	}, nil
+	return toGraphQLModel(user), nil
 }
 
 func (s *Service) DeleteUser(ctx context.Context, id uuid.UUID) error {
@@ -124,4 +102,15 @@ func (s *Service) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func toGraphQLModel(u sqlc.User) *model.User {
+	return &model.User{
+		ID:        u.ID.String(),
+		Email:     u.Email,
+		Name:      u.Name,
+		Cpf:       u.Cpf,
+		CreatedAt: u.CreatedAt.String(),
+		UpdatedAt: u.UpdatedAt.String(),
+	}
 }
