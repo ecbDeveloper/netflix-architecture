@@ -26,7 +26,7 @@ input UpdateEpisodeInput {
 
 extend type Query {
   getEpisode(id: ID!): Episode
-  listEpisodes(serieId: Int!): [Episode!]!
+  listEpisodes(seriesId: Int!): [Episode!]!
 }
 
 extend type Mutation {

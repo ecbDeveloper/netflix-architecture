@@ -102,7 +102,7 @@ type ComplexityRoot struct {
 		GetSeries          func(childComplexity int, id string) int
 		GetUser            func(childComplexity int, id string) int
 		GetWatchHistory    func(childComplexity int, id string) int
-		ListEpisodes       func(childComplexity int, serieID int32) int
+		ListEpisodes       func(childComplexity int, seriesID int32) int
 		ListMovies         func(childComplexity int) int
 		ListProfiles       func(childComplexity int, userID string) int
 		ListReviews        func(childComplexity int, profileID string) int
@@ -179,7 +179,7 @@ type QueryResolver interface {
 	GetUser(ctx context.Context, id string) (*model.User, error)
 	ListUsers(ctx context.Context) ([]*model.User, error)
 	GetEpisode(ctx context.Context, id string) (*model.Episode, error)
-	ListEpisodes(ctx context.Context, serieID int32) ([]*model.Episode, error)
+	ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error)
 	GetMovie(ctx context.Context, id string) (*model.Movie, error)
 	ListMovies(ctx context.Context) ([]*model.Movie, error)
 	GetProfile(ctx context.Context, id string) (*model.Profile, error)
@@ -684,7 +684,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.ListEpisodes(childComplexity, args["serieId"].(int32)), true
+		return e.ComplexityRoot.Query.ListEpisodes(childComplexity, args["seriesId"].(int32)), true
 	case "Query.listMovies":
 		if e.ComplexityRoot.Query.ListMovies == nil {
 			break
@@ -1395,11 +1395,11 @@ func (ec *executionContext) field_Query_getWatchHistory_args(ctx context.Context
 func (ec *executionContext) field_Query_listEpisodes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "serieId", ec.unmarshalNInt2int32)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "seriesId", ec.unmarshalNInt2int32)
 	if err != nil {
 		return nil, err
 	}
-	args["serieId"] = arg0
+	args["seriesId"] = arg0
 	return args, nil
 }
 
@@ -3551,7 +3551,7 @@ func (ec *executionContext) _Query_listEpisodes(ctx context.Context, field graph
 		ec.fieldContext_Query_listEpisodes,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().ListEpisodes(ctx, fc.Args["serieId"].(int32))
+			return ec.Resolvers.Query().ListEpisodes(ctx, fc.Args["seriesId"].(int32))
 		},
 		nil,
 		ec.marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ,
