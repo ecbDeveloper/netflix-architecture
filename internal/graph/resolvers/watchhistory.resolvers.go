@@ -7,35 +7,55 @@ package resolvers
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateWatchHistory is the resolver for the createWatchHistory field.
 func (r *mutationResolver) CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
-	return r.WatchhistoryService.CreateWatchHistory(ctx, input)
+	wh, err := r.WatchhistoryService.CreateWatchHistory(ctx, input)
+	if err != nil {
+		r.Logger.Error("failed to create watch history", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error creating watch history, try again later")
+	}
+
+	return wh, nil
 }
 
 // UpdateWatchHistory is the resolver for the updateWatchHistory field.
 func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id string, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
 	whID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse watch history id to update it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid watch history ID")
 	}
-	return r.WatchhistoryService.UpdateWatchHistory(ctx, whID, input)
+
+	wh, err := r.WatchhistoryService.UpdateWatchHistory(ctx, whID, input)
+	if err != nil {
+		r.Logger.Error("failed to update watch history", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error updating watch history, try again later")
+	}
+
+	return wh, nil
 }
 
 // DeleteWatchHistory is the resolver for the deleteWatchHistory field.
 func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id string) (bool, error) {
 	whID, err := uuid.Parse(id)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to parse watch history id to delete it", slog.Any("error", err))
+		return false, gqlerror.Errorf("invalid watch history ID")
 	}
+
 	err = r.WatchhistoryService.DeleteWatchHistory(ctx, whID)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to delete watch history", slog.Any("error", err))
+		return false, gqlerror.Errorf("error deleting watch history, try again later")
 	}
+
 	return true, nil
 }
 
@@ -43,16 +63,32 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id string) (b
 func (r *queryResolver) GetWatchHistory(ctx context.Context, id string) (*model.WatchHistory, error) {
 	whID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse watch history id to get it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid watch history ID")
 	}
-	return r.WatchhistoryService.GetWatchHistory(ctx, whID)
+
+	wh, err := r.WatchhistoryService.GetWatchHistory(ctx, whID)
+	if err != nil {
+		r.Logger.Error("failed to get watch history", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error getting watch history, try again later")
+	}
+
+	return wh, nil
 }
 
 // ListWatchHistories is the resolver for the listWatchHistories field.
 func (r *queryResolver) ListWatchHistories(ctx context.Context, profileID string) ([]*model.WatchHistory, error) {
 	pid, err := uuid.Parse(profileID)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse profile id to list watch histories", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid profile ID")
 	}
-	return r.WatchhistoryService.ListWatchHistories(ctx, pid)
+
+	watchHistories, err := r.WatchhistoryService.ListWatchHistories(ctx, pid)
+	if err != nil {
+		r.Logger.Error("failed to list watch histories", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error listing watch histories, try again later")
+	}
+
+	return watchHistories, nil
 }

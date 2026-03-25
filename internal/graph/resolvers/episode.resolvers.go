@@ -7,34 +7,53 @@ package resolvers
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateEpisode is the resolver for the createEpisode field.
 func (r *mutationResolver) CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error) {
-	return r.EpisodeService.CreateEpisode(ctx, input)
+	episode, err := r.EpisodeService.CreateEpisode(ctx, input)
+	if err != nil {
+		r.Logger.Error("failed to create episode", slog.Any("error", err))
+		return nil, gqlerror.Errorf("failed to update episode")
+	}
+
+	return episode, err
 }
 
 // UpdateEpisode is the resolver for the updateEpisode field.
 func (r *mutationResolver) UpdateEpisode(ctx context.Context, id string, input model.UpdateEpisodeInput) (*model.Episode, error) {
 	episodeID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse episode id to update it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("failed to update episode, try again later")
 	}
-	return r.EpisodeService.UpdateEpisode(ctx, episodeID, input)
+
+	episode, err := r.EpisodeService.UpdateEpisode(ctx, episodeID, input)
+	if err != nil {
+		r.Logger.Error("failed to update episode", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error updating episode, try again later")
+	}
+
+	return episode, nil
 }
 
 // DeleteEpisode is the resolver for the deleteEpisode field.
 func (r *mutationResolver) DeleteEpisode(ctx context.Context, id string) (bool, error) {
 	episodeID, err := uuid.Parse(id)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to parse episode id to delete it", slog.Any("error", err))
+		return false, gqlerror.Errorf("invalid episode ID")
 	}
+
 	err = r.EpisodeService.DeleteEpisode(ctx, episodeID)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to delete episode", slog.Any("error", err))
+		return false, gqlerror.Errorf("error deleting episode, try again later")
 	}
 	return true, nil
 }
@@ -43,12 +62,26 @@ func (r *mutationResolver) DeleteEpisode(ctx context.Context, id string) (bool, 
 func (r *queryResolver) GetEpisode(ctx context.Context, id string) (*model.Episode, error) {
 	episodeID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse episode id to get it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid episode ID")
 	}
-	return r.EpisodeService.GetEpisode(ctx, episodeID)
+
+	episode, err := r.EpisodeService.GetEpisode(ctx, episodeID)
+	if err != nil {
+		r.Logger.Error("failed to get episode", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error getting episode, try again later")
+	}
+
+	return episode, err
 }
 
 // ListEpisodes is the resolver for the listEpisodes field.
-func (r *queryResolver) ListEpisodes(ctx context.Context, serieID int32) ([]*model.Episode, error) {
-	return r.EpisodeService.ListEpisodes(ctx, serieID)
+func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error) {
+	episodes, err := r.EpisodeService.ListEpisodes(ctx, seriesID)
+	if err != nil {
+		r.Logger.Error("failed to list all episodes from a series", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error to get all episodes from series, try again later")
+	}
+
+	return episodes, nil
 }

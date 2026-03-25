@@ -7,54 +7,88 @@ package resolvers
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateProfile is the resolver for the createProfile field.
-// CreateProfile is the resolver for the createProfile field.
 func (r *mutationResolver) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
-	return r.ProfileService.CreateProfile(ctx, input)
+	profile, err := r.ProfileService.CreateProfile(ctx, input)
+	if err != nil {
+		r.Logger.Error("failed to create profile", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error creating profile, try again later")
+	}
+
+	return profile, nil
 }
 
 // UpdateProfile is the resolver for the updateProfile field.
 func (r *mutationResolver) UpdateProfile(ctx context.Context, id string, input model.UpdateProfileInput) (*model.Profile, error) {
 	profileID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse profile id to update it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid profile ID")
 	}
-	return r.ProfileService.UpdateProfile(ctx, profileID, input)
+
+	profile, err := r.ProfileService.UpdateProfile(ctx, profileID, input)
+	if err != nil {
+		r.Logger.Error("failed to update profile", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error updating profile, try again later")
+	}
+
+	return profile, nil
 }
 
 // DeleteProfile is the resolver for the deleteProfile field.
 func (r *mutationResolver) DeleteProfile(ctx context.Context, id string) (bool, error) {
 	profileID, err := uuid.Parse(id)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to parse profile id to delete it", slog.Any("error", err))
+		return false, gqlerror.Errorf("invalid profile ID")
 	}
+
 	err = r.ProfileService.DeleteProfile(ctx, profileID)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to delete profile", slog.Any("error", err))
+		return false, gqlerror.Errorf("error deleting profile, try again later")
 	}
+
 	return true, nil
 }
 
 // GetProfile is the resolver for the getProfile field.
-// GetProfile is the resolver for the getProfile field.
 func (r *queryResolver) GetProfile(ctx context.Context, id string) (*model.Profile, error) {
 	profileID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse profile id to get it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid profile ID")
 	}
-	return r.ProfileService.GetProfile(ctx, profileID)
+
+	profile, err := r.ProfileService.GetProfile(ctx, profileID)
+	if err != nil {
+		r.Logger.Error("failed to get profile", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error getting profile, try again later")
+	}
+
+	return profile, nil
 }
 
 // ListProfiles is the resolver for the listProfiles field.
 func (r *queryResolver) ListProfiles(ctx context.Context, userID string) ([]*model.Profile, error) {
 	uid, err := uuid.Parse(userID)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse user id to list profiles", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid user ID")
 	}
-	return r.ProfileService.ListProfiles(ctx, uid)
+
+	profiles, err := r.ProfileService.ListProfiles(ctx, uid)
+	if err != nil {
+		r.Logger.Error("failed to list profiles", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error listing profiles, try again later")
+	}
+
+	return profiles, nil
 }

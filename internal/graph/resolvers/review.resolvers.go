@@ -7,37 +7,56 @@ package resolvers
 
 import (
 	"context"
+	"log/slog"
 	"strconv"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateReview is the resolver for the createReview field.
-// CreateReview is the resolver for the createReview field.
 func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error) {
-	return r.ReviewService.CreateReview(ctx, input)
+	review, err := r.ReviewService.CreateReview(ctx, input)
+	if err != nil {
+		r.Logger.Error("failed to create review", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error creating review, try again later")
+	}
+
+	return review, nil
 }
 
 // UpdateReview is the resolver for the updateReview field.
 func (r *mutationResolver) UpdateReview(ctx context.Context, id string, input model.UpdateReviewInput) (*model.Review, error) {
 	reviewID, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse review id to update it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid review ID")
 	}
-	return r.ReviewService.UpdateReview(ctx, int32(reviewID), input)
+
+	review, err := r.ReviewService.UpdateReview(ctx, int32(reviewID), input)
+	if err != nil {
+		r.Logger.Error("failed to update review", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error updating review, try again later")
+	}
+
+	return review, nil
 }
 
 // DeleteReview is the resolver for the deleteReview field.
 func (r *mutationResolver) DeleteReview(ctx context.Context, id string) (bool, error) {
 	reviewID, err := strconv.Atoi(id)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to parse review id to delete it", slog.Any("error", err))
+		return false, gqlerror.Errorf("invalid review ID")
 	}
+
 	err = r.ReviewService.DeleteReview(ctx, int32(reviewID))
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to delete review", slog.Any("error", err))
+		return false, gqlerror.Errorf("error deleting review, try again later")
 	}
+
 	return true, nil
 }
 
@@ -45,16 +64,32 @@ func (r *mutationResolver) DeleteReview(ctx context.Context, id string) (bool, e
 func (r *queryResolver) GetReview(ctx context.Context, id string) (*model.Review, error) {
 	reviewID, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse review id to get it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid review ID")
 	}
-	return r.ReviewService.GetReview(ctx, int32(reviewID))
+
+	review, err := r.ReviewService.GetReview(ctx, int32(reviewID))
+	if err != nil {
+		r.Logger.Error("failed to get review", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error getting review, try again later")
+	}
+
+	return review, nil
 }
 
 // ListReviews is the resolver for the listReviews field.
 func (r *queryResolver) ListReviews(ctx context.Context, profileID string) ([]*model.Review, error) {
 	pid, err := uuid.Parse(profileID)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse profile id to list reviews", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid profile ID")
 	}
-	return r.ReviewService.ListReviews(ctx, pid)
+
+	reviews, err := r.ReviewService.ListReviews(ctx, pid)
+	if err != nil {
+		r.Logger.Error("failed to list reviews", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error listing reviews, try again later")
+	}
+
+	return reviews, nil
 }

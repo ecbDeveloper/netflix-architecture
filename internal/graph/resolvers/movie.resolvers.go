@@ -7,34 +7,51 @@ package resolvers
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateMovie is the resolver for the createMovie field.
 func (r *mutationResolver) CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error) {
-	return r.MovieService.CreateMovie(ctx, input)
+	movie, err := r.MovieService.CreateMovie(ctx, input)
+	if err != nil {
+		r.Logger.Error("failed to create movie", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error creating movie, try again later")
+	}
+
+	return movie, nil
 }
 
 // UpdateMovie is the resolver for the updateMovie field.
 func (r *mutationResolver) UpdateMovie(ctx context.Context, id string, input model.UpdateMovieInput) (*model.Movie, error) {
 	movieID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to update movie", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error updatig movie, try again later")
 	}
-	return r.MovieService.UpdateMovie(ctx, movieID, input)
+	movie, err := r.MovieService.UpdateMovie(ctx, movieID, input)
+	if err != nil {
+		r.Logger.Error("failed to update movie", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error updating movie, try again later")
+	}
+
+	return movie, nil
 }
 
 // DeleteMovie is the resolver for the deleteMovie field.
 func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, error) {
 	movieID, err := uuid.Parse(id)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to parse episode id to delete it", slog.Any("error", err))
+		return false, gqlerror.Errorf("invalid movie ID")
 	}
 	err = r.MovieService.DeleteMovie(ctx, movieID)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to delete movie", slog.Any("error", err))
+		return false, gqlerror.Errorf("error deleting movie, try again later")
 	}
 	return true, nil
 }
@@ -43,12 +60,25 @@ func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, er
 func (r *queryResolver) GetMovie(ctx context.Context, id string) (*model.Movie, error) {
 	movieID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse episode id to get it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid movie ID")
 	}
-	return r.MovieService.GetMovie(ctx, movieID)
+	movie, err := r.MovieService.GetMovie(ctx, movieID)
+	if err != nil {
+		r.Logger.Error("failed to get movie", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error getting movie, try again later")
+	}
+
+	return movie, nil
 }
 
 // ListMovies is the resolver for the listMovies field.
 func (r *queryResolver) ListMovies(ctx context.Context) ([]*model.Movie, error) {
-	return r.MovieService.ListMovies(ctx)
+	movies, err := r.MovieService.ListMovies(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get all movies", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error getting all movies, try again later")
+	}
+
+	return movies, nil
 }

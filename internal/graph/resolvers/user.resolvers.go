@@ -7,35 +7,55 @@ package resolvers
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
-	return r.UserService.CreateUser(ctx, input)
+	user, err := r.UserService.CreateUser(ctx, input)
+	if err != nil {
+		r.Logger.Error("failed to create user", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error creating user, try again later")
+	}
+
+	return user, nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input model.UpdateUserInput) (*model.User, error) {
 	userID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse user id to update it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid user ID")
 	}
-	return r.UserService.UpdateUser(ctx, userID, input)
+
+	user, err := r.UserService.UpdateUser(ctx, userID, input)
+	if err != nil {
+		r.Logger.Error("failed to update user", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error updating user, try again later")
+	}
+
+	return user, nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, error) {
 	userID, err := uuid.Parse(id)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to parse user id to delete it", slog.Any("error", err))
+		return false, gqlerror.Errorf("invalid user ID")
 	}
+
 	err = r.UserService.DeleteUser(ctx, userID)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to delete user", slog.Any("error", err))
+		return false, gqlerror.Errorf("error deleting user, try again later")
 	}
+
 	return true, nil
 }
 
@@ -43,12 +63,26 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.User, error) {
 	userID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse user id to get it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid user ID")
 	}
-	return r.UserService.GetUser(ctx, userID)
+
+	user, err := r.UserService.GetUser(ctx, userID)
+	if err != nil {
+		r.Logger.Error("failed to get user", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error getting user, try again later")
+	}
+
+	return user, nil
 }
 
 // ListUsers is the resolver for the listUsers field.
 func (r *queryResolver) ListUsers(ctx context.Context) ([]*model.User, error) {
-	return r.UserService.ListUsers(ctx)
+	users, err := r.UserService.ListUsers(ctx)
+	if err != nil {
+		r.Logger.Error("failed to list all users", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error listing users, try again later")
+	}
+
+	return users, nil
 }

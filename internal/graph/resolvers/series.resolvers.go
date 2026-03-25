@@ -7,35 +7,55 @@ package resolvers
 
 import (
 	"context"
+	"log/slog"
 	"strconv"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateSeries is the resolver for the createSeries field.
 func (r *mutationResolver) CreateSeries(ctx context.Context, input model.CreateSeriesInput) (*model.Series, error) {
-	return r.SeriesService.CreateSeries(ctx, input)
+	s, err := r.SeriesService.CreateSeries(ctx, input)
+	if err != nil {
+		r.Logger.Error("failed to create series", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error creating series, try again later")
+	}
+
+	return s, nil
 }
 
 // UpdateSeries is the resolver for the updateSeries field.
 func (r *mutationResolver) UpdateSeries(ctx context.Context, id string, input model.UpdateSeriesInput) (*model.Series, error) {
 	seriesID, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse series id to update it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid series ID")
 	}
-	return r.SeriesService.UpdateSeries(ctx, int32(seriesID), input)
+
+	s, err := r.SeriesService.UpdateSeries(ctx, int32(seriesID), input)
+	if err != nil {
+		r.Logger.Error("failed to update series", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error updating series, try again later")
+	}
+
+	return s, nil
 }
 
 // DeleteSeries is the resolver for the deleteSeries field.
 func (r *mutationResolver) DeleteSeries(ctx context.Context, id string) (bool, error) {
 	seriesID, err := strconv.Atoi(id)
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to parse series id to delete it", slog.Any("error", err))
+		return false, gqlerror.Errorf("invalid series ID")
 	}
+
 	err = r.SeriesService.DeleteSeries(ctx, int32(seriesID))
 	if err != nil {
-		return false, err
+		r.Logger.Error("failed to delete series", slog.Any("error", err))
+		return false, gqlerror.Errorf("error deleting series, try again later")
 	}
+
 	return true, nil
 }
 
@@ -43,12 +63,26 @@ func (r *mutationResolver) DeleteSeries(ctx context.Context, id string) (bool, e
 func (r *queryResolver) GetSeries(ctx context.Context, id string) (*model.Series, error) {
 	seriesID, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, err
+		r.Logger.Error("failed to parse series id to get it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid series ID")
 	}
-	return r.SeriesService.GetSeries(ctx, int32(seriesID))
+
+	s, err := r.SeriesService.GetSeries(ctx, int32(seriesID))
+	if err != nil {
+		r.Logger.Error("failed to get series", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error getting series, try again later")
+	}
+
+	return s, nil
 }
 
 // ListSeries is the resolver for the listSeries field.
 func (r *queryResolver) ListSeries(ctx context.Context) ([]*model.Series, error) {
-	return r.SeriesService.ListSeries(ctx)
+	series, err := r.SeriesService.ListSeries(ctx)
+	if err != nil {
+		r.Logger.Error("failed to list all series", slog.Any("error", err))
+		return nil, gqlerror.Errorf("error listing series, try again later")
+	}
+
+	return series, nil
 }

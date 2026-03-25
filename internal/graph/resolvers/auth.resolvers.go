@@ -7,13 +7,12 @@ package resolvers
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
-
-var ErrInvalidEmailOrPassword = errors.New("invalid email and/or Password")
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (string, error) {
@@ -26,10 +25,15 @@ func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (
 	err = r.Sessions.RenewToken(ctx)
 	if err != nil {
 		r.Logger.Error("failed to renew user token", slog.Any("error", err))
-		return "", errors.New("failed to make login, try again after")
+		return "", gqlerror.Errorf("error logging in, try again after")
 	}
 
 	r.Sessions.Put(ctx, "AuthenticatedUserID", userID)
 
 	return "user authenticated successfully", nil
+}
+
+// Logout is the resolver for the logout field.
+func (r *mutationResolver) Logout(ctx context.Context) (string, error) {
+	panic(fmt.Errorf("not implemented: Logout - logout"))
 }
