@@ -7,6 +7,6 @@ CREATE TABLE series (
   maturity_rating VARCHAR(10)
 );
 ---- create above / drop below ----
-IF EXISTS DROP TABLE series;
+DROP TABLE IF EXISTS series;
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.

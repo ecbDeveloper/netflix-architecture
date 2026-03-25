@@ -9,6 +9,6 @@ CREATE TABLE movies (
   content_url TEXT NOT NULL
 );
 ---- create above / drop below ----
-IF EXISTS DROP TABLE movies;
+DROP TABLE IF EXISTS movies;
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.

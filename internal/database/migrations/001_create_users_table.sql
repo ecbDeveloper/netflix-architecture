@@ -9,6 +9,6 @@ CREATE TABLE users (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 ---- create above / drop below ----
-IF EXISTS DROP TABLE users;
+DROP TABLE IF EXISTS users;
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.

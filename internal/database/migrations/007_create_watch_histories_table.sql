@@ -9,6 +9,6 @@ CREATE TABLE watch_histories (
   is_completed BOOLEAN DEFAULT FALSE
 );
 ---- create above / drop below ----
-IF EXISTS DROP TABLE watch_histories;
+DROP TABLE IF EXISTS watch_histories;
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.

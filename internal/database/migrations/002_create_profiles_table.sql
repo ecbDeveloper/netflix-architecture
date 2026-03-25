@@ -10,6 +10,6 @@ CREATE TABLE profiles (
   UNIQUE (user_id, name)
 );
 ---- create above / drop below ----
-IF EXISTS DROP TABLE profiles;
+DROP TABLE IF EXISTS profiles;
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.

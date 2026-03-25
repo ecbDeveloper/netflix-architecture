@@ -11,6 +11,6 @@ CREATE TABLE episodes (
   UNIQUE (series_id, season, episode_number)
 );
 ---- create above / drop below ----
-IF EXISTS DROP TABLE episodes;
+DROP TABLE IF EXISTS episodes;
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.

@@ -7,6 +7,6 @@ CREATE TABLE sessions (
 
 CREATE INDEX sessions_expiry_idx ON sessions (expiry);
 ---- create above / drop below ----
-IF EXISTS DROP TABLE sessions;
+DROP TABLE IF EXISTS sessions;
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.

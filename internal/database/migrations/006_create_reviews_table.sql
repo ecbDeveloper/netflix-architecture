@@ -9,6 +9,6 @@ CREATE TABLE reviews (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 ---- create above / drop below ----
-IF EXISTS DROP TABLE reviews;
+DROP TABLE IF EXISTS reviews;
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.
