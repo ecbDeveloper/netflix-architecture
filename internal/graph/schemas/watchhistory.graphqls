@@ -29,5 +29,5 @@ extend type Query {
 extend type Mutation {
   createWatchHistory(input: CreateWatchHistoryInput!): WatchHistory!
   updateWatchHistory(id: ID!, input: UpdateWatchHistoryInput!): WatchHistory!
-  deleteWatchHistory(id: ID!): Boolean!
+  deleteWatchHistory(id: ID!): Boolean! @hasRole(role: MEMBER)
 }

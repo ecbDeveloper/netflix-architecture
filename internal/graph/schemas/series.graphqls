@@ -27,7 +27,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  createSeries(input: CreateSeriesInput!): Series!
-  updateSeries(id: ID!, input: UpdateSeriesInput!): Series!
-  deleteSeries(id: ID!): Boolean!
+  createSeries(input: CreateSeriesInput!): Series! @hasRole(role: ADMIN)
+  updateSeries(id: ID!, input: UpdateSeriesInput!): Series! @hasRole(role: ADMIN)
+  deleteSeries(id: ID!): Boolean! @hasRole(role: ADMIN)
 }

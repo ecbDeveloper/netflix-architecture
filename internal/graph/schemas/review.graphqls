@@ -27,7 +27,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  createReview(input: CreateReviewInput!): Review!
-  updateReview(id: ID!, input: UpdateReviewInput!): Review!
-  deleteReview(id: ID!): Boolean!
+  createReview(input: CreateReviewInput!): Review! @hasRole(role: MEMBER)
+  updateReview(id: ID!, input: UpdateReviewInput!): Review! @hasRole(role: MEMBER)
+  deleteReview(id: ID!): Boolean! @hasRole(role: MEMBER)
 }

@@ -33,7 +33,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  createMovie(input: CreateMovieInput!): Movie!
-  updateMovie(id: ID!, input: UpdateMovieInput!): Movie!
-  deleteMovie(id: ID!): Boolean!
+  createMovie(input: CreateMovieInput!): Movie! @hasRole(role: ADMIN)
+  updateMovie(id: ID!, input: UpdateMovieInput!): Movie! @hasRole(role: ADMIN)
+  deleteMovie(id: ID!): Boolean! @hasRole(role: ADMIN)
 }
