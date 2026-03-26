@@ -58,14 +58,26 @@ type Series struct {
 	MaturityRating pgtype.Text `json:"maturity_rating"`
 }
 
+type Session struct {
+	Token  string    `json:"token"`
+	Data   []byte    `json:"data"`
+	Expiry time.Time `json:"expiry"`
+}
+
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	Email     string    `json:"email"`
-	Name      string    `json:"name"`
-	Cpf       string    `json:"cpf"`
-	Password  string    `json:"password"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uuid.UUID   `json:"id"`
+	Email     string      `json:"email"`
+	Name      string      `json:"name"`
+	Cpf       string      `json:"cpf"`
+	Password  string      `json:"password"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
+	Role      pgtype.Int4 `json:"role"`
+}
+
+type UsersRole struct {
+	ID   int32       `json:"id"`
+	Role pgtype.Text `json:"role"`
 }
 
 type WatchHistory struct {
