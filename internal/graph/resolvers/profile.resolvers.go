@@ -19,7 +19,7 @@ func (r *mutationResolver) CreateProfile(ctx context.Context, input model.Create
 	profile, err := r.ProfileService.CreateProfile(ctx, input)
 	if err != nil {
 		r.Logger.Error("failed to create profile", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error creating profile, try again later")
+		return nil, handleError(err)
 	}
 
 	return profile, nil
@@ -36,7 +36,7 @@ func (r *mutationResolver) UpdateProfile(ctx context.Context, id string, input m
 	profile, err := r.ProfileService.UpdateProfile(ctx, profileID, input)
 	if err != nil {
 		r.Logger.Error("failed to update profile", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error updating profile, try again later")
+		return nil, handleError(err)
 	}
 
 	return profile, nil
@@ -53,7 +53,7 @@ func (r *mutationResolver) DeleteProfile(ctx context.Context, id string) (bool, 
 	err = r.ProfileService.DeleteProfile(ctx, profileID)
 	if err != nil {
 		r.Logger.Error("failed to delete profile", slog.Any("error", err))
-		return false, gqlerror.Errorf("error deleting profile, try again later")
+		return false, handleError(err)
 	}
 
 	return true, nil
@@ -70,7 +70,7 @@ func (r *queryResolver) GetProfile(ctx context.Context, id string) (*model.Profi
 	profile, err := r.ProfileService.GetProfile(ctx, profileID)
 	if err != nil {
 		r.Logger.Error("failed to get profile", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error getting profile, try again later")
+		return nil, handleError(err)
 	}
 
 	return profile, nil
@@ -87,7 +87,7 @@ func (r *queryResolver) ListProfiles(ctx context.Context, userID string) ([]*mod
 	profiles, err := r.ProfileService.ListProfiles(ctx, uid)
 	if err != nil {
 		r.Logger.Error("failed to list profiles", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error listing profiles, try again later")
+		return nil, handleError(err)
 	}
 
 	return profiles, nil

@@ -19,10 +19,10 @@ func (r *mutationResolver) CreateEpisode(ctx context.Context, input model.Create
 	episode, err := r.EpisodeService.CreateEpisode(ctx, input)
 	if err != nil {
 		r.Logger.Error("failed to create episode", slog.Any("error", err))
-		return nil, gqlerror.Errorf("failed to update episode")
+		return nil, handleError(err)
 	}
 
-	return episode, err
+	return episode, nil
 }
 
 // UpdateEpisode is the resolver for the updateEpisode field.
@@ -30,13 +30,13 @@ func (r *mutationResolver) UpdateEpisode(ctx context.Context, id string, input m
 	episodeID, err := uuid.Parse(id)
 	if err != nil {
 		r.Logger.Error("failed to parse episode id to update it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("failed to update episode, try again later")
+		return nil, gqlerror.Errorf("invalid episode ID")
 	}
 
 	episode, err := r.EpisodeService.UpdateEpisode(ctx, episodeID, input)
 	if err != nil {
 		r.Logger.Error("failed to update episode", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error updating episode, try again later")
+		return nil, handleError(err)
 	}
 
 	return episode, nil
@@ -53,8 +53,9 @@ func (r *mutationResolver) DeleteEpisode(ctx context.Context, id string) (bool, 
 	err = r.EpisodeService.DeleteEpisode(ctx, episodeID)
 	if err != nil {
 		r.Logger.Error("failed to delete episode", slog.Any("error", err))
-		return false, gqlerror.Errorf("error deleting episode, try again later")
+		return false, handleError(err)
 	}
+
 	return true, nil
 }
 
@@ -69,10 +70,10 @@ func (r *queryResolver) GetEpisode(ctx context.Context, id string) (*model.Episo
 	episode, err := r.EpisodeService.GetEpisode(ctx, episodeID)
 	if err != nil {
 		r.Logger.Error("failed to get episode", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error getting episode, try again later")
+		return nil, handleError(err)
 	}
 
-	return episode, err
+	return episode, nil
 }
 
 // ListEpisodes is the resolver for the listEpisodes field.
@@ -80,7 +81,7 @@ func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID int32) ([]*mo
 	episodes, err := r.EpisodeService.ListEpisodes(ctx, seriesID)
 	if err != nil {
 		r.Logger.Error("failed to list all episodes from a series", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error to get all episodes from series, try again later")
+		return nil, handleError(err)
 	}
 
 	return episodes, nil

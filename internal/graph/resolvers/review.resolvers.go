@@ -20,7 +20,7 @@ func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateR
 	review, err := r.ReviewService.CreateReview(ctx, input)
 	if err != nil {
 		r.Logger.Error("failed to create review", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error creating review, try again later")
+		return nil, handleError(err)
 	}
 
 	return review, nil
@@ -37,7 +37,7 @@ func (r *mutationResolver) UpdateReview(ctx context.Context, id string, input mo
 	review, err := r.ReviewService.UpdateReview(ctx, int32(reviewID), input)
 	if err != nil {
 		r.Logger.Error("failed to update review", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error updating review, try again later")
+		return nil, handleError(err)
 	}
 
 	return review, nil
@@ -54,7 +54,7 @@ func (r *mutationResolver) DeleteReview(ctx context.Context, id string) (bool, e
 	err = r.ReviewService.DeleteReview(ctx, int32(reviewID))
 	if err != nil {
 		r.Logger.Error("failed to delete review", slog.Any("error", err))
-		return false, gqlerror.Errorf("error deleting review, try again later")
+		return false, handleError(err)
 	}
 
 	return true, nil
@@ -71,7 +71,7 @@ func (r *queryResolver) GetReview(ctx context.Context, id string) (*model.Review
 	review, err := r.ReviewService.GetReview(ctx, int32(reviewID))
 	if err != nil {
 		r.Logger.Error("failed to get review", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error getting review, try again later")
+		return nil, handleError(err)
 	}
 
 	return review, nil
@@ -88,7 +88,7 @@ func (r *queryResolver) ListReviews(ctx context.Context, profileID string) ([]*m
 	reviews, err := r.ReviewService.ListReviews(ctx, pid)
 	if err != nil {
 		r.Logger.Error("failed to list reviews", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error listing reviews, try again later")
+		return nil, handleError(err)
 	}
 
 	return reviews, nil

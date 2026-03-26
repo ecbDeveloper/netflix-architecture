@@ -19,7 +19,7 @@ func (r *mutationResolver) CreateSeries(ctx context.Context, input model.CreateS
 	s, err := r.SeriesService.CreateSeries(ctx, input)
 	if err != nil {
 		r.Logger.Error("failed to create series", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error creating series, try again later")
+		return nil, handleError(err)
 	}
 
 	return s, nil
@@ -36,7 +36,7 @@ func (r *mutationResolver) UpdateSeries(ctx context.Context, id string, input mo
 	s, err := r.SeriesService.UpdateSeries(ctx, int32(seriesID), input)
 	if err != nil {
 		r.Logger.Error("failed to update series", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error updating series, try again later")
+		return nil, handleError(err)
 	}
 
 	return s, nil
@@ -53,7 +53,7 @@ func (r *mutationResolver) DeleteSeries(ctx context.Context, id string) (bool, e
 	err = r.SeriesService.DeleteSeries(ctx, int32(seriesID))
 	if err != nil {
 		r.Logger.Error("failed to delete series", slog.Any("error", err))
-		return false, gqlerror.Errorf("error deleting series, try again later")
+		return false, handleError(err)
 	}
 
 	return true, nil
@@ -70,7 +70,7 @@ func (r *queryResolver) GetSeries(ctx context.Context, id string) (*model.Series
 	s, err := r.SeriesService.GetSeries(ctx, int32(seriesID))
 	if err != nil {
 		r.Logger.Error("failed to get series", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error getting series, try again later")
+		return nil, handleError(err)
 	}
 
 	return s, nil
@@ -81,7 +81,7 @@ func (r *queryResolver) ListSeries(ctx context.Context) ([]*model.Series, error)
 	series, err := r.SeriesService.ListSeries(ctx)
 	if err != nil {
 		r.Logger.Error("failed to list all series", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error listing series, try again later")
+		return nil, handleError(err)
 	}
 
 	return series, nil

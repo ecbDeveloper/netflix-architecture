@@ -19,7 +19,7 @@ func (r *mutationResolver) CreateMovie(ctx context.Context, input model.CreateMo
 	movie, err := r.MovieService.CreateMovie(ctx, input)
 	if err != nil {
 		r.Logger.Error("failed to create movie", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error creating movie, try again later")
+		return nil, handleError(err)
 	}
 
 	return movie, nil
@@ -29,13 +29,14 @@ func (r *mutationResolver) CreateMovie(ctx context.Context, input model.CreateMo
 func (r *mutationResolver) UpdateMovie(ctx context.Context, id string, input model.UpdateMovieInput) (*model.Movie, error) {
 	movieID, err := uuid.Parse(id)
 	if err != nil {
-		r.Logger.Error("failed to update movie", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error updatig movie, try again later")
+		r.Logger.Error("failed to parse movie id to update it", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid movie ID")
 	}
+
 	movie, err := r.MovieService.UpdateMovie(ctx, movieID, input)
 	if err != nil {
 		r.Logger.Error("failed to update movie", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error updating movie, try again later")
+		return nil, handleError(err)
 	}
 
 	return movie, nil
@@ -45,14 +46,16 @@ func (r *mutationResolver) UpdateMovie(ctx context.Context, id string, input mod
 func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, error) {
 	movieID, err := uuid.Parse(id)
 	if err != nil {
-		r.Logger.Error("failed to parse episode id to delete it", slog.Any("error", err))
+		r.Logger.Error("failed to parse movie id to delete it", slog.Any("error", err))
 		return false, gqlerror.Errorf("invalid movie ID")
 	}
+
 	err = r.MovieService.DeleteMovie(ctx, movieID)
 	if err != nil {
 		r.Logger.Error("failed to delete movie", slog.Any("error", err))
-		return false, gqlerror.Errorf("error deleting movie, try again later")
+		return false, handleError(err)
 	}
+
 	return true, nil
 }
 
@@ -60,13 +63,14 @@ func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, er
 func (r *queryResolver) GetMovie(ctx context.Context, id string) (*model.Movie, error) {
 	movieID, err := uuid.Parse(id)
 	if err != nil {
-		r.Logger.Error("failed to parse episode id to get it", slog.Any("error", err))
+		r.Logger.Error("failed to parse movie id to get it", slog.Any("error", err))
 		return nil, gqlerror.Errorf("invalid movie ID")
 	}
+
 	movie, err := r.MovieService.GetMovie(ctx, movieID)
 	if err != nil {
 		r.Logger.Error("failed to get movie", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error getting movie, try again later")
+		return nil, handleError(err)
 	}
 
 	return movie, nil
@@ -77,7 +81,7 @@ func (r *queryResolver) ListMovies(ctx context.Context) ([]*model.Movie, error) 
 	movies, err := r.MovieService.ListMovies(ctx)
 	if err != nil {
 		r.Logger.Error("failed to get all movies", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error getting all movies, try again later")
+		return nil, handleError(err)
 	}
 
 	return movies, nil

@@ -19,7 +19,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 	user, err := r.UserService.CreateUser(ctx, input)
 	if err != nil {
 		r.Logger.Error("failed to create user", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error creating user, try again later")
+		return nil, handleError(err)
 	}
 
 	return user, nil
@@ -36,7 +36,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 	user, err := r.UserService.UpdateUser(ctx, userID, input)
 	if err != nil {
 		r.Logger.Error("failed to update user", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error updating user, try again later")
+		return nil, handleError(err)
 	}
 
 	return user, nil
@@ -53,7 +53,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 	err = r.UserService.DeleteUser(ctx, userID)
 	if err != nil {
 		r.Logger.Error("failed to delete user", slog.Any("error", err))
-		return false, gqlerror.Errorf("error deleting user, try again later")
+		return false, handleError(err)
 	}
 
 	return true, nil
@@ -70,7 +70,7 @@ func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.User, er
 	user, err := r.UserService.GetUser(ctx, userID)
 	if err != nil {
 		r.Logger.Error("failed to get user", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error getting user, try again later")
+		return nil, handleError(err)
 	}
 
 	return user, nil
@@ -81,7 +81,7 @@ func (r *queryResolver) ListUsers(ctx context.Context) ([]*model.User, error) {
 	users, err := r.UserService.ListUsers(ctx)
 	if err != nil {
 		r.Logger.Error("failed to list all users", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error listing users, try again later")
+		return nil, handleError(err)
 	}
 
 	return users, nil

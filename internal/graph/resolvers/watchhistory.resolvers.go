@@ -19,7 +19,7 @@ func (r *mutationResolver) CreateWatchHistory(ctx context.Context, input model.C
 	wh, err := r.WatchhistoryService.CreateWatchHistory(ctx, input)
 	if err != nil {
 		r.Logger.Error("failed to create watch history", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error creating watch history, try again later")
+		return nil, handleError(err)
 	}
 
 	return wh, nil
@@ -36,7 +36,7 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id string, in
 	wh, err := r.WatchhistoryService.UpdateWatchHistory(ctx, whID, input)
 	if err != nil {
 		r.Logger.Error("failed to update watch history", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error updating watch history, try again later")
+		return nil, handleError(err)
 	}
 
 	return wh, nil
@@ -53,7 +53,7 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id string) (b
 	err = r.WatchhistoryService.DeleteWatchHistory(ctx, whID)
 	if err != nil {
 		r.Logger.Error("failed to delete watch history", slog.Any("error", err))
-		return false, gqlerror.Errorf("error deleting watch history, try again later")
+		return false, handleError(err)
 	}
 
 	return true, nil
@@ -70,7 +70,7 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id string) (*model.
 	wh, err := r.WatchhistoryService.GetWatchHistory(ctx, whID)
 	if err != nil {
 		r.Logger.Error("failed to get watch history", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error getting watch history, try again later")
+		return nil, handleError(err)
 	}
 
 	return wh, nil
@@ -87,7 +87,7 @@ func (r *queryResolver) ListWatchHistories(ctx context.Context, profileID string
 	watchHistories, err := r.WatchhistoryService.ListWatchHistories(ctx, pid)
 	if err != nil {
 		r.Logger.Error("failed to list watch histories", slog.Any("error", err))
-		return nil, gqlerror.Errorf("error listing watch histories, try again later")
+		return nil, handleError(err)
 	}
 
 	return watchHistories, nil
