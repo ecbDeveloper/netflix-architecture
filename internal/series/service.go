@@ -2,12 +2,16 @@ package series
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/ecbDeveloper/netflix-architecture/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -22,23 +26,30 @@ func NewService(queries *sqlc.Queries) *Service {
 }
 
 func (s *Service) CreateSeries(ctx context.Context, input model.CreateSeriesInput) (*model.Series, error) {
-	params := sqlc.CreateSerieParams{
-		Title: input.Title,
+	if strings.TrimSpace(input.Title) == "" {
+		return nil, &apperror.ValidationError{Field: "title", Message: "title is required"}
+	}
+	if input.Description == nil || strings.TrimSpace(*input.Description) == "" {
+		return nil, &apperror.ValidationError{Field: "description", Message: "description is required"}
+	}
+	if input.ReleaseDate == nil || strings.TrimSpace(*input.ReleaseDate) == "" {
+		return nil, &apperror.ValidationError{Field: "releaseDate", Message: "release date is required"}
+	}
+	if input.MaturityRating == nil || strings.TrimSpace(*input.MaturityRating) == "" {
+		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating is required"}
 	}
 
-	if input.Description != nil {
-		params.Description = pgtype.Text{String: *input.Description, Valid: true}
+	params := sqlc.CreateSerieParams{
+		Title:       input.Title,
+		Description: pgtype.Text{String: *input.Description, Valid: true},
+		MaturityRating: pgtype.Text{String: *input.MaturityRating, Valid: true},
 	}
-	if input.ReleaseDate != nil {
-		releaseDate, err := time.Parse("2006-01-02", *input.ReleaseDate)
-		if err != nil {
-			return nil, fmt.Errorf("invalid release date format: %w", err)
-		}
-		params.ReleaseDate = pgtype.Date{Time: releaseDate, Valid: true}
+
+	releaseDate, err := time.Parse("2006-01-02", *input.ReleaseDate)
+	if err != nil {
+		return nil, &apperror.ValidationError{Field: "releaseDate", Message: "invalid date format, use YYYY-MM-DD"}
 	}
-	if input.MaturityRating != nil {
-		params.MaturityRating = pgtype.Text{String: *input.MaturityRating, Valid: true}
-	}
+	params.ReleaseDate = pgtype.Date{Time: releaseDate, Valid: true}
 
 	serie, err := s.Queries.CreateSerie(ctx, params)
 	if err != nil {
@@ -51,6 +62,9 @@ func (s *Service) CreateSeries(ctx context.Context, input model.CreateSeriesInpu
 func (s *Service) GetSeries(ctx context.Context, id int32) (*model.Series, error) {
 	serie, err := s.Queries.GetSerie(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "series"}
+		}
 		return nil, fmt.Errorf("failed to fetch series %v from database: %w", id, err)
 	}
 
@@ -71,8 +85,21 @@ func (s *Service) ListSeries(ctx context.Context) ([]*model.Series, error) {
 }
 
 func (s *Service) UpdateSeries(ctx context.Context, id int32, input model.UpdateSeriesInput) (*model.Series, error) {
+	if input.Title != nil && strings.TrimSpace(*input.Title) == "" {
+		return nil, &apperror.ValidationError{Field: "title", Message: "title cannot be empty"}
+	}
+	if input.Description != nil && strings.TrimSpace(*input.Description) == "" {
+		return nil, &apperror.ValidationError{Field: "description", Message: "description cannot be empty"}
+	}
+	if input.MaturityRating != nil && strings.TrimSpace(*input.MaturityRating) == "" {
+		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating cannot be empty"}
+	}
+
 	current, err := s.Queries.GetSerie(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "series"}
+		}
 		return nil, fmt.Errorf("failed to get series %v to update from database: %w", id, err)
 	}
 
@@ -93,7 +120,7 @@ func (s *Service) UpdateSeries(ctx context.Context, id int32, input model.Update
 	if input.ReleaseDate != nil {
 		releaseDate, err := time.Parse("2006-01-02", *input.ReleaseDate)
 		if err != nil {
-			return nil, fmt.Errorf("invalid release date format: %w", err)
+			return nil, &apperror.ValidationError{Field: "releaseDate", Message: "invalid date format, use YYYY-MM-DD"}
 		}
 		params.ReleaseDate = pgtype.Date{Time: releaseDate, Valid: true}
 	}
@@ -111,6 +138,9 @@ func (s *Service) UpdateSeries(ctx context.Context, id int32, input model.Update
 
 func (s *Service) DeleteSeries(ctx context.Context, id int32) error {
 	if err := s.Queries.DeleteSerie(ctx, id); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &apperror.NotFoundError{Entity: "series"}
+		}
 		return fmt.Errorf("failed to delete series %v from database: %w", id, err)
 	}
 	return nil

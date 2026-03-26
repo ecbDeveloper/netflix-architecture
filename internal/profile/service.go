@@ -2,11 +2,15 @@ package profile
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/ecbDeveloper/netflix-architecture/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -21,11 +25,15 @@ func NewService(queries *sqlc.Queries) *Service {
 }
 
 func (s *Service) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
+	if strings.TrimSpace(input.Name) == "" {
+		return nil, &apperror.ValidationError{Field: "name", Message: "profile name is required"}
+	}
+
 	profileID := uuid.New()
 
 	userUUID, err := uuid.Parse(input.UserID)
 	if err != nil {
-		return nil, err
+		return nil, &apperror.ValidationError{Field: "userId", Message: "invalid user ID"}
 	}
 
 	hasParentalControls := false
@@ -43,6 +51,9 @@ func (s *Service) CreateProfile(ctx context.Context, input model.CreateProfileIn
 		HasParentalControls: hasParentalControls,
 	})
 	if err != nil {
+		if apperror.IsUniqueViolation(err) {
+			return nil, &apperror.ConflictError{Field: "profile name for this user"}
+		}
 		return nil, fmt.Errorf("failed to insert profile on database: %w", err)
 	}
 
@@ -52,6 +63,9 @@ func (s *Service) CreateProfile(ctx context.Context, input model.CreateProfileIn
 func (s *Service) GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error) {
 	p, err := s.Queries.GetProfile(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
 		return nil, fmt.Errorf("failed to fetch profile %v from database: %w", id, err)
 	}
 
@@ -75,8 +89,15 @@ func (s *Service) ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.
 }
 
 func (s *Service) UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error) {
+	if input.Name != nil && strings.TrimSpace(*input.Name) == "" {
+		return nil, &apperror.ValidationError{Field: "name", Message: "profile name cannot be empty"}
+	}
+
 	current, err := s.Queries.GetProfile(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
 		return nil, fmt.Errorf("failed to get profile %v to update from database: %w", id, err)
 	}
 
@@ -95,6 +116,9 @@ func (s *Service) UpdateProfile(ctx context.Context, id uuid.UUID, input model.U
 
 	p, err := s.Queries.UpdateProfile(ctx, params)
 	if err != nil {
+		if apperror.IsUniqueViolation(err) {
+			return nil, &apperror.ConflictError{Field: "profile name for this user"}
+		}
 		return nil, fmt.Errorf("failed to update profile %v from database: %w", id, err)
 	}
 
@@ -103,6 +127,9 @@ func (s *Service) UpdateProfile(ctx context.Context, id uuid.UUID, input model.U
 
 func (s *Service) DeleteProfile(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteProfile(ctx, id); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &apperror.NotFoundError{Entity: "profile"}
+		}
 		return fmt.Errorf("failed to delete profile %v from database: %w", id, err)
 	}
 	return nil

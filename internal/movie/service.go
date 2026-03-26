@@ -2,12 +2,16 @@ package movie
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/ecbDeveloper/netflix-architecture/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -22,11 +26,27 @@ func NewService(queries *sqlc.Queries) *Service {
 }
 
 func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error) {
+	if strings.TrimSpace(input.Title) == "" {
+		return nil, &apperror.ValidationError{Field: "title", Message: "title is required"}
+	}
+	if strings.TrimSpace(input.Description) == "" {
+		return nil, &apperror.ValidationError{Field: "description", Message: "description is required"}
+	}
+	if input.DurationMinutes <= 0 {
+		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: "duration must be greater than zero"}
+	}
+	if strings.TrimSpace(input.MaturityRating) == "" {
+		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating is required"}
+	}
+	if strings.TrimSpace(input.ContentURL) == "" {
+		return nil, &apperror.ValidationError{Field: "contentUrl", Message: "content URL is required"}
+	}
+
 	movieID := uuid.New()
 
 	releaseDate, err := time.Parse("2006-01-02", input.ReleaseDate)
 	if err != nil {
-		return nil, fmt.Errorf("invalid release date format: %w", err)
+		return nil, &apperror.ValidationError{Field: "releaseDate", Message: "invalid date format, use YYYY-MM-DD"}
 	}
 
 	movie, err := s.Queries.CreateMovie(ctx, sqlc.CreateMovieParams{
@@ -42,6 +62,9 @@ func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput)
 		ContentUrl:     input.ContentURL,
 	})
 	if err != nil {
+		if apperror.IsUniqueViolation(err) {
+			return nil, &apperror.ConflictError{Field: "title"}
+		}
 		return nil, fmt.Errorf("failed to insert movie on database: %w", err)
 	}
 
@@ -51,6 +74,9 @@ func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput)
 func (s *Service) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error) {
 	movie, err := s.Queries.GetMovie(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "movie"}
+		}
 		return nil, fmt.Errorf("failed to fetch movie %v from database: %w", id, err)
 	}
 
@@ -71,8 +97,27 @@ func (s *Service) ListMovies(ctx context.Context) ([]*model.Movie, error) {
 }
 
 func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.UpdateMovieInput) (*model.Movie, error) {
+	if input.Title != nil && strings.TrimSpace(*input.Title) == "" {
+		return nil, &apperror.ValidationError{Field: "title", Message: "title cannot be empty"}
+	}
+	if input.Description != nil && strings.TrimSpace(*input.Description) == "" {
+		return nil, &apperror.ValidationError{Field: "description", Message: "description cannot be empty"}
+	}
+	if input.DurationMinutes != nil && *input.DurationMinutes <= 0 {
+		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: "duration must be greater than zero"}
+	}
+	if input.MaturityRating != nil && strings.TrimSpace(*input.MaturityRating) == "" {
+		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating cannot be empty"}
+	}
+	if input.ContentURL != nil && strings.TrimSpace(*input.ContentURL) == "" {
+		return nil, &apperror.ValidationError{Field: "contentUrl", Message: "content URL cannot be empty"}
+	}
+
 	current, err := s.Queries.GetMovie(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "movie"}
+		}
 		return nil, fmt.Errorf("failed to get movie %v to update from database: %w", id, err)
 	}
 
@@ -98,7 +143,7 @@ func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.Upd
 	if input.ReleaseDate != nil {
 		releaseDate, err := time.Parse("2006-01-02", *input.ReleaseDate)
 		if err != nil {
-			return nil, fmt.Errorf("invalid release date format: %w", err)
+			return nil, &apperror.ValidationError{Field: "releaseDate", Message: "invalid date format, use YYYY-MM-DD"}
 		}
 		params.ReleaseDate = pgtype.Date{Time: releaseDate, Valid: true}
 	}
@@ -111,6 +156,9 @@ func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.Upd
 
 	movie, err := s.Queries.UpdateMovie(ctx, params)
 	if err != nil {
+		if apperror.IsUniqueViolation(err) {
+			return nil, &apperror.ConflictError{Field: "title"}
+		}
 		return nil, fmt.Errorf("failed to update movie %v from database: %w", id, err)
 	}
 
@@ -119,6 +167,9 @@ func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.Upd
 
 func (s *Service) DeleteMovie(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteMovie(ctx, id); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &apperror.NotFoundError{Entity: "movie"}
+		}
 		return fmt.Errorf("failed to delete movie %v from database: %w", id, err)
 	}
 	return nil

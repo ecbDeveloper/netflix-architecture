@@ -2,12 +2,15 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 
-	// For context
+	"github.com/ecbDeveloper/netflix-architecture/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
-	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model" // Assuming this is the correct import path for model_gen.go
+	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,6 +25,19 @@ func NewService(queries *sqlc.Queries) *Service {
 }
 
 func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
+	if strings.TrimSpace(input.Email) == "" {
+		return nil, &apperror.ValidationError{Field: "email", Message: "email is required"}
+	}
+	if strings.TrimSpace(input.Name) == "" {
+		return nil, &apperror.ValidationError{Field: "name", Message: "name is required"}
+	}
+	if len(input.Cpf) != 11 {
+		return nil, &apperror.ValidationError{Field: "cpf", Message: "cpf must have exactly 11 characters"}
+	}
+	if strings.TrimSpace(input.Password) == "" {
+		return nil, &apperror.ValidationError{Field: "password", Message: "password is required"}
+	}
+
 	userID := uuid.New()
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
@@ -37,6 +53,10 @@ func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (
 		Password: string(hashedPassword),
 	})
 	if err != nil {
+		if apperror.IsUniqueViolation(err) {
+			field := apperror.UniqueViolationField(err)
+			return nil, &apperror.ConflictError{Field: field}
+		}
 		return nil, fmt.Errorf("failed to insert user on database: %w", err)
 	}
 
@@ -46,6 +66,9 @@ func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (
 func (s *Service) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
 	user, err := s.Queries.GetUser(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "user"}
+		}
 		return nil, fmt.Errorf("failed to fetch user %v from database: %w", id, err)
 	}
 
@@ -66,6 +89,16 @@ func (s *Service) ListUsers(ctx context.Context) ([]*model.User, error) {
 }
 
 func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error) {
+	if input.Email != nil && strings.TrimSpace(*input.Email) == "" {
+		return nil, &apperror.ValidationError{Field: "email", Message: "email cannot be empty"}
+	}
+	if input.Name != nil && strings.TrimSpace(*input.Name) == "" {
+		return nil, &apperror.ValidationError{Field: "name", Message: "name cannot be empty"}
+	}
+	if input.Password != nil && strings.TrimSpace(*input.Password) == "" {
+		return nil, &apperror.ValidationError{Field: "password", Message: "password cannot be empty"}
+	}
+
 	updateParams := sqlc.UpdateUserParams{
 		ID: id,
 	}
@@ -86,6 +119,13 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, input model.Upda
 
 	user, err := s.Queries.UpdateUser(ctx, updateParams)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "user"}
+		}
+		if apperror.IsUniqueViolation(err) {
+			field := apperror.UniqueViolationField(err)
+			return nil, &apperror.ConflictError{Field: field}
+		}
 		return nil, fmt.Errorf("failed to update user %v from database: %w", id, err)
 	}
 
@@ -94,6 +134,9 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, input model.Upda
 
 func (s *Service) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteUser(ctx, id); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &apperror.NotFoundError{Entity: "user"}
+		}
 		return fmt.Errorf("failed to delete user %v from database: %w", id, err)
 	}
 

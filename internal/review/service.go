@@ -2,12 +2,15 @@ package review
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
+	"github.com/ecbDeveloper/netflix-architecture/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -22,20 +25,30 @@ func NewService(queries *sqlc.Queries) *Service {
 }
 
 func (s *Service) CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error) {
+	if input.Rating < 1 || input.Rating > 5 {
+		return nil, &apperror.ValidationError{Field: "rating", Message: "rating must be between 1 and 5"}
+	}
+	if input.MovieID == nil && input.EpisodeID == nil {
+		return nil, &apperror.ValidationError{Field: "movieId/episodeId", Message: "movie or episode is required for the review"}
+	}
+	if input.MovieID != nil && input.EpisodeID != nil {
+		return nil, &apperror.ValidationError{Field: "movieId/episodeId", Message: "provide only movie or episode, not both"}
+	}
+
 	params := sqlc.CreateReviewParams{
 		Rating: input.Rating,
 	}
 
 	profileUUID, err := uuid.Parse(input.ProfileID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid profile ID: %w", err)
+		return nil, &apperror.ValidationError{Field: "profileId", Message: "invalid profile ID"}
 	}
 	params.ProfileID = pgtype.UUID{Bytes: profileUUID, Valid: true}
 
 	if input.MovieID != nil {
 		movieUUID, err := uuid.Parse(*input.MovieID)
 		if err != nil {
-			return nil, fmt.Errorf("invalid movie ID: %w", err)
+			return nil, &apperror.ValidationError{Field: "movieId", Message: "invalid movie ID"}
 		}
 		params.MovieID = pgtype.UUID{Bytes: movieUUID, Valid: true}
 	}
@@ -43,7 +56,7 @@ func (s *Service) CreateReview(ctx context.Context, input model.CreateReviewInpu
 	if input.EpisodeID != nil {
 		episodeUUID, err := uuid.Parse(*input.EpisodeID)
 		if err != nil {
-			return nil, fmt.Errorf("invalid episode ID: %w", err)
+			return nil, &apperror.ValidationError{Field: "episodeId", Message: "invalid episode ID"}
 		}
 		params.EpisodeID = pgtype.UUID{Bytes: episodeUUID, Valid: true}
 	}
@@ -63,6 +76,9 @@ func (s *Service) CreateReview(ctx context.Context, input model.CreateReviewInpu
 func (s *Service) GetReview(ctx context.Context, id int32) (*model.Review, error) {
 	r, err := s.Queries.GetReview(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "review"}
+		}
 		return nil, fmt.Errorf("failed to fetch review %v from database: %w", id, err)
 	}
 
@@ -86,8 +102,15 @@ func (s *Service) ListReviews(ctx context.Context, profileID uuid.UUID) ([]*mode
 }
 
 func (s *Service) UpdateReview(ctx context.Context, id int32, input model.UpdateReviewInput) (*model.Review, error) {
+	if input.Rating != nil && (*input.Rating < 1 || *input.Rating > 5) {
+		return nil, &apperror.ValidationError{Field: "rating", Message: "rating must be between 1 and 5"}
+	}
+
 	current, err := s.Queries.GetReview(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "review"}
+		}
 		return nil, fmt.Errorf("failed to get review %v to update from database: %w", id, err)
 	}
 
@@ -114,6 +137,9 @@ func (s *Service) UpdateReview(ctx context.Context, id int32, input model.Update
 
 func (s *Service) DeleteReview(ctx context.Context, id int32) error {
 	if err := s.Queries.DeleteReview(ctx, id); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &apperror.NotFoundError{Entity: "review"}
+		}
 		return fmt.Errorf("failed to delete review %v from database: %w", id, err)
 	}
 	return nil
