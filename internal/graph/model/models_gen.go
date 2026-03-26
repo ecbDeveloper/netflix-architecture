@@ -2,6 +2,13 @@
 
 package model
 
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type CreateEpisodeInput struct {
 	SeriesID        int32  `json:"seriesId"`
 	Season          int32  `json:"season"`
@@ -180,4 +187,59 @@ type WatchHistory struct {
 	WatchedAt           string  `json:"watchedAt"`
 	LastPositionSeconds *int32  `json:"lastPositionSeconds,omitempty"`
 	IsCompleted         *bool   `json:"isCompleted,omitempty"`
+}
+
+type UserRole string
+
+const (
+	UserRoleAdmin  UserRole = "ADMIN"
+	UserRoleMember UserRole = "MEMBER"
+)
+
+var AllUserRole = []UserRole{
+	UserRoleAdmin,
+	UserRoleMember,
+}
+
+func (e UserRole) IsValid() bool {
+	switch e {
+	case UserRoleAdmin, UserRoleMember:
+		return true
+	}
+	return false
+}
+
+func (e UserRole) String() string {
+	return string(e)
+}
+
+func (e *UserRole) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UserRole(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UserRole", str)
+	}
+	return nil
+}
+
+func (e UserRole) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *UserRole) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e UserRole) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

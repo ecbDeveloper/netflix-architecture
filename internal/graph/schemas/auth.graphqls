@@ -1,3 +1,10 @@
+directive @hasRole(role: UserRole!) on FIELD_DEFINITION
+
+enum UserRole {
+  ADMIN
+  MEMBER
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -5,4 +12,5 @@ input LoginInput {
 
 extend type Mutation {
   login(input: LoginInput): String!
+  logout: String!
 }
