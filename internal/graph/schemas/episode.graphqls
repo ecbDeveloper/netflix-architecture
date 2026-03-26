@@ -30,7 +30,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  createEpisode(input: CreateEpisodeInput!): Episode!
-  updateEpisode(id: ID!, input: UpdateEpisodeInput!): Episode!
-  deleteEpisode(id: ID!): Boolean!
+  createEpisode(input: CreateEpisodeInput!): Episode! @hasRole(role: ADMIN)
+  updateEpisode(id: ID!, input: UpdateEpisodeInput!): Episode! @hasRole(role: ADMIN)
+  deleteEpisode(id: ID!): Boolean! @hasRole(role: ADMIN)
 }

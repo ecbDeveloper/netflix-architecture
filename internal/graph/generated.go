@@ -2085,7 +2085,25 @@ func (ec *executionContext) _Mutation_createEpisode(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().CreateEpisode(ctx, fc.Args["input"].(model.CreateEpisodeInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.Episode
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Episode
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode,
 		true,
 		true,
@@ -2144,7 +2162,25 @@ func (ec *executionContext) _Mutation_updateEpisode(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateEpisode(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateEpisodeInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.Episode
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Episode
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode,
 		true,
 		true,
@@ -2203,7 +2239,25 @@ func (ec *executionContext) _Mutation_deleteEpisode(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DeleteEpisode(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNBoolean2bool,
 		true,
 		true,
@@ -2244,7 +2298,25 @@ func (ec *executionContext) _Mutation_createMovie(ctx context.Context, field gra
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().CreateMovie(ctx, fc.Args["input"].(model.CreateMovieInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.Movie
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Movie
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie,
 		true,
 		true,
@@ -2303,7 +2375,25 @@ func (ec *executionContext) _Mutation_updateMovie(ctx context.Context, field gra
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateMovie(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateMovieInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.Movie
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Movie
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie,
 		true,
 		true,
@@ -2362,7 +2452,25 @@ func (ec *executionContext) _Mutation_deleteMovie(ctx context.Context, field gra
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DeleteMovie(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNBoolean2bool,
 		true,
 		true,
@@ -2403,7 +2511,25 @@ func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().CreateProfile(ctx, fc.Args["input"].(model.CreateProfileInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal *model.Profile
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Profile
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile,
 		true,
 		true,
@@ -2462,7 +2588,25 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateProfile(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateProfileInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal *model.Profile
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Profile
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile,
 		true,
 		true,
@@ -2521,7 +2665,25 @@ func (ec *executionContext) _Mutation_deleteProfile(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DeleteProfile(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNBoolean2bool,
 		true,
 		true,
@@ -2562,7 +2724,25 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().CreateReview(ctx, fc.Args["input"].(model.CreateReviewInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal *model.Review
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
 		true,
 		true,
@@ -2619,7 +2799,25 @@ func (ec *executionContext) _Mutation_updateReview(ctx context.Context, field gr
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateReview(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateReviewInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal *model.Review
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
 		true,
 		true,
@@ -2676,7 +2874,25 @@ func (ec *executionContext) _Mutation_deleteReview(ctx context.Context, field gr
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DeleteReview(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNBoolean2bool,
 		true,
 		true,
@@ -2717,7 +2933,25 @@ func (ec *executionContext) _Mutation_createSeries(ctx context.Context, field gr
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().CreateSeries(ctx, fc.Args["input"].(model.CreateSeriesInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.Series
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Series
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries,
 		true,
 		true,
@@ -2772,7 +3006,25 @@ func (ec *executionContext) _Mutation_updateSeries(ctx context.Context, field gr
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateSeries(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateSeriesInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.Series
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Series
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries,
 		true,
 		true,
@@ -2827,7 +3079,25 @@ func (ec *executionContext) _Mutation_deleteSeries(ctx context.Context, field gr
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DeleteSeries(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNBoolean2bool,
 		true,
 		true,
@@ -3137,7 +3407,25 @@ func (ec *executionContext) _Mutation_deleteWatchHistory(ctx context.Context, fi
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DeleteWatchHistory(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNBoolean2bool,
 		true,
 		true,
@@ -4052,7 +4340,25 @@ func (ec *executionContext) _Query_listUsers(ctx context.Context, field graphql.
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ListUsers(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal []*model.User
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal []*model.User
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNUser2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserᚄ,
 		true,
 		true,
