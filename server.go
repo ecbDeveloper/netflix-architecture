@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -20,6 +21,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/episode"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
+	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/resolvers"
 	"github.com/ecbDeveloper/netflix-architecture/internal/movie"
 	"github.com/ecbDeveloper/netflix-architecture/internal/profile"
@@ -31,13 +33,23 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func init() {
 	gob.Register(uuid.UUID{})
 }
 
-const defaultPort = "8080"
+const (
+	defaultPort        = "8080"
+	dbRoleAdmin  int32 = 1
+	dbRoleMember int32 = 2
+)
+
+var userRoleDBValue = map[model.UserRole]int32{
+	model.UserRoleAdmin:  dbRoleAdmin,
+	model.UserRoleMember: dbRoleMember,
+}
 
 func main() {
 	port := os.Getenv("PORT")
@@ -45,58 +57,24 @@ func main() {
 		port = defaultPort
 	}
 
-	router := chi.NewRouter()
+	ctx := context.Background()
 
 	loggerHandler := slog.NewJSONHandler(os.Stdout, nil)
 	logger := slog.New(loggerHandler)
 
-	ctx := context.Background()
-	connStr := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASS"),
-		os.Getenv("DB_NAME"),
-	)
-
-	pool, err := pgxpool.New(ctx, connStr)
+	pool, err := initializeDatabaseConnection(ctx)
 	if err != nil {
 		logger.Error("failed to initialize db pool", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
-	queries := sqlc.New(pool)
+	defer pool.Close()
 
-	s := scs.New()
-	s.Store = pgxstore.New(pool)
-	s.Lifetime = 24 * time.Hour
-	s.Cookie.HttpOnly = true
-	s.Cookie.SameSite = http.SameSiteLaxMode
+	resolver, s, queries := initializeDependencies(pool, logger)
 
-	userService := user.NewService(queries)
-	episodeService := episode.NewService(queries)
-	movieService := movie.NewService(queries)
-	profileService := profile.NewService(queries)
-	reviewService := review.NewService(queries)
-	seriesService := series.NewService(queries)
-	watchhistoryService := watchhistory.NewService(queries)
-	authService := auth.NewService(queries)
-
+	router := chi.NewRouter()
 	router.Use(s.LoadAndSave)
 
-	graphConfig := graph.Config{Resolvers: &resolvers.Resolver{
-		Queries:             queries,
-		Logger:              logger,
-		Sessions:            s,
-		UserService:         userService,
-		EpisodeService:      episodeService,
-		MovieService:        movieService,
-		ProfileService:      profileService,
-		ReviewService:       reviewService,
-		SeriesService:       seriesService,
-		WatchhistoryService: watchhistoryService,
-		AuthService:         authService,
-	}}
+	graphConfig := initializeGraphQLConfig(resolver, s, queries)
 
 	srv := handler.New(graph.NewExecutableSchema(graphConfig))
 
@@ -111,7 +89,10 @@ func main() {
 		Cache: lru.New[string](100),
 	})
 
-	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	if os.Getenv("ENV") == "development" {
+		router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	}
+
 	router.Handle("/query", srv)
 
 	logger.Info("server initialized successfully", slog.String("url", "http://localhost:"+port+"/query"))
@@ -119,4 +100,82 @@ func main() {
 		logger.Error("failed to start application", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+}
+
+func initializeDatabaseConnection(ctx context.Context) (*pgxpool.Pool, error) {
+	connStr := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASS"),
+		os.Getenv("DB_NAME"),
+	)
+
+	pool, err := pgxpool.New(ctx, connStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize db pool: %w", err)
+	}
+
+	return pool, nil
+}
+
+func initializeDependencies(pool *pgxpool.Pool, logger *slog.Logger) (*resolvers.Resolver, *scs.SessionManager, *sqlc.Queries) {
+	queries := sqlc.New(pool)
+
+	userService := user.NewService(queries)
+	episodeService := episode.NewService(queries)
+	movieService := movie.NewService(queries)
+	profileService := profile.NewService(queries)
+	reviewService := review.NewService(queries)
+	seriesService := series.NewService(queries)
+	watchhistoryService := watchhistory.NewService(queries)
+	authService := auth.NewService(queries)
+
+	s := scs.New()
+	s.Store = pgxstore.New(pool)
+	s.Lifetime = 24 * time.Hour
+	s.Cookie.HttpOnly = true
+	s.Cookie.SameSite = http.SameSiteLaxMode
+
+	resolver := resolvers.NewResolver(
+		queries,
+		logger,
+		s,
+		userService,
+		episodeService,
+		movieService,
+		profileService,
+		reviewService,
+		seriesService,
+		watchhistoryService,
+		authService,
+	)
+
+	return resolver, s, queries
+}
+
+func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager, queries *sqlc.Queries) graph.Config {
+	graphConfig := graph.Config{Resolvers: resolver}
+
+	graphConfig.Directives.HasRole = func(ctx context.Context, obj any, next graphql.Resolver, role model.UserRole) (res any, err error) {
+		userID, ok := s.Get(ctx, resolvers.SessionUserIDKey).(uuid.UUID)
+		if !ok {
+			return nil, gqlerror.Errorf("access denied")
+		}
+
+		dbRole, ok := userRoleDBValue[role]
+		if !ok {
+			return nil, gqlerror.Errorf("access denied")
+		}
+
+		user, err := queries.GetUser(ctx, userID)
+		if err != nil || user.Role.Int32 != dbRole {
+			return nil, gqlerror.Errorf("access denied")
+		}
+
+		return next(ctx)
+	}
+
+	return graphConfig
 }
