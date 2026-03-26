@@ -89,7 +89,7 @@ func main() {
 		Cache: lru.New[string](100),
 	})
 
-	if os.Getenv("ENV") == "development" {
+	if os.Getenv("ENV") != "production" {
 		router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	}
 
