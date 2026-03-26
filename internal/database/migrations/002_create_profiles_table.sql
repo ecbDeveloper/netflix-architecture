@@ -1,7 +1,7 @@
 -- Write your migrate up statements here
 CREATE TABLE profiles (
   id UUID PRIMARY KEY,
-  user_id UUID REFERENCES users(id),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name VARCHAR(100) NOT NULL,
   has_parental_controls BOOL NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

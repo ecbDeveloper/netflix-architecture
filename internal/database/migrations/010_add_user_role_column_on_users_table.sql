@@ -1,6 +1,6 @@
 -- Write your migrate up statements here
 ALTER TABLE users 
-ADD COLUMN role INT DEFAULT 2,
+ADD COLUMN role INT NOT NULL DEFAULT 2,
 ADD CONSTRAINT users_roles_user_fk FOREIGN KEY (role)
   REFERENCES users_roles(id);
 ---- create above / drop below ----

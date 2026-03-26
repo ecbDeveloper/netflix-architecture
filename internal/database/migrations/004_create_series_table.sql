@@ -2,9 +2,9 @@
 CREATE TABLE series (
   id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
-  description TEXT,
-  release_date DATE,
-  maturity_rating VARCHAR(10)
+  description TEXT NOT NULL,
+  release_date DATE NOT NULL,
+  maturity_rating VARCHAR(10) NOT NULL
 );
 ---- create above / drop below ----
 DROP TABLE IF EXISTS series;

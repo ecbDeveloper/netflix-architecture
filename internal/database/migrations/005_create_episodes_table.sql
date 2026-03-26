@@ -1,7 +1,7 @@
 -- Write your migrate up statements here
 CREATE TABLE episodes (
   id UUID PRIMARY KEY,
-  series_id INT REFERENCES series(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  series_id INT NOT NULL REFERENCES series(id) ON DELETE CASCADE ON UPDATE CASCADE,
   season INT NOT NULL,
   episode_number INT NOT NULL,
   title VARCHAR(255) NOT NULL,

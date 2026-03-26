@@ -1,7 +1,7 @@
 -- Write your migrate up statements here
 CREATE TABLE users_roles (
   id SERIAL PRIMARY KEY,
-  role VARCHAR(20) UNIQUE
+  role VARCHAR(20) UNIQUE NOT NULL
 );
 
 INSERT INTO users_roles (role)
