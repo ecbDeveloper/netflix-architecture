@@ -21,12 +21,12 @@ input UpdateUserInput {
   password: String
 }
 
-type Query {
+extend type Query {
   getUser(id: ID!): User
   listUsers: [User!]!
 }
 
-type Mutation {
+extend type Mutation {
   createUser(input: CreateUserInput!): User!
   updateUser(id: ID!, input: UpdateUserInput!): User!
   deleteUser(id: ID!): Boolean!
