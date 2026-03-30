@@ -5,6 +5,7 @@ type User {
   cpf: String!
   createdAt: String!
   updatedAt: String!
+  roleId: Int!
   profiles: [Profile!]!
 }
 
