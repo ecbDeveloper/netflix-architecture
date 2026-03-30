@@ -43,7 +43,7 @@ func (s *Service) CreateReview(ctx context.Context, input model.CreateReviewInpu
 	if err != nil {
 		return nil, &apperror.ValidationError{Field: "profileId", Message: "invalid profile ID"}
 	}
-	params.ProfileID = pgtype.UUID{Bytes: profileUUID, Valid: true}
+	params.ProfileID = profileUUID
 
 	if input.MovieID != nil {
 		movieUUID, err := uuid.Parse(*input.MovieID)
@@ -86,10 +86,7 @@ func (s *Service) GetReview(ctx context.Context, id int32) (*model.Review, error
 }
 
 func (s *Service) ListReviews(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error) {
-	reviews, err := s.Queries.ListReviewsByProfile(ctx, pgtype.UUID{
-		Bytes: profileID,
-		Valid: true,
-	})
+	reviews, err := s.Queries.ListReviewsByProfile(ctx, profileID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all reviews from database: %w", err)
 	}
@@ -151,8 +148,8 @@ func toGraphQLModel(r sqlc.Review) *model.Review {
 		Rating: r.Rating,
 	}
 
-	if r.ProfileID.Valid {
-		m.ProfileID = uuid.UUID(r.ProfileID.Bytes).String()
+	if r.ProfileID != uuid.Nil {
+		m.ProfileID = r.ProfileID.String()
 	}
 	if r.MovieID.Valid {
 		mid := uuid.UUID(r.MovieID.Bytes).String()

@@ -35,7 +35,7 @@ func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput)
 	if input.DurationMinutes <= 0 {
 		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: "duration must be greater than zero"}
 	}
-	if strings.TrimSpace(input.MaturityRating) == "" {
+	if strings.TrimSpace(string(input.MaturityRating)) == "" {
 		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating is required"}
 	}
 	if strings.TrimSpace(input.ContentURL) == "" {
@@ -58,8 +58,9 @@ func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput)
 			Time:  releaseDate,
 			Valid: true,
 		},
-		MaturityRating: input.MaturityRating,
+		MaturityRating: sqlc.MaturityRating(input.MaturityRating),
 		ContentUrl:     input.ContentURL,
+		GenreID:        input.GenreID,
 	})
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
@@ -106,7 +107,7 @@ func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.Upd
 	if input.DurationMinutes != nil && *input.DurationMinutes <= 0 {
 		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: "duration must be greater than zero"}
 	}
-	if input.MaturityRating != nil && strings.TrimSpace(*input.MaturityRating) == "" {
+	if input.MaturityRating != nil && strings.TrimSpace(string(*input.MaturityRating)) == "" {
 		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating cannot be empty"}
 	}
 	if input.ContentURL != nil && strings.TrimSpace(*input.ContentURL) == "" {
@@ -148,7 +149,7 @@ func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.Upd
 		params.ReleaseDate = pgtype.Date{Time: releaseDate, Valid: true}
 	}
 	if input.MaturityRating != nil {
-		params.MaturityRating = *input.MaturityRating
+		params.MaturityRating = sqlc.MaturityRating(*input.MaturityRating)
 	}
 	if input.ContentURL != nil {
 		params.ContentUrl = *input.ContentURL
@@ -187,7 +188,8 @@ func toGraphQLModel(m sqlc.Movie) *model.Movie {
 		Description:     m.Description,
 		DurationMinutes: m.DurationMinutes,
 		ReleaseDate:     releaseDateStr,
-		MaturityRating:  m.MaturityRating,
+		MaturityRating:  model.MaturityRating(m.MaturityRating),
 		ContentURL:      m.ContentUrl,
+		GenreID:         m.GenreID,
 	}
 }

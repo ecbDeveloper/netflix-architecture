@@ -11,7 +11,6 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Service struct {
@@ -41,12 +40,8 @@ func (s *Service) CreateEpisode(ctx context.Context, input model.CreateEpisodeIn
 	episodeID := uuid.New()
 
 	ep, err := s.Queries.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
-		ID: episodeID,
-		SeriesID: pgtype.Int4{
-			Int32: input.SeriesID,
-			Valid: true,
-		},
-		Season:          input.Season,
+		ID:       episodeID,
+		SeriesID: input.SeriesID, Season: input.Season,
 		EpisodeNumber:   input.EpisodeNumber,
 		Title:           input.Title,
 		DurationMinutes: input.DurationMinutes,
@@ -74,10 +69,7 @@ func (s *Service) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode,
 }
 
 func (s *Service) ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error) {
-	episodes, err := s.Queries.ListEpisodesBySerie(ctx, pgtype.Int4{
-		Int32: seriesID,
-		Valid: true,
-	})
+	episodes, err := s.Queries.ListEpisodesBySerie(ctx, seriesID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all episodes from series %v from database: %w", seriesID, err)
 	}
@@ -157,7 +149,7 @@ func (s *Service) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
 func toGraphQLModel(e sqlc.Episode) *model.Episode {
 	return &model.Episode{
 		ID:              e.ID.String(),
-		SeriesID:        e.SeriesID.Int32,
+		SeriesID:        e.SeriesID,
 		Season:          e.Season,
 		EpisodeNumber:   e.EpisodeNumber,
 		Title:           e.Title,

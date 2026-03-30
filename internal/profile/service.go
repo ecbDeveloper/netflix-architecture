@@ -11,7 +11,6 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Service struct {
@@ -43,10 +42,7 @@ func (s *Service) CreateProfile(ctx context.Context, input model.CreateProfileIn
 
 	p, err := s.Queries.CreateProfile(ctx, sqlc.CreateProfileParams{
 		ID: profileID,
-		UserID: pgtype.UUID{
-			Bytes: userUUID,
-			Valid: true,
-		},
+		UserID: userUUID,
 		Name:                input.Name,
 		HasParentalControls: hasParentalControls,
 	})
@@ -73,10 +69,7 @@ func (s *Service) GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile,
 }
 
 func (s *Service) ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.Profile, error) {
-	profiles, err := s.Queries.ListProfilesByUser(ctx, pgtype.UUID{
-		Bytes: userID,
-		Valid: true,
-	})
+	profiles, err := s.Queries.ListProfilesByUser(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all profiles from database: %w", err)
 	}
@@ -137,8 +130,8 @@ func (s *Service) DeleteProfile(ctx context.Context, id uuid.UUID) error {
 
 func toGraphQLModel(p sqlc.Profile) *model.Profile {
 	userIDStr := ""
-	if p.UserID.Valid {
-		userIDStr = uuid.UUID(p.UserID.Bytes).String()
+	if p.UserID != uuid.Nil {
+		userIDStr = p.UserID.String()
 	}
 
 	return &model.Profile{

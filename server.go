@@ -32,6 +32,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -46,7 +47,7 @@ const (
 	dbRoleMember int32 = 2
 )
 
-var userRoleDBValue = map[model.UserRole]int32{
+var userRoleOnDB = map[model.UserRole]int32{
 	model.UserRoleAdmin:  dbRoleAdmin,
 	model.UserRoleMember: dbRoleMember,
 }
@@ -61,6 +62,12 @@ func main() {
 
 	loggerHandler := slog.NewJSONHandler(os.Stdout, nil)
 	logger := slog.New(loggerHandler)
+
+	err := godotenv.Load()
+	if err != nil {
+		logger.Error("failed to load .env file", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
 
 	pool, err := initializeDatabaseConnection(ctx)
 	if err != nil {
@@ -164,13 +171,13 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 			return nil, gqlerror.Errorf("access denied")
 		}
 
-		dbRole, ok := userRoleDBValue[role]
+		dbRole, ok := userRoleOnDB[role]
 		if !ok {
 			return nil, gqlerror.Errorf("access denied")
 		}
 
 		user, err := queries.GetUser(ctx, userID)
-		if err != nil || user.Role.Int32 != dbRole {
+		if err != nil || user.RoleID != dbRole {
 			return nil, gqlerror.Errorf("access denied")
 		}
 

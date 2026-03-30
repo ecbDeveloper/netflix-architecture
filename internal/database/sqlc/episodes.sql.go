@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createEpisode = `-- name: CreateEpisode :one
@@ -19,12 +18,12 @@ RETURNING id, series_id, season, episode_number, title, duration_minutes, create
 `
 
 type CreateEpisodeParams struct {
-	ID              uuid.UUID   `json:"id"`
-	SeriesID        pgtype.Int4 `json:"series_id"`
-	Season          int32       `json:"season"`
-	EpisodeNumber   int32       `json:"episode_number"`
-	Title           string      `json:"title"`
-	DurationMinutes int32       `json:"duration_minutes"`
+	ID              uuid.UUID `json:"id"`
+	SeriesID        int32     `json:"series_id"`
+	Season          int32     `json:"season"`
+	EpisodeNumber   int32     `json:"episode_number"`
+	Title           string    `json:"title"`
+	DurationMinutes int32     `json:"duration_minutes"`
 }
 
 func (q *Queries) CreateEpisode(ctx context.Context, arg CreateEpisodeParams) (Episode, error) {
@@ -81,7 +80,7 @@ const listEpisodesBySerie = `-- name: ListEpisodesBySerie :many
 SELECT id, series_id, season, episode_number, title, duration_minutes, created_at FROM episodes WHERE series_id = $1 ORDER BY season, episode_number
 `
 
-func (q *Queries) ListEpisodesBySerie(ctx context.Context, seriesID pgtype.Int4) ([]Episode, error) {
+func (q *Queries) ListEpisodesBySerie(ctx context.Context, seriesID int32) ([]Episode, error) {
 	rows, err := q.db.Query(ctx, listEpisodesBySerie, seriesID)
 	if err != nil {
 		return nil, err

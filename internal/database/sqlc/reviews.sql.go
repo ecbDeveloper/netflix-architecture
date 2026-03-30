@@ -8,6 +8,7 @@ package sqlc
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -18,7 +19,7 @@ RETURNING id, profile_id, movie_id, episode_id, rating, comment, created_at
 `
 
 type CreateReviewParams struct {
-	ProfileID pgtype.UUID `json:"profile_id"`
+	ProfileID uuid.UUID   `json:"profile_id"`
 	MovieID   pgtype.UUID `json:"movie_id"`
 	EpisodeID pgtype.UUID `json:"episode_id"`
 	Rating    int32       `json:"rating"`
@@ -142,7 +143,7 @@ const listReviewsByProfile = `-- name: ListReviewsByProfile :many
 SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at FROM reviews WHERE profile_id = $1 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListReviewsByProfile(ctx context.Context, profileID pgtype.UUID) ([]Review, error) {
+func (q *Queries) ListReviewsByProfile(ctx context.Context, profileID uuid.UUID) ([]Review, error) {
 	rows, err := q.db.Query(ctx, listReviewsByProfile, profileID)
 	if err != nil {
 		return nil, err

@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createProfile = `-- name: CreateProfile :one
@@ -19,10 +18,10 @@ RETURNING id, user_id, name, has_parental_controls, created_at, updated_at
 `
 
 type CreateProfileParams struct {
-	ID                  uuid.UUID   `json:"id"`
-	UserID              pgtype.UUID `json:"user_id"`
-	Name                string      `json:"name"`
-	HasParentalControls bool        `json:"has_parental_controls"`
+	ID                  uuid.UUID `json:"id"`
+	UserID              uuid.UUID `json:"user_id"`
+	Name                string    `json:"name"`
+	HasParentalControls bool      `json:"has_parental_controls"`
 }
 
 func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) (Profile, error) {
@@ -75,7 +74,7 @@ const listProfilesByUser = `-- name: ListProfilesByUser :many
 SELECT id, user_id, name, has_parental_controls, created_at, updated_at FROM profiles WHERE user_id = $1
 `
 
-func (q *Queries) ListProfilesByUser(ctx context.Context, userID pgtype.UUID) ([]Profile, error) {
+func (q *Queries) ListProfilesByUser(ctx context.Context, userID uuid.UUID) ([]Profile, error) {
 	rows, err := q.db.Query(ctx, listProfilesByUser, userID)
 	if err != nil {
 		return nil, err

@@ -29,23 +29,24 @@ func (s *Service) CreateSeries(ctx context.Context, input model.CreateSeriesInpu
 	if strings.TrimSpace(input.Title) == "" {
 		return nil, &apperror.ValidationError{Field: "title", Message: "title is required"}
 	}
-	if input.Description == nil || strings.TrimSpace(*input.Description) == "" {
+	if strings.TrimSpace(input.Description) == "" {
 		return nil, &apperror.ValidationError{Field: "description", Message: "description is required"}
 	}
-	if input.ReleaseDate == nil || strings.TrimSpace(*input.ReleaseDate) == "" {
+	if strings.TrimSpace(input.ReleaseDate) == "" {
 		return nil, &apperror.ValidationError{Field: "releaseDate", Message: "release date is required"}
 	}
-	if input.MaturityRating == nil || strings.TrimSpace(*input.MaturityRating) == "" {
+	if strings.TrimSpace(string(input.MaturityRating)) == "" {
 		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating is required"}
 	}
 
 	params := sqlc.CreateSerieParams{
-		Title:       input.Title,
-		Description: pgtype.Text{String: *input.Description, Valid: true},
-		MaturityRating: pgtype.Text{String: *input.MaturityRating, Valid: true},
+		Title:          input.Title,
+		Description:    input.Description,
+		MaturityRating: sqlc.MaturityRating(input.MaturityRating),
+		GenreID:        input.GenreID,
 	}
 
-	releaseDate, err := time.Parse("2006-01-02", *input.ReleaseDate)
+	releaseDate, err := time.Parse("2006-01-02", input.ReleaseDate)
 	if err != nil {
 		return nil, &apperror.ValidationError{Field: "releaseDate", Message: "invalid date format, use YYYY-MM-DD"}
 	}
@@ -91,7 +92,7 @@ func (s *Service) UpdateSeries(ctx context.Context, id int32, input model.Update
 	if input.Description != nil && strings.TrimSpace(*input.Description) == "" {
 		return nil, &apperror.ValidationError{Field: "description", Message: "description cannot be empty"}
 	}
-	if input.MaturityRating != nil && strings.TrimSpace(*input.MaturityRating) == "" {
+	if input.MaturityRating != nil && strings.TrimSpace(string(*input.MaturityRating)) == "" {
 		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating cannot be empty"}
 	}
 
@@ -109,13 +110,14 @@ func (s *Service) UpdateSeries(ctx context.Context, id int32, input model.Update
 		Description:    current.Description,
 		ReleaseDate:    current.ReleaseDate,
 		MaturityRating: current.MaturityRating,
+		GenreID:        current.GenreID,
 	}
 
 	if input.Title != nil {
 		params.Title = *input.Title
 	}
 	if input.Description != nil {
-		params.Description = pgtype.Text{String: *input.Description, Valid: true}
+		params.Description = *input.Description
 	}
 	if input.ReleaseDate != nil {
 		releaseDate, err := time.Parse("2006-01-02", *input.ReleaseDate)
@@ -125,7 +127,10 @@ func (s *Service) UpdateSeries(ctx context.Context, id int32, input model.Update
 		params.ReleaseDate = pgtype.Date{Time: releaseDate, Valid: true}
 	}
 	if input.MaturityRating != nil {
-		params.MaturityRating = pgtype.Text{String: *input.MaturityRating, Valid: true}
+		params.MaturityRating = sqlc.MaturityRating(*input.MaturityRating)
+	}
+	if input.GenreID != nil {
+		params.GenreID = *input.GenreID
 	}
 
 	serie, err := s.Queries.UpdateSerie(ctx, params)
@@ -148,19 +153,15 @@ func (s *Service) DeleteSeries(ctx context.Context, id int32) error {
 
 func toGraphQLModel(s sqlc.Series) *model.Series {
 	m := &model.Series{
-		ID:    strconv.Itoa(int(s.ID)),
-		Title: s.Title,
+		ID:             strconv.Itoa(int(s.ID)),
+		Title:          s.Title,
+		Description:    s.Description,
+		MaturityRating: model.MaturityRating(s.MaturityRating),
+		GenreID:        s.GenreID,
 	}
 
-	if s.Description.Valid {
-		m.Description = &s.Description.String
-	}
 	if s.ReleaseDate.Valid {
-		rd := s.ReleaseDate.Time.Format("2006-01-02")
-		m.ReleaseDate = &rd
-	}
-	if s.MaturityRating.Valid {
-		m.MaturityRating = &s.MaturityRating.String
+		m.ReleaseDate = s.ReleaseDate.Time.Format("2006-01-02")
 	}
 
 	return m

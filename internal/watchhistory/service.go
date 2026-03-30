@@ -41,7 +41,7 @@ func (s *Service) CreateWatchHistory(ctx context.Context, input model.CreateWatc
 	if err != nil {
 		return nil, &apperror.ValidationError{Field: "profileId", Message: "invalid profile ID"}
 	}
-	params.ProfileID = pgtype.UUID{Bytes: profileUUID, Valid: true}
+	params.ProfileID = profileUUID
 
 	if input.MovieID != nil {
 		movieUUID, err := uuid.Parse(*input.MovieID)
@@ -88,10 +88,7 @@ func (s *Service) GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.Wat
 }
 
 func (s *Service) ListWatchHistories(ctx context.Context, profileID uuid.UUID) ([]*model.WatchHistory, error) {
-	histories, err := s.Queries.ListWatchHistoryByProfile(ctx, pgtype.UUID{
-		Bytes: profileID,
-		Valid: true,
-	})
+	histories, err := s.Queries.ListWatchHistoryByProfile(ctx, profileID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all watch histories from database: %w", err)
 	}
@@ -148,8 +145,8 @@ func toGraphQLModel(wh sqlc.WatchHistory) *model.WatchHistory {
 		ID: wh.ID.String(),
 	}
 
-	if wh.ProfileID.Valid {
-		m.ProfileID = uuid.UUID(wh.ProfileID.Bytes).String()
+	if wh.ProfileID != uuid.Nil {
+		m.ProfileID = wh.ProfileID.String()
 	}
 	if wh.MovieID.Valid {
 		mid := uuid.UUID(wh.MovieID.Bytes).String()

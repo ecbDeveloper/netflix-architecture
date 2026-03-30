@@ -20,7 +20,7 @@ RETURNING id, profile_id, movie_id, episode_id, watched_at, last_position_second
 
 type CreateWatchHistoryParams struct {
 	ID                  uuid.UUID   `json:"id"`
-	ProfileID           pgtype.UUID `json:"profile_id"`
+	ProfileID           uuid.UUID   `json:"profile_id"`
 	MovieID             pgtype.UUID `json:"movie_id"`
 	EpisodeID           pgtype.UUID `json:"episode_id"`
 	LastPositionSeconds pgtype.Int4 `json:"last_position_seconds"`
@@ -81,7 +81,7 @@ const listWatchHistoryByProfile = `-- name: ListWatchHistoryByProfile :many
 SELECT id, profile_id, movie_id, episode_id, watched_at, last_position_seconds, is_completed FROM watch_histories WHERE profile_id = $1 ORDER BY watched_at DESC
 `
 
-func (q *Queries) ListWatchHistoryByProfile(ctx context.Context, profileID pgtype.UUID) ([]WatchHistory, error) {
+func (q *Queries) ListWatchHistoryByProfile(ctx context.Context, profileID uuid.UUID) ([]WatchHistory, error) {
 	rows, err := q.db.Query(ctx, listWatchHistoryByProfile, profileID)
 	if err != nil {
 		return nil, err
