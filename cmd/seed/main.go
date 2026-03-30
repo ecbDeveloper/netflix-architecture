@@ -83,7 +83,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		_, err = tx.Exec(ctx, "UPDATE users SET role = 1 WHERE id = $1", adminID)
+		_, err = tx.Exec(ctx, "UPDATE users SET role_id = 1 WHERE id = $1", adminID)
 		if err != nil {
 			logger.Error("failed to set user as admin", slog.String("error", err.Error()))
 			os.Exit(1)
@@ -108,8 +108,9 @@ func main() {
 		Description:     "A movie about the Go Gopher adventuring in the cloud.",
 		DurationMinutes: 120,
 		ReleaseDate:     pgtype.Date{Time: time.Now(), Valid: true},
-		MaturityRating:  "13",
+		MaturityRating:  sqlc.MaturityRatingL,
 		ContentUrl:      "https://example.com/movies/gopher.mp4",
+		GenreID:         1,
 	})
 	if err != nil {
 		logger.Error("failed to seed movie", slog.String("error", err.Error()))
@@ -119,7 +120,8 @@ func main() {
 		Title:          "Breaking Bugs",
 		Description:    "A programmer turned bug hunter.",
 		ReleaseDate:    pgtype.Date{Time: time.Now(), Valid: true},
-		MaturityRating: "TV-MA",
+		MaturityRating: sqlc.MaturityRatingL,
+		GenreID:        1,
 	})
 	if err != nil {
 		logger.Error("failed to seed series", slog.String("error", err.Error()))
