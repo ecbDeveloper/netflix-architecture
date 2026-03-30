@@ -66,13 +66,13 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		logger.Error("failed to load .env file", slog.String("error", err.Error()))
+		logger.Error("failed to load .env file", slog.Any("error", err))
 		os.Exit(1)
 	}
 
 	pool, err := initializeDatabaseConnection(ctx)
 	if err != nil {
-		logger.Error("failed to initialize db pool", slog.String("error", err.Error()))
+		logger.Error("failed to initialize db pool", slog.Any("error", err))
 		os.Exit(1)
 	}
 	defer pool.Close()
@@ -137,7 +137,11 @@ func initializeDatabaseConnection(ctx context.Context) (*pgxpool.Pool, error) {
 
 	pool, err := pgxpool.New(ctx, connStr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize db pool: %w", err)
+		return nil, fmt.Errorf("failed to create new db pool: %w", err)
+	}
+
+	if err := pool.Ping(ctx); err != nil {
+		return nil, fmt.Errorf("failed to ping db: %w", err)
 	}
 
 	return pool, nil
