@@ -15,7 +15,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/alexedwards/scs/pgxstore"
+	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/ecbDeveloper/netflix-architecture/internal/auth"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
@@ -30,6 +30,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/internal/user"
 	"github.com/ecbDeveloper/netflix-architecture/internal/watchhistory"
 	"github.com/go-chi/chi/v5"
+	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -76,7 +77,22 @@ func main() {
 	}
 	defer pool.Close()
 
-	resolver, s, queries := initializeDependencies(pool, logger)
+	redisPort := os.Getenv("REDIS_PORT")
+	redisUser := os.Getenv("REDIS_USER")
+	redisPass := os.Getenv("REDIS_PASS")
+
+	redisPool := &redis.Pool{
+		MaxIdle:     10,
+		IdleTimeout: 240 * time.Second,
+		DialContext: func(ctx context.Context) (redis.Conn, error) {
+			return redis.Dial("tcp", "host:"+redisPort,
+				redis.DialUsername(redisUser),
+				redis.DialPassword(redisPass),
+			)
+		},
+	}
+
+	resolver, s, queries := initializeDependencies(pool, redisPool, logger)
 
 	router := chi.NewRouter()
 	router.Use(s.LoadAndSave)
@@ -127,7 +143,7 @@ func initializeDatabaseConnection(ctx context.Context) (*pgxpool.Pool, error) {
 	return pool, nil
 }
 
-func initializeDependencies(pool *pgxpool.Pool, logger *slog.Logger) (*resolvers.Resolver, *scs.SessionManager, *sqlc.Queries) {
+func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *slog.Logger) (*resolvers.Resolver, *scs.SessionManager, *sqlc.Queries) {
 	queries := sqlc.New(pool)
 
 	userService := user.NewService(queries)
@@ -140,7 +156,7 @@ func initializeDependencies(pool *pgxpool.Pool, logger *slog.Logger) (*resolvers
 	authService := auth.NewService(queries)
 
 	s := scs.New()
-	s.Store = pgxstore.New(pool)
+	s.Store = redisstore.New(redisPool)
 	s.Lifetime = 24 * time.Hour
 	s.Cookie.HttpOnly = true
 	s.Cookie.SameSite = http.SameSiteLaxMode
