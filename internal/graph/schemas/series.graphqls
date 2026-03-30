@@ -25,12 +25,12 @@ input UpdateSeriesInput {
 }
 
 extend type Query {
-  getSeries(id: ID!): Series
-  listSeries: [Series!]!
+  getSeries(id: ID!): Series @auth
+  listSeries: [Series!]! @auth
 }
 
 extend type Mutation {
-  createSeries(input: CreateSeriesInput!): Series! @hasRole(role: ADMIN)
-  updateSeries(id: ID!, input: UpdateSeriesInput!): Series! @hasRole(role: ADMIN)
-  deleteSeries(id: ID!): Boolean! @hasRole(role: ADMIN)
+  createSeries(input: CreateSeriesInput!): Series! @auth @hasRole(role: ADMIN)
+  updateSeries(id: ID!, input: UpdateSeriesInput!): Series! @auth @hasRole(role: ADMIN)
+  deleteSeries(id: ID!): Boolean! @auth @hasRole(role: ADMIN)
 }

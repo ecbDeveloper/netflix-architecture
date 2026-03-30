@@ -165,6 +165,13 @@ func initializeDependencies(pool *pgxpool.Pool, logger *slog.Logger) (*resolvers
 func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager, queries *sqlc.Queries) graph.Config {
 	graphConfig := graph.Config{Resolvers: resolver}
 
+	graphConfig.Directives.Auth = func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
+		if !s.Exists(ctx, resolvers.SessionUserIDKey) {
+			return nil, gqlerror.Errorf("must be logged in")
+		}
+		return next(ctx)
+	}
+
 	graphConfig.Directives.HasRole = func(ctx context.Context, obj any, next graphql.Resolver, role model.UserRole) (res any, err error) {
 		userID, ok := s.Get(ctx, resolvers.SessionUserIDKey).(uuid.UUID)
 		if !ok {

@@ -25,12 +25,12 @@ input UpdateEpisodeInput {
 }
 
 extend type Query {
-  getEpisode(id: ID!): Episode
-  listEpisodes(seriesId: Int!): [Episode!]!
+  getEpisode(id: ID!): Episode @auth
+  listEpisodes(seriesId: Int!): [Episode!]! @auth
 }
 
 extend type Mutation {
-  createEpisode(input: CreateEpisodeInput!): Episode! @hasRole(role: ADMIN)
-  updateEpisode(id: ID!, input: UpdateEpisodeInput!): Episode! @hasRole(role: ADMIN)
-  deleteEpisode(id: ID!): Boolean! @hasRole(role: ADMIN)
+  createEpisode(input: CreateEpisodeInput!): Episode! @auth @hasRole(role: ADMIN)
+  updateEpisode(id: ID!, input: UpdateEpisodeInput!): Episode! @auth @hasRole(role: ADMIN)
+  deleteEpisode(id: ID!): Boolean! @auth @hasRole(role: ADMIN)
 }

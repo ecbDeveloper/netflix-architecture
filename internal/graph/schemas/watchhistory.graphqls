@@ -22,12 +22,12 @@ input UpdateWatchHistoryInput {
 }
 
 extend type Query {
-  getWatchHistory(id: ID!): WatchHistory
-  listWatchHistories(profileId: ID!): [WatchHistory!]!
+  getWatchHistory(id: ID!): WatchHistory @auth
+  listWatchHistories(profileId: ID!): [WatchHistory!]! @auth
 }
 
 extend type Mutation {
-  createWatchHistory(input: CreateWatchHistoryInput!): WatchHistory!
-  updateWatchHistory(id: ID!, input: UpdateWatchHistoryInput!): WatchHistory!
-  deleteWatchHistory(id: ID!): Boolean! @hasRole(role: MEMBER)
+  createWatchHistory(input: CreateWatchHistoryInput!): WatchHistory! @auth
+  updateWatchHistory(id: ID!, input: UpdateWatchHistoryInput!): WatchHistory! @auth
+  deleteWatchHistory(id: ID!): Boolean! @auth @hasRole(role: MEMBER)
 }

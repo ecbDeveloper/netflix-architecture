@@ -33,6 +33,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Auth    func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	HasRole func(ctx context.Context, obj any, next graphql.Resolver, role model.UserRole) (res any, err error)
 }
 
@@ -2181,7 +2182,20 @@ func (ec *executionContext) _Mutation_logout(ctx context.Context, field graphql.
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Mutation().Logout(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNString2string,
 		true,
 		true,
@@ -2215,6 +2229,13 @@ func (ec *executionContext) _Mutation_createEpisode(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Episode
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Episode
@@ -2224,10 +2245,10 @@ func (ec *executionContext) _Mutation_createEpisode(ctx context.Context, field g
 					var zeroVal *model.Episode
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode,
@@ -2292,6 +2313,13 @@ func (ec *executionContext) _Mutation_updateEpisode(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Episode
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Episode
@@ -2301,10 +2329,10 @@ func (ec *executionContext) _Mutation_updateEpisode(ctx context.Context, field g
 					var zeroVal *model.Episode
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode,
@@ -2369,6 +2397,13 @@ func (ec *executionContext) _Mutation_deleteEpisode(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal bool
@@ -2378,10 +2413,10 @@ func (ec *executionContext) _Mutation_deleteEpisode(ctx context.Context, field g
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNBoolean2bool,
@@ -2428,6 +2463,13 @@ func (ec *executionContext) _Mutation_createMovie(ctx context.Context, field gra
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Movie
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Movie
@@ -2437,10 +2479,10 @@ func (ec *executionContext) _Mutation_createMovie(ctx context.Context, field gra
 					var zeroVal *model.Movie
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie,
@@ -2507,6 +2549,13 @@ func (ec *executionContext) _Mutation_updateMovie(ctx context.Context, field gra
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Movie
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Movie
@@ -2516,10 +2565,10 @@ func (ec *executionContext) _Mutation_updateMovie(ctx context.Context, field gra
 					var zeroVal *model.Movie
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie,
@@ -2586,6 +2635,13 @@ func (ec *executionContext) _Mutation_deleteMovie(ctx context.Context, field gra
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal bool
@@ -2595,10 +2651,10 @@ func (ec *executionContext) _Mutation_deleteMovie(ctx context.Context, field gra
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNBoolean2bool,
@@ -2645,6 +2701,13 @@ func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Profile
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Profile
@@ -2654,10 +2717,10 @@ func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field g
 					var zeroVal *model.Profile
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile,
@@ -2722,6 +2785,13 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Profile
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Profile
@@ -2731,10 +2801,10 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 					var zeroVal *model.Profile
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile,
@@ -2799,6 +2869,13 @@ func (ec *executionContext) _Mutation_deleteProfile(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
@@ -2808,10 +2885,10 @@ func (ec *executionContext) _Mutation_deleteProfile(ctx context.Context, field g
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNBoolean2bool,
@@ -2858,6 +2935,13 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Review
@@ -2867,10 +2951,10 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 					var zeroVal *model.Review
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
@@ -2933,6 +3017,13 @@ func (ec *executionContext) _Mutation_updateReview(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Review
@@ -2942,10 +3033,10 @@ func (ec *executionContext) _Mutation_updateReview(ctx context.Context, field gr
 					var zeroVal *model.Review
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
@@ -3008,6 +3099,13 @@ func (ec *executionContext) _Mutation_deleteReview(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
@@ -3017,10 +3115,10 @@ func (ec *executionContext) _Mutation_deleteReview(ctx context.Context, field gr
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNBoolean2bool,
@@ -3067,6 +3165,13 @@ func (ec *executionContext) _Mutation_createSeries(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Series
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Series
@@ -3076,10 +3181,10 @@ func (ec *executionContext) _Mutation_createSeries(ctx context.Context, field gr
 					var zeroVal *model.Series
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries,
@@ -3142,6 +3247,13 @@ func (ec *executionContext) _Mutation_updateSeries(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Series
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Series
@@ -3151,10 +3263,10 @@ func (ec *executionContext) _Mutation_updateSeries(ctx context.Context, field gr
 					var zeroVal *model.Series
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries,
@@ -3217,6 +3329,13 @@ func (ec *executionContext) _Mutation_deleteSeries(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal bool
@@ -3226,10 +3345,10 @@ func (ec *executionContext) _Mutation_deleteSeries(ctx context.Context, field gr
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNBoolean2bool,
@@ -3331,7 +3450,20 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateUser(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateUserInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.User
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUser,
 		true,
 		true,
@@ -3390,7 +3522,20 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DeleteUser(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNBoolean2bool,
 		true,
 		true,
@@ -3431,7 +3576,20 @@ func (ec *executionContext) _Mutation_createWatchHistory(ctx context.Context, fi
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().CreateWatchHistory(ctx, fc.Args["input"].(model.CreateWatchHistoryInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory,
 		true,
 		true,
@@ -3488,7 +3646,20 @@ func (ec *executionContext) _Mutation_updateWatchHistory(ctx context.Context, fi
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateWatchHistory(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateWatchHistoryInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory,
 		true,
 		true,
@@ -3549,6 +3720,13 @@ func (ec *executionContext) _Mutation_deleteWatchHistory(ctx context.Context, fi
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
@@ -3558,10 +3736,10 @@ func (ec *executionContext) _Mutation_deleteWatchHistory(ctx context.Context, fi
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNBoolean2bool,
@@ -3868,7 +4046,20 @@ func (ec *executionContext) _Query_getEpisode(ctx context.Context, field graphql
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().GetEpisode(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Episode
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalOEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode,
 		true,
 		false,
@@ -3927,7 +4118,20 @@ func (ec *executionContext) _Query_listEpisodes(ctx context.Context, field graph
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().ListEpisodes(ctx, fc.Args["seriesId"].(int32))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Episode
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ,
 		true,
 		true,
@@ -3986,7 +4190,20 @@ func (ec *executionContext) _Query_getMovie(ctx context.Context, field graphql.C
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().GetMovie(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Movie
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalOMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie,
 		true,
 		false,
@@ -4046,7 +4263,20 @@ func (ec *executionContext) _Query_listMovies(ctx context.Context, field graphql
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ListMovies(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Movie
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNMovie2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovieᚄ,
 		true,
 		true,
@@ -4096,7 +4326,20 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().GetProfile(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Profile
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalOProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile,
 		true,
 		false,
@@ -4155,7 +4398,20 @@ func (ec *executionContext) _Query_listProfiles(ctx context.Context, field graph
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().ListProfiles(ctx, fc.Args["userId"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Profile
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfileᚄ,
 		true,
 		true,
@@ -4214,7 +4470,20 @@ func (ec *executionContext) _Query_getReview(ctx context.Context, field graphql.
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().GetReview(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalOReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
 		true,
 		false,
@@ -4271,7 +4540,20 @@ func (ec *executionContext) _Query_listReviews(ctx context.Context, field graphq
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().ListReviews(ctx, fc.Args["profileId"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Review
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
 		true,
 		true,
@@ -4328,7 +4610,20 @@ func (ec *executionContext) _Query_getSeries(ctx context.Context, field graphql.
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().GetSeries(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Series
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalOSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries,
 		true,
 		false,
@@ -4384,7 +4679,20 @@ func (ec *executionContext) _Query_listSeries(ctx context.Context, field graphql
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ListSeries(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Series
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNSeries2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeriesᚄ,
 		true,
 		true,
@@ -4430,7 +4738,20 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().GetUser(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.User
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalOUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUser,
 		true,
 		false,
@@ -4492,6 +4813,13 @@ func (ec *executionContext) _Query_listUsers(ctx context.Context, field graphql.
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.User
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal []*model.User
@@ -4501,10 +4829,10 @@ func (ec *executionContext) _Query_listUsers(ctx context.Context, field graphql.
 					var zeroVal []*model.User
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive0, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
 			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNUser2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserᚄ,
@@ -4554,7 +4882,20 @@ func (ec *executionContext) _Query_getWatchHistory(ctx context.Context, field gr
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().GetWatchHistory(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalOWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory,
 		true,
 		false,
@@ -4611,7 +4952,20 @@ func (ec *executionContext) _Query_listWatchHistories(ctx context.Context, field
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().ListWatchHistories(ctx, fc.Args["profileId"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.WatchHistory
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ,
 		true,
 		true,

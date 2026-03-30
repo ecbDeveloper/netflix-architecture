@@ -1,3 +1,4 @@
+directive @auth on FIELD_DEFINITION
 directive @hasRole(role: UserRole!) on FIELD_DEFINITION
 
 enum UserRole {
@@ -12,5 +13,5 @@ input LoginInput {
 
 extend type Mutation {
   login(input: LoginInput): String!
-  logout: String!
+  logout: String! @auth
 }

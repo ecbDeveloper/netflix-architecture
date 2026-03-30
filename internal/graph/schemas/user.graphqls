@@ -23,12 +23,12 @@ input UpdateUserInput {
 }
 
 extend type Query {
-  getUser(id: ID!): User
-  listUsers: [User!]! @hasRole(role: ADMIN)
+  getUser(id: ID!): User @auth
+  listUsers: [User!]! @auth @hasRole(role: ADMIN)
 }
 
 extend type Mutation {
   createUser(input: CreateUserInput!): User!
-  updateUser(id: ID!, input: UpdateUserInput!): User!
-  deleteUser(id: ID!): Boolean!
+  updateUser(id: ID!, input: UpdateUserInput!): User! @auth
+  deleteUser(id: ID!): Boolean! @auth
 }

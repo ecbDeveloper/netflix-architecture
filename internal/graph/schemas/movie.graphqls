@@ -31,12 +31,12 @@ input UpdateMovieInput {
 }
 
 extend type Query {
-  getMovie(id: ID!): Movie
-  listMovies: [Movie!]!
+  getMovie(id: ID!): Movie @auth
+  listMovies: [Movie!]! @auth
 }
 
 extend type Mutation {
-  createMovie(input: CreateMovieInput!): Movie! @hasRole(role: ADMIN)
-  updateMovie(id: ID!, input: UpdateMovieInput!): Movie! @hasRole(role: ADMIN)
-  deleteMovie(id: ID!): Boolean! @hasRole(role: ADMIN)
+  createMovie(input: CreateMovieInput!): Movie! @auth @hasRole(role: ADMIN)
+  updateMovie(id: ID!, input: UpdateMovieInput!): Movie! @auth @hasRole(role: ADMIN)
+  deleteMovie(id: ID!): Boolean! @auth @hasRole(role: ADMIN)
 }

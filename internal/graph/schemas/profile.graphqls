@@ -21,12 +21,12 @@ input UpdateProfileInput {
 }
 
 extend type Query {
-  getProfile(id: ID!): Profile
-  listProfiles(userId: ID!): [Profile!]!
+  getProfile(id: ID!): Profile @auth
+  listProfiles(userId: ID!): [Profile!]! @auth
 }
 
 extend type Mutation {
-  createProfile(input: CreateProfileInput!): Profile! @hasRole(role: MEMBER)
-  updateProfile(id: ID!, input: UpdateProfileInput!): Profile! @hasRole(role: MEMBER)
-  deleteProfile(id: ID!): Boolean! @hasRole(role: MEMBER)
+  createProfile(input: CreateProfileInput!): Profile! @auth @hasRole(role: MEMBER)
+  updateProfile(id: ID!, input: UpdateProfileInput!): Profile! @auth @hasRole(role: MEMBER)
+  deleteProfile(id: ID!): Boolean! @auth @hasRole(role: MEMBER)
 }
