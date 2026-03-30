@@ -1,24 +1,27 @@
 type Series {
   id: ID!
   title: String!
-  description: String
-  releaseDate: String
-  maturityRating: String
+  description: String!
+  releaseDate: String!
+  maturityRating: MaturityRating!
+  genreId: Int!
   episodes: [Episode!]!
 }
 
 input CreateSeriesInput {
   title: String!
-  description: String
-  releaseDate: String
-  maturityRating: String
+  description: String!
+  releaseDate: String!
+  maturityRating: MaturityRating!
+  genreId: Int!
 }
 
 input UpdateSeriesInput {
   title: String
   description: String
   releaseDate: String
-  maturityRating: String
+  maturityRating: MaturityRating
+  genreId: Int
 }
 
 extend type Query {

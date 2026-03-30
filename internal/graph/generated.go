@@ -37,6 +37,11 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	ContentGenre struct {
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+	}
+
 	Episode struct {
 		CreatedAt       func(childComplexity int) int
 		DurationMinutes func(childComplexity int) int
@@ -52,6 +57,7 @@ type ComplexityRoot struct {
 		ContentURL      func(childComplexity int) int
 		Description     func(childComplexity int) int
 		DurationMinutes func(childComplexity int) int
+		GenreID         func(childComplexity int) int
 		ID              func(childComplexity int) int
 		MaturityRating  func(childComplexity int) int
 		ReleaseDate     func(childComplexity int) int
@@ -126,6 +132,7 @@ type ComplexityRoot struct {
 	Series struct {
 		Description    func(childComplexity int) int
 		Episodes       func(childComplexity int) int
+		GenreID        func(childComplexity int) int
 		ID             func(childComplexity int) int
 		MaturityRating func(childComplexity int) int
 		ReleaseDate    func(childComplexity int) int
@@ -139,6 +146,7 @@ type ComplexityRoot struct {
 		ID        func(childComplexity int) int
 		Name      func(childComplexity int) int
 		Profiles  func(childComplexity int) int
+		RoleID    func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 	}
 
@@ -209,6 +217,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "ContentGenre.description":
+		if e.ComplexityRoot.ContentGenre.Description == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ContentGenre.Description(childComplexity), true
+	case "ContentGenre.id":
+		if e.ComplexityRoot.ContentGenre.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ContentGenre.ID(childComplexity), true
+
 	case "Episode.createdAt":
 		if e.ComplexityRoot.Episode.CreatedAt == nil {
 			break
@@ -276,6 +297,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Movie.DurationMinutes(childComplexity), true
+	case "Movie.genreId":
+		if e.ComplexityRoot.Movie.GenreID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Movie.GenreID(childComplexity), true
 	case "Movie.id":
 		if e.ComplexityRoot.Movie.ID == nil {
 			break
@@ -801,6 +828,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Series.Episodes(childComplexity), true
+	case "Series.genreId":
+		if e.ComplexityRoot.Series.GenreID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Series.GenreID(childComplexity), true
 	case "Series.id":
 		if e.ComplexityRoot.Series.ID == nil {
 			break
@@ -862,6 +895,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Profiles(childComplexity), true
+	case "User.roleId":
+		if e.ComplexityRoot.User.RoleID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.RoleID(childComplexity), true
 	case "User.updatedAt":
 		if e.ComplexityRoot.User.UpdatedAt == nil {
 			break
@@ -1509,6 +1548,64 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _ContentGenre_id(ctx context.Context, field graphql.CollectedField, obj *model.ContentGenre) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ContentGenre_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNInt2int32,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ContentGenre_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ContentGenre",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ContentGenre_description(ctx context.Context, field graphql.CollectedField, obj *model.ContentGenre) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ContentGenre_description,
+		func(ctx context.Context) (any, error) {
+			return obj.Description, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ContentGenre_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ContentGenre",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Episode_id(ctx context.Context, field graphql.CollectedField, obj *model.Episode) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1912,7 +2009,7 @@ func (ec *executionContext) _Movie_maturityRating(ctx context.Context, field gra
 			return obj.MaturityRating, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating,
 		true,
 		true,
 	)
@@ -1925,7 +2022,7 @@ func (ec *executionContext) fieldContext_Movie_maturityRating(_ context.Context,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type MaturityRating does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1955,6 +2052,35 @@ func (ec *executionContext) fieldContext_Movie_contentUrl(_ context.Context, fie
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Movie_genreId(ctx context.Context, field graphql.CollectedField, obj *model.Movie) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Movie_genreId,
+		func(ctx context.Context) (any, error) {
+			return obj.GenreID, nil
+		},
+		nil,
+		ec.marshalNInt2int32,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Movie_genreId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Movie",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2345,6 +2471,8 @@ func (ec *executionContext) fieldContext_Mutation_createMovie(ctx context.Contex
 				return ec.fieldContext_Movie_maturityRating(ctx, field)
 			case "contentUrl":
 				return ec.fieldContext_Movie_contentUrl(ctx, field)
+			case "genreId":
+				return ec.fieldContext_Movie_genreId(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Movie_reviews(ctx, field)
 			}
@@ -2422,6 +2550,8 @@ func (ec *executionContext) fieldContext_Mutation_updateMovie(ctx context.Contex
 				return ec.fieldContext_Movie_maturityRating(ctx, field)
 			case "contentUrl":
 				return ec.fieldContext_Movie_contentUrl(ctx, field)
+			case "genreId":
+				return ec.fieldContext_Movie_genreId(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Movie_reviews(ctx, field)
 			}
@@ -2976,6 +3106,8 @@ func (ec *executionContext) fieldContext_Mutation_createSeries(ctx context.Conte
 				return ec.fieldContext_Series_releaseDate(ctx, field)
 			case "maturityRating":
 				return ec.fieldContext_Series_maturityRating(ctx, field)
+			case "genreId":
+				return ec.fieldContext_Series_genreId(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Series_episodes(ctx, field)
 			}
@@ -3049,6 +3181,8 @@ func (ec *executionContext) fieldContext_Mutation_updateSeries(ctx context.Conte
 				return ec.fieldContext_Series_releaseDate(ctx, field)
 			case "maturityRating":
 				return ec.fieldContext_Series_maturityRating(ctx, field)
+			case "genreId":
+				return ec.fieldContext_Series_genreId(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Series_episodes(ctx, field)
 			}
@@ -3165,6 +3299,8 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_User_updatedAt(ctx, field)
+			case "roleId":
+				return ec.fieldContext_User_roleId(ctx, field)
 			case "profiles":
 				return ec.fieldContext_User_profiles(ctx, field)
 			}
@@ -3222,6 +3358,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_User_updatedAt(ctx, field)
+			case "roleId":
+				return ec.fieldContext_User_roleId(ctx, field)
 			case "profiles":
 				return ec.fieldContext_User_profiles(ctx, field)
 			}
@@ -3877,6 +4015,8 @@ func (ec *executionContext) fieldContext_Query_getMovie(ctx context.Context, fie
 				return ec.fieldContext_Movie_maturityRating(ctx, field)
 			case "contentUrl":
 				return ec.fieldContext_Movie_contentUrl(ctx, field)
+			case "genreId":
+				return ec.fieldContext_Movie_genreId(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Movie_reviews(ctx, field)
 			}
@@ -3935,6 +4075,8 @@ func (ec *executionContext) fieldContext_Query_listMovies(_ context.Context, fie
 				return ec.fieldContext_Movie_maturityRating(ctx, field)
 			case "contentUrl":
 				return ec.fieldContext_Movie_contentUrl(ctx, field)
+			case "genreId":
+				return ec.fieldContext_Movie_genreId(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Movie_reviews(ctx, field)
 			}
@@ -4211,6 +4353,8 @@ func (ec *executionContext) fieldContext_Query_getSeries(ctx context.Context, fi
 				return ec.fieldContext_Series_releaseDate(ctx, field)
 			case "maturityRating":
 				return ec.fieldContext_Series_maturityRating(ctx, field)
+			case "genreId":
+				return ec.fieldContext_Series_genreId(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Series_episodes(ctx, field)
 			}
@@ -4265,6 +4409,8 @@ func (ec *executionContext) fieldContext_Query_listSeries(_ context.Context, fie
 				return ec.fieldContext_Series_releaseDate(ctx, field)
 			case "maturityRating":
 				return ec.fieldContext_Series_maturityRating(ctx, field)
+			case "genreId":
+				return ec.fieldContext_Series_genreId(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Series_episodes(ctx, field)
 			}
@@ -4311,6 +4457,8 @@ func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, fiel
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_User_updatedAt(ctx, field)
+			case "roleId":
+				return ec.fieldContext_User_roleId(ctx, field)
 			case "profiles":
 				return ec.fieldContext_User_profiles(ctx, field)
 			}
@@ -4385,6 +4533,8 @@ func (ec *executionContext) fieldContext_Query_listUsers(_ context.Context, fiel
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_User_updatedAt(ctx, field)
+			case "roleId":
+				return ec.fieldContext_User_roleId(ctx, field)
 			case "profiles":
 				return ec.fieldContext_User_profiles(ctx, field)
 			}
@@ -4887,9 +5037,9 @@ func (ec *executionContext) _Series_description(ctx context.Context, field graph
 			return obj.Description, nil
 		},
 		nil,
-		ec.marshalOString2ᚖstring,
+		ec.marshalNString2string,
 		true,
-		false,
+		true,
 	)
 }
 
@@ -4916,9 +5066,9 @@ func (ec *executionContext) _Series_releaseDate(ctx context.Context, field graph
 			return obj.ReleaseDate, nil
 		},
 		nil,
-		ec.marshalOString2ᚖstring,
+		ec.marshalNString2string,
 		true,
-		false,
+		true,
 	)
 }
 
@@ -4945,9 +5095,9 @@ func (ec *executionContext) _Series_maturityRating(ctx context.Context, field gr
 			return obj.MaturityRating, nil
 		},
 		nil,
-		ec.marshalOString2ᚖstring,
+		ec.marshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating,
 		true,
-		false,
+		true,
 	)
 }
 
@@ -4958,7 +5108,36 @@ func (ec *executionContext) fieldContext_Series_maturityRating(_ context.Context
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type MaturityRating does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Series_genreId(ctx context.Context, field graphql.CollectedField, obj *model.Series) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Series_genreId,
+		func(ctx context.Context) (any, error) {
+			return obj.GenreID, nil
+		},
+		nil,
+		ec.marshalNInt2int32,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Series_genreId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Series",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5180,6 +5359,35 @@ func (ec *executionContext) fieldContext_User_updatedAt(_ context.Context, field
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_roleId(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_roleId,
+		func(ctx context.Context) (any, error) {
+			return obj.RoleID, nil
+		},
+		nil,
+		ec.marshalNInt2int32,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_roleId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -6950,7 +7158,7 @@ func (ec *executionContext) unmarshalInputCreateMovieInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "contentUrl"}
+	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "contentUrl", "genreId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6987,7 +7195,7 @@ func (ec *executionContext) unmarshalInputCreateMovieInput(ctx context.Context, 
 			it.ReleaseDate = data
 		case "maturityRating":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maturityRating"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6999,6 +7207,13 @@ func (ec *executionContext) unmarshalInputCreateMovieInput(ctx context.Context, 
 				return it, err
 			}
 			it.ContentURL = data
+		case "genreId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GenreID = data
 		}
 	}
 	return it, nil
@@ -7117,7 +7332,7 @@ func (ec *executionContext) unmarshalInputCreateSeriesInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating"}
+	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating", "genreId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7133,25 +7348,32 @@ func (ec *executionContext) unmarshalInputCreateSeriesInput(ctx context.Context,
 			it.Title = data
 		case "description":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Description = data
 		case "releaseDate":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("releaseDate"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.ReleaseDate = data
 		case "maturityRating":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maturityRating"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.MaturityRating = data
+		case "genreId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GenreID = data
 		}
 	}
 	return it, nil
@@ -7365,7 +7587,7 @@ func (ec *executionContext) unmarshalInputUpdateMovieInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "contentUrl"}
+	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "contentUrl", "genreId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7402,7 +7624,7 @@ func (ec *executionContext) unmarshalInputUpdateMovieInput(ctx context.Context, 
 			it.ReleaseDate = data
 		case "maturityRating":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maturityRating"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7414,6 +7636,13 @@ func (ec *executionContext) unmarshalInputUpdateMovieInput(ctx context.Context, 
 				return it, err
 			}
 			it.ContentURL = data
+		case "genreId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GenreID = data
 		}
 	}
 	return it, nil
@@ -7504,7 +7733,7 @@ func (ec *executionContext) unmarshalInputUpdateSeriesInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating"}
+	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating", "genreId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7534,11 +7763,18 @@ func (ec *executionContext) unmarshalInputUpdateSeriesInput(ctx context.Context,
 			it.ReleaseDate = data
 		case "maturityRating":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maturityRating"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.MaturityRating = data
+		case "genreId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GenreID = data
 		}
 	}
 	return it, nil
@@ -7632,6 +7868,50 @@ func (ec *executionContext) unmarshalInputUpdateWatchHistoryInput(ctx context.Co
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var contentGenreImplementors = []string{"ContentGenre"}
+
+func (ec *executionContext) _ContentGenre(ctx context.Context, sel ast.SelectionSet, obj *model.ContentGenre) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, contentGenreImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ContentGenre")
+		case "id":
+			out.Values[i] = ec._ContentGenre_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "description":
+			out.Values[i] = ec._ContentGenre_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
 
 var episodeImplementors = []string{"Episode"}
 
@@ -7750,6 +8030,11 @@ func (ec *executionContext) _Movie(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "contentUrl":
 			out.Values[i] = ec._Movie_contentUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "genreId":
+			out.Values[i] = ec._Movie_genreId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -8478,10 +8763,24 @@ func (ec *executionContext) _Series(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "description":
 			out.Values[i] = ec._Series_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "releaseDate":
 			out.Values[i] = ec._Series_releaseDate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "maturityRating":
 			out.Values[i] = ec._Series_maturityRating(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "genreId":
+			out.Values[i] = ec._Series_genreId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "episodes":
 			out.Values[i] = ec._Series_episodes(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -8548,6 +8847,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "updatedAt":
 			out.Values[i] = ec._User_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "roleId":
+			out.Values[i] = ec._User_roleId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -9084,6 +9388,16 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, v any) (model.MaturityRating, error) {
+	var res model.MaturityRating
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, sel ast.SelectionSet, v model.MaturityRating) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNMovie2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie(ctx context.Context, sel ast.SelectionSet, v model.Movie) graphql.Marshaler {
 	return ec._Movie(ctx, sel, &v)
 }
@@ -9545,6 +9859,22 @@ func (ec *executionContext) unmarshalOLoginInput2ᚖgithubᚗcomᚋecbDeveloper�
 	}
 	res, err := ec.unmarshalInputLoginInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, v any) (*model.MaturityRating, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.MaturityRating)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, sel ast.SelectionSet, v *model.MaturityRating) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalOMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie(ctx context.Context, sel ast.SelectionSet, v *model.Movie) graphql.Marshaler {

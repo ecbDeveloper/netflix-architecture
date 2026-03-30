@@ -13,19 +13,20 @@ import (
 )
 
 const createMovie = `-- name: CreateMovie :one
-INSERT INTO movies (id, title, description, duration_minutes, release_date, maturity_rating, content_url)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, title, description, duration_minutes, release_date, maturity_rating, content_url
+INSERT INTO movies (id, title, description, duration_minutes, release_date, maturity_rating, content_url, genre_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, title, description, duration_minutes, release_date, content_url, maturity_rating, genre_id
 `
 
 type CreateMovieParams struct {
-	ID              uuid.UUID   `json:"id"`
-	Title           string      `json:"title"`
-	Description     string      `json:"description"`
-	DurationMinutes int32       `json:"duration_minutes"`
-	ReleaseDate     pgtype.Date `json:"release_date"`
-	MaturityRating  string      `json:"maturity_rating"`
-	ContentUrl      string      `json:"content_url"`
+	ID              uuid.UUID      `json:"id"`
+	Title           string         `json:"title"`
+	Description     string         `json:"description"`
+	DurationMinutes int32          `json:"duration_minutes"`
+	ReleaseDate     pgtype.Date    `json:"release_date"`
+	MaturityRating  MaturityRating `json:"maturity_rating"`
+	ContentUrl      string         `json:"content_url"`
+	GenreID         int32          `json:"genre_id"`
 }
 
 func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Movie, error) {
@@ -37,6 +38,7 @@ func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Movie
 		arg.ReleaseDate,
 		arg.MaturityRating,
 		arg.ContentUrl,
+		arg.GenreID,
 	)
 	var i Movie
 	err := row.Scan(
@@ -45,8 +47,9 @@ func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Movie
 		&i.Description,
 		&i.DurationMinutes,
 		&i.ReleaseDate,
-		&i.MaturityRating,
 		&i.ContentUrl,
+		&i.MaturityRating,
+		&i.GenreID,
 	)
 	return i, err
 }
@@ -61,7 +64,7 @@ func (q *Queries) DeleteMovie(ctx context.Context, id uuid.UUID) error {
 }
 
 const getMovie = `-- name: GetMovie :one
-SELECT id, title, description, duration_minutes, release_date, maturity_rating, content_url FROM movies WHERE id = $1
+SELECT id, title, description, duration_minutes, release_date, content_url, maturity_rating, genre_id FROM movies WHERE id = $1
 `
 
 func (q *Queries) GetMovie(ctx context.Context, id uuid.UUID) (Movie, error) {
@@ -73,14 +76,15 @@ func (q *Queries) GetMovie(ctx context.Context, id uuid.UUID) (Movie, error) {
 		&i.Description,
 		&i.DurationMinutes,
 		&i.ReleaseDate,
-		&i.MaturityRating,
 		&i.ContentUrl,
+		&i.MaturityRating,
+		&i.GenreID,
 	)
 	return i, err
 }
 
 const listMovies = `-- name: ListMovies :many
-SELECT id, title, description, duration_minutes, release_date, maturity_rating, content_url FROM movies ORDER BY release_date DESC
+SELECT id, title, description, duration_minutes, release_date, content_url, maturity_rating, genre_id FROM movies ORDER BY release_date DESC
 `
 
 func (q *Queries) ListMovies(ctx context.Context) ([]Movie, error) {
@@ -98,8 +102,9 @@ func (q *Queries) ListMovies(ctx context.Context) ([]Movie, error) {
 			&i.Description,
 			&i.DurationMinutes,
 			&i.ReleaseDate,
-			&i.MaturityRating,
 			&i.ContentUrl,
+			&i.MaturityRating,
+			&i.GenreID,
 		); err != nil {
 			return nil, err
 		}
@@ -115,17 +120,17 @@ const updateMovie = `-- name: UpdateMovie :one
 UPDATE movies
 SET title = $2, description = $3, duration_minutes = $4, release_date = $5, maturity_rating = $6, content_url = $7
 WHERE id = $1
-RETURNING id, title, description, duration_minutes, release_date, maturity_rating, content_url
+RETURNING id, title, description, duration_minutes, release_date, content_url, maturity_rating, genre_id
 `
 
 type UpdateMovieParams struct {
-	ID              uuid.UUID   `json:"id"`
-	Title           string      `json:"title"`
-	Description     string      `json:"description"`
-	DurationMinutes int32       `json:"duration_minutes"`
-	ReleaseDate     pgtype.Date `json:"release_date"`
-	MaturityRating  string      `json:"maturity_rating"`
-	ContentUrl      string      `json:"content_url"`
+	ID              uuid.UUID      `json:"id"`
+	Title           string         `json:"title"`
+	Description     string         `json:"description"`
+	DurationMinutes int32          `json:"duration_minutes"`
+	ReleaseDate     pgtype.Date    `json:"release_date"`
+	MaturityRating  MaturityRating `json:"maturity_rating"`
+	ContentUrl      string         `json:"content_url"`
 }
 
 func (q *Queries) UpdateMovie(ctx context.Context, arg UpdateMovieParams) (Movie, error) {
@@ -145,8 +150,9 @@ func (q *Queries) UpdateMovie(ctx context.Context, arg UpdateMovieParams) (Movie
 		&i.Description,
 		&i.DurationMinutes,
 		&i.ReleaseDate,
-		&i.MaturityRating,
 		&i.ContentUrl,
+		&i.MaturityRating,
+		&i.GenreID,
 	)
 	return i, err
 }

@@ -4,8 +4,9 @@ type Movie {
   description: String!
   durationMinutes: Int!
   releaseDate: String!
-  maturityRating: String!
+  maturityRating: MaturityRating!
   contentUrl: String!
+  genreId: Int!
   reviews: [Review!]!
 }
 
@@ -14,8 +15,9 @@ input CreateMovieInput {
   description: String!
   durationMinutes: Int!
   releaseDate: String!
-  maturityRating: String!
+  maturityRating: MaturityRating!
   contentUrl: String!
+  genreId: Int!
 }
 
 input UpdateMovieInput {
@@ -23,8 +25,9 @@ input UpdateMovieInput {
   description: String
   durationMinutes: Int
   releaseDate: String
-  maturityRating: String
+  maturityRating: MaturityRating
   contentUrl: String
+  genreId: Int
 }
 
 extend type Query {

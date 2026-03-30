@@ -9,6 +9,11 @@ import (
 	"strconv"
 )
 
+type ContentGenre struct {
+	ID          int32  `json:"id"`
+	Description string `json:"description"`
+}
+
 type CreateEpisodeInput struct {
 	SeriesID        int32  `json:"seriesId"`
 	Season          int32  `json:"season"`
@@ -18,12 +23,13 @@ type CreateEpisodeInput struct {
 }
 
 type CreateMovieInput struct {
-	Title           string `json:"title"`
-	Description     string `json:"description"`
-	DurationMinutes int32  `json:"durationMinutes"`
-	ReleaseDate     string `json:"releaseDate"`
-	MaturityRating  string `json:"maturityRating"`
-	ContentURL      string `json:"contentUrl"`
+	Title           string         `json:"title"`
+	Description     string         `json:"description"`
+	DurationMinutes int32          `json:"durationMinutes"`
+	ReleaseDate     string         `json:"releaseDate"`
+	MaturityRating  MaturityRating `json:"maturityRating"`
+	ContentURL      string         `json:"contentUrl"`
+	GenreID         int32          `json:"genreId"`
 }
 
 type CreateProfileInput struct {
@@ -41,10 +47,11 @@ type CreateReviewInput struct {
 }
 
 type CreateSeriesInput struct {
-	Title          string  `json:"title"`
-	Description    *string `json:"description,omitempty"`
-	ReleaseDate    *string `json:"releaseDate,omitempty"`
-	MaturityRating *string `json:"maturityRating,omitempty"`
+	Title          string         `json:"title"`
+	Description    string         `json:"description"`
+	ReleaseDate    string         `json:"releaseDate"`
+	MaturityRating MaturityRating `json:"maturityRating"`
+	GenreID        int32          `json:"genreId"`
 }
 
 type CreateUserInput struct {
@@ -79,14 +86,15 @@ type LoginInput struct {
 }
 
 type Movie struct {
-	ID              string    `json:"id"`
-	Title           string    `json:"title"`
-	Description     string    `json:"description"`
-	DurationMinutes int32     `json:"durationMinutes"`
-	ReleaseDate     string    `json:"releaseDate"`
-	MaturityRating  string    `json:"maturityRating"`
-	ContentURL      string    `json:"contentUrl"`
-	Reviews         []*Review `json:"reviews"`
+	ID              string         `json:"id"`
+	Title           string         `json:"title"`
+	Description     string         `json:"description"`
+	DurationMinutes int32          `json:"durationMinutes"`
+	ReleaseDate     string         `json:"releaseDate"`
+	MaturityRating  MaturityRating `json:"maturityRating"`
+	ContentURL      string         `json:"contentUrl"`
+	GenreID         int32          `json:"genreId"`
+	Reviews         []*Review      `json:"reviews"`
 }
 
 type Mutation struct {
@@ -117,12 +125,13 @@ type Review struct {
 }
 
 type Series struct {
-	ID             string     `json:"id"`
-	Title          string     `json:"title"`
-	Description    *string    `json:"description,omitempty"`
-	ReleaseDate    *string    `json:"releaseDate,omitempty"`
-	MaturityRating *string    `json:"maturityRating,omitempty"`
-	Episodes       []*Episode `json:"episodes"`
+	ID             string         `json:"id"`
+	Title          string         `json:"title"`
+	Description    string         `json:"description"`
+	ReleaseDate    string         `json:"releaseDate"`
+	MaturityRating MaturityRating `json:"maturityRating"`
+	GenreID        int32          `json:"genreId"`
+	Episodes       []*Episode     `json:"episodes"`
 }
 
 type UpdateEpisodeInput struct {
@@ -133,12 +142,13 @@ type UpdateEpisodeInput struct {
 }
 
 type UpdateMovieInput struct {
-	Title           *string `json:"title,omitempty"`
-	Description     *string `json:"description,omitempty"`
-	DurationMinutes *int32  `json:"durationMinutes,omitempty"`
-	ReleaseDate     *string `json:"releaseDate,omitempty"`
-	MaturityRating  *string `json:"maturityRating,omitempty"`
-	ContentURL      *string `json:"contentUrl,omitempty"`
+	Title           *string         `json:"title,omitempty"`
+	Description     *string         `json:"description,omitempty"`
+	DurationMinutes *int32          `json:"durationMinutes,omitempty"`
+	ReleaseDate     *string         `json:"releaseDate,omitempty"`
+	MaturityRating  *MaturityRating `json:"maturityRating,omitempty"`
+	ContentURL      *string         `json:"contentUrl,omitempty"`
+	GenreID         *int32          `json:"genreId,omitempty"`
 }
 
 type UpdateProfileInput struct {
@@ -152,10 +162,11 @@ type UpdateReviewInput struct {
 }
 
 type UpdateSeriesInput struct {
-	Title          *string `json:"title,omitempty"`
-	Description    *string `json:"description,omitempty"`
-	ReleaseDate    *string `json:"releaseDate,omitempty"`
-	MaturityRating *string `json:"maturityRating,omitempty"`
+	Title          *string         `json:"title,omitempty"`
+	Description    *string         `json:"description,omitempty"`
+	ReleaseDate    *string         `json:"releaseDate,omitempty"`
+	MaturityRating *MaturityRating `json:"maturityRating,omitempty"`
+	GenreID        *int32          `json:"genreId,omitempty"`
 }
 
 type UpdateUserInput struct {
@@ -176,6 +187,7 @@ type User struct {
 	Cpf       string     `json:"cpf"`
 	CreatedAt string     `json:"createdAt"`
 	UpdatedAt string     `json:"updatedAt"`
+	RoleID    int32      `json:"roleId"`
 	Profiles  []*Profile `json:"profiles"`
 }
 
@@ -187,6 +199,69 @@ type WatchHistory struct {
 	WatchedAt           string  `json:"watchedAt"`
 	LastPositionSeconds *int32  `json:"lastPositionSeconds,omitempty"`
 	IsCompleted         *bool   `json:"isCompleted,omitempty"`
+}
+
+type MaturityRating string
+
+const (
+	MaturityRatingL        MaturityRating = "L"
+	MaturityRatingRating10 MaturityRating = "RATING_10"
+	MaturityRatingRating12 MaturityRating = "RATING_12"
+	MaturityRatingRating14 MaturityRating = "RATING_14"
+	MaturityRatingRating16 MaturityRating = "RATING_16"
+	MaturityRatingRating18 MaturityRating = "RATING_18"
+)
+
+var AllMaturityRating = []MaturityRating{
+	MaturityRatingL,
+	MaturityRatingRating10,
+	MaturityRatingRating12,
+	MaturityRatingRating14,
+	MaturityRatingRating16,
+	MaturityRatingRating18,
+}
+
+func (e MaturityRating) IsValid() bool {
+	switch e {
+	case MaturityRatingL, MaturityRatingRating10, MaturityRatingRating12, MaturityRatingRating14, MaturityRatingRating16, MaturityRatingRating18:
+		return true
+	}
+	return false
+}
+
+func (e MaturityRating) String() string {
+	return string(e)
+}
+
+func (e *MaturityRating) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = MaturityRating(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid MaturityRating", str)
+	}
+	return nil
+}
+
+func (e MaturityRating) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *MaturityRating) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e MaturityRating) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type UserRole string

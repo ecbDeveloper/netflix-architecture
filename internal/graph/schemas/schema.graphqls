@@ -1,2 +1,16 @@
 type Mutation
 type Query
+
+enum MaturityRating {
+  L
+  RATING_10
+  RATING_12
+  RATING_14
+  RATING_16
+  RATING_18
+}
+
+type ContentGenre {
+  id: Int!
+  description: String!
+}

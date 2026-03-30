@@ -12,16 +12,17 @@ import (
 )
 
 const createSerie = `-- name: CreateSerie :one
-INSERT INTO series (title, description, release_date, maturity_rating)
-VALUES ($1, $2, $3, $4)
-RETURNING id, title, description, release_date, maturity_rating
+INSERT INTO series (title, description, release_date, maturity_rating, genre_id)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, title, description, release_date, maturity_rating, genre_id
 `
 
 type CreateSerieParams struct {
-	Title          string      `json:"title"`
-	Description    pgtype.Text `json:"description"`
-	ReleaseDate    pgtype.Date `json:"release_date"`
-	MaturityRating pgtype.Text `json:"maturity_rating"`
+	Title          string         `json:"title"`
+	Description    string         `json:"description"`
+	ReleaseDate    pgtype.Date    `json:"release_date"`
+	MaturityRating MaturityRating `json:"maturity_rating"`
+	GenreID        int32          `json:"genre_id"`
 }
 
 func (q *Queries) CreateSerie(ctx context.Context, arg CreateSerieParams) (Series, error) {
@@ -30,6 +31,7 @@ func (q *Queries) CreateSerie(ctx context.Context, arg CreateSerieParams) (Serie
 		arg.Description,
 		arg.ReleaseDate,
 		arg.MaturityRating,
+		arg.GenreID,
 	)
 	var i Series
 	err := row.Scan(
@@ -38,6 +40,7 @@ func (q *Queries) CreateSerie(ctx context.Context, arg CreateSerieParams) (Serie
 		&i.Description,
 		&i.ReleaseDate,
 		&i.MaturityRating,
+		&i.GenreID,
 	)
 	return i, err
 }
@@ -52,7 +55,7 @@ func (q *Queries) DeleteSerie(ctx context.Context, id int32) error {
 }
 
 const getSerie = `-- name: GetSerie :one
-SELECT id, title, description, release_date, maturity_rating FROM series WHERE id = $1
+SELECT id, title, description, release_date, maturity_rating, genre_id FROM series WHERE id = $1
 `
 
 func (q *Queries) GetSerie(ctx context.Context, id int32) (Series, error) {
@@ -64,12 +67,13 @@ func (q *Queries) GetSerie(ctx context.Context, id int32) (Series, error) {
 		&i.Description,
 		&i.ReleaseDate,
 		&i.MaturityRating,
+		&i.GenreID,
 	)
 	return i, err
 }
 
 const listSeries = `-- name: ListSeries :many
-SELECT id, title, description, release_date, maturity_rating FROM series ORDER BY title
+SELECT id, title, description, release_date, maturity_rating, genre_id FROM series ORDER BY title
 `
 
 func (q *Queries) ListSeries(ctx context.Context) ([]Series, error) {
@@ -87,6 +91,7 @@ func (q *Queries) ListSeries(ctx context.Context) ([]Series, error) {
 			&i.Description,
 			&i.ReleaseDate,
 			&i.MaturityRating,
+			&i.GenreID,
 		); err != nil {
 			return nil, err
 		}
@@ -100,17 +105,18 @@ func (q *Queries) ListSeries(ctx context.Context) ([]Series, error) {
 
 const updateSerie = `-- name: UpdateSerie :one
 UPDATE series
-SET title = $2, description = $3, release_date = $4, maturity_rating = $5
+SET title = $2, description = $3, release_date = $4, maturity_rating = $5, genre_id = $6
 WHERE id = $1
-RETURNING id, title, description, release_date, maturity_rating
+RETURNING id, title, description, release_date, maturity_rating, genre_id
 `
 
 type UpdateSerieParams struct {
-	ID             int32       `json:"id"`
-	Title          string      `json:"title"`
-	Description    pgtype.Text `json:"description"`
-	ReleaseDate    pgtype.Date `json:"release_date"`
-	MaturityRating pgtype.Text `json:"maturity_rating"`
+	ID             int32          `json:"id"`
+	Title          string         `json:"title"`
+	Description    string         `json:"description"`
+	ReleaseDate    pgtype.Date    `json:"release_date"`
+	MaturityRating MaturityRating `json:"maturity_rating"`
+	GenreID        int32          `json:"genre_id"`
 }
 
 func (q *Queries) UpdateSerie(ctx context.Context, arg UpdateSerieParams) (Series, error) {
@@ -120,6 +126,7 @@ func (q *Queries) UpdateSerie(ctx context.Context, arg UpdateSerieParams) (Serie
 		arg.Description,
 		arg.ReleaseDate,
 		arg.MaturityRating,
+		arg.GenreID,
 	)
 	var i Series
 	err := row.Scan(
@@ -128,6 +135,7 @@ func (q *Queries) UpdateSerie(ctx context.Context, arg UpdateSerieParams) (Serie
 		&i.Description,
 		&i.ReleaseDate,
 		&i.MaturityRating,
+		&i.GenreID,
 	)
 	return i, err
 }
