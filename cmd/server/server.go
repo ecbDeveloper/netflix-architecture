@@ -187,7 +187,12 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 
 	graphConfig.Directives.Auth = func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 		if !s.Exists(ctx, resolvers.SessionUserIDKey) {
-			return nil, gqlerror.Errorf("must be logged in")
+			return nil, &gqlerror.Error{
+				Message: "must be logged in",
+				Extensions: map[string]any{
+					"code": "UNAUTHENTICATED",
+				},
+			}
 		}
 		return next(ctx)
 	}
@@ -195,17 +200,32 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 	graphConfig.Directives.HasRole = func(ctx context.Context, obj any, next graphql.Resolver, role model.UserRole) (res any, err error) {
 		userID, ok := s.Get(ctx, resolvers.SessionUserIDKey).(uuid.UUID)
 		if !ok {
-			return nil, gqlerror.Errorf("access denied")
+			return nil, &gqlerror.Error{
+				Message: "access denied",
+				Extensions: map[string]any{
+					"code": "FORBIDDEN",
+				},
+			}
 		}
 
 		dbRole, ok := userRoleOnDB[role]
 		if !ok {
-			return nil, gqlerror.Errorf("access denied")
+			return nil, &gqlerror.Error{
+				Message: "access denied",
+				Extensions: map[string]any{
+					"code": "FORBIDDEN",
+				},
+			}
 		}
 
 		user, err := queries.GetUser(ctx, userID)
 		if err != nil || user.RoleID != dbRole {
-			return nil, gqlerror.Errorf("access denied")
+			return nil, &gqlerror.Error{
+				Message: "access denied",
+				Extensions: map[string]any{
+					"code": "FORBIDDEN",
+				},
+			}
 		}
 
 		return next(ctx)
