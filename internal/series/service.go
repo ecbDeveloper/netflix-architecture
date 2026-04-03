@@ -15,17 +15,25 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Service struct {
+type Service interface {
+	CreateSeries(ctx context.Context, input model.CreateSeriesInput) (*model.Series, error)
+	GetSeries(ctx context.Context, id int32) (*model.Series, error)
+	ListSeries(ctx context.Context) ([]*model.Series, error)
+	UpdateSeries(ctx context.Context, id int32, input model.UpdateSeriesInput) (*model.Series, error)
+	DeleteSeries(ctx context.Context, id int32) error
+}
+
+type ServiceImpl struct {
 	Queries *sqlc.Queries
 }
 
-func NewService(queries *sqlc.Queries) *Service {
-	return &Service{
+func NewService(queries *sqlc.Queries) Service {
+	return &ServiceImpl{
 		Queries: queries,
 	}
 }
 
-func (s *Service) CreateSeries(ctx context.Context, input model.CreateSeriesInput) (*model.Series, error) {
+func (s *ServiceImpl) CreateSeries(ctx context.Context, input model.CreateSeriesInput) (*model.Series, error) {
 	if strings.TrimSpace(input.Title) == "" {
 		return nil, &apperror.ValidationError{Field: "title", Message: "title is required"}
 	}
@@ -60,7 +68,7 @@ func (s *Service) CreateSeries(ctx context.Context, input model.CreateSeriesInpu
 	return toGraphQLModel(serie), nil
 }
 
-func (s *Service) GetSeries(ctx context.Context, id int32) (*model.Series, error) {
+func (s *ServiceImpl) GetSeries(ctx context.Context, id int32) (*model.Series, error) {
 	serie, err := s.Queries.GetSerie(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -72,7 +80,7 @@ func (s *Service) GetSeries(ctx context.Context, id int32) (*model.Series, error
 	return toGraphQLModel(serie), nil
 }
 
-func (s *Service) ListSeries(ctx context.Context) ([]*model.Series, error) {
+func (s *ServiceImpl) ListSeries(ctx context.Context) ([]*model.Series, error) {
 	seriesList, err := s.Queries.ListSeries(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all series from database: %w", err)
@@ -85,7 +93,7 @@ func (s *Service) ListSeries(ctx context.Context) ([]*model.Series, error) {
 	return result, nil
 }
 
-func (s *Service) UpdateSeries(ctx context.Context, id int32, input model.UpdateSeriesInput) (*model.Series, error) {
+func (s *ServiceImpl) UpdateSeries(ctx context.Context, id int32, input model.UpdateSeriesInput) (*model.Series, error) {
 	if input.Title != nil && strings.TrimSpace(*input.Title) == "" {
 		return nil, &apperror.ValidationError{Field: "title", Message: "title cannot be empty"}
 	}
@@ -141,7 +149,7 @@ func (s *Service) UpdateSeries(ctx context.Context, id int32, input model.Update
 	return toGraphQLModel(serie), nil
 }
 
-func (s *Service) DeleteSeries(ctx context.Context, id int32) error {
+func (s *ServiceImpl) DeleteSeries(ctx context.Context, id int32) error {
 	if err := s.Queries.DeleteSerie(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "series"}

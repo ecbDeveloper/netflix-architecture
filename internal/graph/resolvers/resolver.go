@@ -25,28 +25,28 @@ type Resolver struct {
 	Logger   *slog.Logger
 	Sessions *scs.SessionManager
 
-	UserService         *user.Service
-	EpisodeService      *episode.Service
-	MovieService        *movie.Service
-	ProfileService      *profile.Service
-	ReviewService       *review.Service
-	SeriesService       *series.Service
-	WatchhistoryService *watchhistory.Service
-	AuthService         *auth.Service
+	UserService         user.Service
+	EpisodeService      episode.Service
+	MovieService        movie.Service
+	ProfileService      profile.Service
+	ReviewService       review.Service
+	SeriesService       series.Service
+	WatchhistoryService watchhistory.Service
+	AuthService         auth.Service
 }
 
 func NewResolver(
 	q *sqlc.Queries,
 	l *slog.Logger,
 	s *scs.SessionManager,
-	us *user.Service,
-	es *episode.Service,
-	ms *movie.Service,
-	ps *profile.Service,
-	rs *review.Service,
-	ss *series.Service,
-	whs *watchhistory.Service,
-	as *auth.Service,
+	us user.Service,
+	es episode.Service,
+	ms movie.Service,
+	ps profile.Service,
+	rs review.Service,
+	ss series.Service,
+	whs watchhistory.Service,
+	as auth.Service,
 ) *Resolver {
 	return &Resolver{
 		Logger:              l,

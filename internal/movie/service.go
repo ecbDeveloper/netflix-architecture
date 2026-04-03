@@ -15,17 +15,25 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Service struct {
+type Service interface {
+	CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error)
+	GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error)
+	ListMovies(ctx context.Context) ([]*model.Movie, error)
+	UpdateMovie(ctx context.Context, id uuid.UUID, input model.UpdateMovieInput) (*model.Movie, error)
+	DeleteMovie(ctx context.Context, id uuid.UUID) error
+}
+
+type ServiceImpl struct {
 	Queries *sqlc.Queries
 }
 
-func NewService(queries *sqlc.Queries) *Service {
-	return &Service{
+func NewService(queries *sqlc.Queries) Service {
+	return &ServiceImpl{
 		Queries: queries,
 	}
 }
 
-func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error) {
+func (s *ServiceImpl) CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error) {
 	if strings.TrimSpace(input.Title) == "" {
 		return nil, &apperror.ValidationError{Field: "title", Message: "title is required"}
 	}
@@ -72,7 +80,7 @@ func (s *Service) CreateMovie(ctx context.Context, input model.CreateMovieInput)
 	return toGraphQLModel(movie), nil
 }
 
-func (s *Service) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error) {
+func (s *ServiceImpl) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error) {
 	movie, err := s.Queries.GetMovie(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -84,7 +92,7 @@ func (s *Service) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, err
 	return toGraphQLModel(movie), nil
 }
 
-func (s *Service) ListMovies(ctx context.Context) ([]*model.Movie, error) {
+func (s *ServiceImpl) ListMovies(ctx context.Context) ([]*model.Movie, error) {
 	movies, err := s.Queries.ListMovies(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all movies from database: %w", err)
@@ -97,7 +105,7 @@ func (s *Service) ListMovies(ctx context.Context) ([]*model.Movie, error) {
 	return result, nil
 }
 
-func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.UpdateMovieInput) (*model.Movie, error) {
+func (s *ServiceImpl) UpdateMovie(ctx context.Context, id uuid.UUID, input model.UpdateMovieInput) (*model.Movie, error) {
 	if input.Title != nil && strings.TrimSpace(*input.Title) == "" {
 		return nil, &apperror.ValidationError{Field: "title", Message: "title cannot be empty"}
 	}
@@ -166,7 +174,7 @@ func (s *Service) UpdateMovie(ctx context.Context, id uuid.UUID, input model.Upd
 	return toGraphQLModel(movie), nil
 }
 
-func (s *Service) DeleteMovie(ctx context.Context, id uuid.UUID) error {
+func (s *ServiceImpl) DeleteMovie(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteMovie(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "movie"}

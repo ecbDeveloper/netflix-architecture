@@ -14,17 +14,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Service struct {
+type Service interface {
+	CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error)
+	GetUser(ctx context.Context, id uuid.UUID) (*model.User, error)
+	ListUsers(ctx context.Context) ([]*model.User, error)
+	UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error)
+	DeleteUser(ctx context.Context, id uuid.UUID) error
+}
+
+type ServiceImpl struct {
 	Queries *sqlc.Queries
 }
 
-func NewService(queries *sqlc.Queries) *Service {
-	return &Service{
+func NewService(queries *sqlc.Queries) Service {
+	return &ServiceImpl{
 		Queries: queries,
 	}
 }
 
-func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
+func (s *ServiceImpl) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
 	if strings.TrimSpace(input.Email) == "" {
 		return nil, &apperror.ValidationError{Field: "email", Message: "email is required"}
 	}
@@ -63,7 +71,7 @@ func (s *Service) CreateUser(ctx context.Context, input model.CreateUserInput) (
 	return toGraphQLModel(user), nil
 }
 
-func (s *Service) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
+func (s *ServiceImpl) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
 	user, err := s.Queries.GetUser(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -75,7 +83,7 @@ func (s *Service) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error
 	return toGraphQLModel(user), nil
 }
 
-func (s *Service) ListUsers(ctx context.Context) ([]*model.User, error) {
+func (s *ServiceImpl) ListUsers(ctx context.Context) ([]*model.User, error) {
 	users, err := s.Queries.ListUsers(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all users from database: %w", err)
@@ -88,7 +96,7 @@ func (s *Service) ListUsers(ctx context.Context) ([]*model.User, error) {
 	return modelUsers, nil
 }
 
-func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error) {
+func (s *ServiceImpl) UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error) {
 	if input.Email != nil && strings.TrimSpace(*input.Email) == "" {
 		return nil, &apperror.ValidationError{Field: "email", Message: "email cannot be empty"}
 	}
@@ -132,7 +140,7 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, input model.Upda
 	return toGraphQLModel(user), nil
 }
 
-func (s *Service) DeleteUser(ctx context.Context, id uuid.UUID) error {
+func (s *ServiceImpl) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteUser(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "user"}

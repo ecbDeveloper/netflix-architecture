@@ -13,17 +13,25 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type Service struct {
+type Service interface {
+	CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error)
+	GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error)
+	ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error)
+	UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error)
+	DeleteEpisode(ctx context.Context, id uuid.UUID) error
+}
+
+type ServiceImpl struct {
 	Queries *sqlc.Queries
 }
 
-func NewService(queries *sqlc.Queries) *Service {
-	return &Service{
+func NewService(queries *sqlc.Queries) Service {
+	return &ServiceImpl{
 		Queries: queries,
 	}
 }
 
-func (s *Service) CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error) {
+func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error) {
 	if strings.TrimSpace(input.Title) == "" {
 		return nil, &apperror.ValidationError{Field: "title", Message: "title is required"}
 	}
@@ -56,7 +64,7 @@ func (s *Service) CreateEpisode(ctx context.Context, input model.CreateEpisodeIn
 	return toGraphQLModel(ep), nil
 }
 
-func (s *Service) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error) {
+func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error) {
 	ep, err := s.Queries.GetEpisode(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -68,7 +76,7 @@ func (s *Service) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode,
 	return toGraphQLModel(ep), nil
 }
 
-func (s *Service) ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error) {
+func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error) {
 	episodes, err := s.Queries.ListEpisodesBySerie(ctx, seriesID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all episodes from series %v from database: %w", seriesID, err)
@@ -81,7 +89,7 @@ func (s *Service) ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Ep
 	return result, nil
 }
 
-func (s *Service) UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error) {
+func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error) {
 	if input.Title != nil && strings.TrimSpace(*input.Title) == "" {
 		return nil, &apperror.ValidationError{Field: "title", Message: "title cannot be empty"}
 	}
@@ -135,7 +143,7 @@ func (s *Service) UpdateEpisode(ctx context.Context, id uuid.UUID, input model.U
 	return toGraphQLModel(ep), nil
 }
 
-func (s *Service) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
+func (s *ServiceImpl) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteEpisode(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "episode"}

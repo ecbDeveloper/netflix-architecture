@@ -13,17 +13,25 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Service struct {
+type Service interface {
+	CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error)
+	GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error)
+	ListWatchHistories(ctx context.Context, profileID uuid.UUID) ([]*model.WatchHistory, error)
+	UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error)
+	DeleteWatchHistory(ctx context.Context, id uuid.UUID) error
+}
+
+type ServiceImpl struct {
 	Queries *sqlc.Queries
 }
 
-func NewService(queries *sqlc.Queries) *Service {
-	return &Service{
+func NewService(queries *sqlc.Queries) Service {
+	return &ServiceImpl{
 		Queries: queries,
 	}
 }
 
-func (s *Service) CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
+func (s *ServiceImpl) CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
 	if input.MovieID == nil && input.EpisodeID == nil {
 		return nil, &apperror.ValidationError{Field: "movieId/episodeId", Message: "movie or episode is required"}
 	}
@@ -75,7 +83,7 @@ func (s *Service) CreateWatchHistory(ctx context.Context, input model.CreateWatc
 	return toGraphQLModel(wh), nil
 }
 
-func (s *Service) GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error) {
+func (s *ServiceImpl) GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error) {
 	wh, err := s.Queries.GetWatchHistory(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -87,7 +95,7 @@ func (s *Service) GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.Wat
 	return toGraphQLModel(wh), nil
 }
 
-func (s *Service) ListWatchHistories(ctx context.Context, profileID uuid.UUID) ([]*model.WatchHistory, error) {
+func (s *ServiceImpl) ListWatchHistories(ctx context.Context, profileID uuid.UUID) ([]*model.WatchHistory, error) {
 	histories, err := s.Queries.ListWatchHistoryByProfile(ctx, profileID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all watch histories from database: %w", err)
@@ -100,7 +108,7 @@ func (s *Service) ListWatchHistories(ctx context.Context, profileID uuid.UUID) (
 	return result, nil
 }
 
-func (s *Service) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
+func (s *ServiceImpl) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
 	current, err := s.Queries.GetWatchHistory(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -130,7 +138,7 @@ func (s *Service) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input mo
 	return toGraphQLModel(wh), nil
 }
 
-func (s *Service) DeleteWatchHistory(ctx context.Context, id uuid.UUID) error {
+func (s *ServiceImpl) DeleteWatchHistory(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteWatchHistory(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "watch history"}

@@ -14,17 +14,25 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Service struct {
+type Service interface {
+	CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error)
+	GetReview(ctx context.Context, id int32) (*model.Review, error)
+	ListReviews(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error)
+	UpdateReview(ctx context.Context, id int32, input model.UpdateReviewInput) (*model.Review, error)
+	DeleteReview(ctx context.Context, id int32) error
+}
+
+type ServiceImpl struct {
 	Queries *sqlc.Queries
 }
 
-func NewService(queries *sqlc.Queries) *Service {
-	return &Service{
+func NewService(queries *sqlc.Queries) Service {
+	return &ServiceImpl{
 		Queries: queries,
 	}
 }
 
-func (s *Service) CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error) {
+func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error) {
 	if input.Rating < 1 || input.Rating > 5 {
 		return nil, &apperror.ValidationError{Field: "rating", Message: "rating must be between 1 and 5"}
 	}
@@ -73,7 +81,7 @@ func (s *Service) CreateReview(ctx context.Context, input model.CreateReviewInpu
 	return toGraphQLModel(r), nil
 }
 
-func (s *Service) GetReview(ctx context.Context, id int32) (*model.Review, error) {
+func (s *ServiceImpl) GetReview(ctx context.Context, id int32) (*model.Review, error) {
 	r, err := s.Queries.GetReview(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -85,7 +93,7 @@ func (s *Service) GetReview(ctx context.Context, id int32) (*model.Review, error
 	return toGraphQLModel(r), nil
 }
 
-func (s *Service) ListReviews(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error) {
+func (s *ServiceImpl) ListReviews(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error) {
 	reviews, err := s.Queries.ListReviewsByProfile(ctx, profileID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all reviews from database: %w", err)
@@ -98,7 +106,7 @@ func (s *Service) ListReviews(ctx context.Context, profileID uuid.UUID) ([]*mode
 	return result, nil
 }
 
-func (s *Service) UpdateReview(ctx context.Context, id int32, input model.UpdateReviewInput) (*model.Review, error) {
+func (s *ServiceImpl) UpdateReview(ctx context.Context, id int32, input model.UpdateReviewInput) (*model.Review, error) {
 	if input.Rating != nil && (*input.Rating < 1 || *input.Rating > 5) {
 		return nil, &apperror.ValidationError{Field: "rating", Message: "rating must be between 1 and 5"}
 	}
@@ -132,7 +140,7 @@ func (s *Service) UpdateReview(ctx context.Context, id int32, input model.Update
 	return toGraphQLModel(r), nil
 }
 
-func (s *Service) DeleteReview(ctx context.Context, id int32) error {
+func (s *ServiceImpl) DeleteReview(ctx context.Context, id int32) error {
 	if err := s.Queries.DeleteReview(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "review"}

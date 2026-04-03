@@ -13,17 +13,25 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type Service struct {
+type Service interface {
+	CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error)
+	GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error)
+	ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.Profile, error)
+	UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error)
+	DeleteProfile(ctx context.Context, id uuid.UUID) error
+}
+
+type ServiceImpl struct {
 	Queries *sqlc.Queries
 }
 
-func NewService(queries *sqlc.Queries) *Service {
-	return &Service{
+func NewService(queries *sqlc.Queries) Service {
+	return &ServiceImpl{
 		Queries: queries,
 	}
 }
 
-func (s *Service) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
+func (s *ServiceImpl) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
 	if strings.TrimSpace(input.Name) == "" {
 		return nil, &apperror.ValidationError{Field: "name", Message: "profile name is required"}
 	}
@@ -41,8 +49,8 @@ func (s *Service) CreateProfile(ctx context.Context, input model.CreateProfileIn
 	}
 
 	p, err := s.Queries.CreateProfile(ctx, sqlc.CreateProfileParams{
-		ID: profileID,
-		UserID: userUUID,
+		ID:                  profileID,
+		UserID:              userUUID,
 		Name:                input.Name,
 		HasParentalControls: hasParentalControls,
 	})
@@ -56,7 +64,7 @@ func (s *Service) CreateProfile(ctx context.Context, input model.CreateProfileIn
 	return toGraphQLModel(p), nil
 }
 
-func (s *Service) GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error) {
+func (s *ServiceImpl) GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error) {
 	p, err := s.Queries.GetProfile(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -68,7 +76,7 @@ func (s *Service) GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile,
 	return toGraphQLModel(p), nil
 }
 
-func (s *Service) ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.Profile, error) {
+func (s *ServiceImpl) ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.Profile, error) {
 	profiles, err := s.Queries.ListProfilesByUser(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all profiles from database: %w", err)
@@ -81,7 +89,7 @@ func (s *Service) ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.
 	return result, nil
 }
 
-func (s *Service) UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error) {
+func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error) {
 	if input.Name != nil && strings.TrimSpace(*input.Name) == "" {
 		return nil, &apperror.ValidationError{Field: "name", Message: "profile name cannot be empty"}
 	}
@@ -118,7 +126,7 @@ func (s *Service) UpdateProfile(ctx context.Context, id uuid.UUID, input model.U
 	return toGraphQLModel(p), nil
 }
 
-func (s *Service) DeleteProfile(ctx context.Context, id uuid.UUID) error {
+func (s *ServiceImpl) DeleteProfile(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteProfile(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "profile"}

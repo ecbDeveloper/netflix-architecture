@@ -14,17 +14,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Service struct {
+type Service interface {
+	Login(ctx context.Context, input model.LoginInput) (uuid.UUID, error)
+}
+
+type ServiceImpl struct {
 	Queries *sqlc.Queries
 }
 
-func NewService(queries *sqlc.Queries) *Service {
-	return &Service{
+func NewService(queries *sqlc.Queries) Service {
+	return &ServiceImpl{
 		Queries: queries,
 	}
 }
 
-func (s *Service) Login(ctx context.Context, input model.LoginInput) (uuid.UUID, error) {
+func (s *ServiceImpl) Login(ctx context.Context, input model.LoginInput) (uuid.UUID, error) {
 	if strings.TrimSpace(input.Email) == "" {
 		return uuid.UUID{}, &apperror.ValidationError{Field: "email", Message: "email is required"}
 	}
