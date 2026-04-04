@@ -78,7 +78,6 @@ func main() {
 	defer pool.Close()
 
 	redisPort := os.Getenv("REDIS_PORT")
-	redisUser := os.Getenv("REDIS_USER")
 	redisPass := os.Getenv("REDIS_PASS")
 
 	redisPool := &redis.Pool{
@@ -86,7 +85,6 @@ func main() {
 		IdleTimeout: 240 * time.Second,
 		DialContext: func(ctx context.Context) (redis.Conn, error) {
 			return redis.Dial("tcp", "host:"+redisPort,
-				redis.DialUsername(redisUser),
 				redis.DialPassword(redisPass),
 			)
 		},
