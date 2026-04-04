@@ -31,8 +31,8 @@ input UpdateMovieInput {
 }
 
 extend type Query {
-  getMovie(id: ID!): Movie @auth
-  listMovies: [Movie!]! @auth
+  getMovie(id: ID!): Movie @auth @profileSelectionIsRequired
+  listMovies: [Movie!]! @auth @profileSelectionIsRequired
 }
 
 extend type Mutation {

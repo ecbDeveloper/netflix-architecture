@@ -25,8 +25,8 @@ input UpdateSeriesInput {
 }
 
 extend type Query {
-  getSeries(id: ID!): Series @auth
-  listSeries: [Series!]! @auth
+  getSeries(id: ID!): Series @auth @profileSelectionIsRequired
+  listSeries: [Series!]! @auth @profileSelectionIsRequired
 }
 
 extend type Mutation {

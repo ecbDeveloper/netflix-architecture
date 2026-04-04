@@ -1,5 +1,6 @@
 directive @auth on FIELD_DEFINITION
 directive @hasRole(role: UserRole!) on FIELD_DEFINITION
+directive @profileSelectionIsRequired on FIELD_DEFINITION
 
 enum UserRole {
   ADMIN

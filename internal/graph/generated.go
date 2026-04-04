@@ -33,8 +33,9 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Auth    func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
-	HasRole func(ctx context.Context, obj any, next graphql.Resolver, role model.UserRole) (res any, err error)
+	Auth                       func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	HasRole                    func(ctx context.Context, obj any, next graphql.Resolver, role model.UserRole) (res any, err error)
+	ProfileSelectionIsRequired func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -2942,6 +2943,13 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Review
@@ -2951,10 +2959,10 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 					var zeroVal *model.Review
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive2, role)
 			}
 
-			next = directive2
+			next = directive3
 			return next
 		},
 		ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
@@ -3024,6 +3032,13 @@ func (ec *executionContext) _Mutation_updateReview(ctx context.Context, field gr
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Review
@@ -3033,10 +3048,10 @@ func (ec *executionContext) _Mutation_updateReview(ctx context.Context, field gr
 					var zeroVal *model.Review
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive2, role)
 			}
 
-			next = directive2
+			next = directive3
 			return next
 		},
 		ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
@@ -3106,6 +3121,13 @@ func (ec *executionContext) _Mutation_deleteReview(ctx context.Context, field gr
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
@@ -3115,10 +3137,10 @@ func (ec *executionContext) _Mutation_deleteReview(ctx context.Context, field gr
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive2, role)
 			}
 
-			next = directive2
+			next = directive3
 			return next
 		},
 		ec.marshalNBoolean2bool,
@@ -3586,8 +3608,27 @@ func (ec *executionContext) _Mutation_createWatchHistory(ctx context.Context, fi
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive2, role)
+			}
 
-			next = directive1
+			next = directive3
 			return next
 		},
 		ec.marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory,
@@ -3656,8 +3697,27 @@ func (ec *executionContext) _Mutation_updateWatchHistory(ctx context.Context, fi
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive2, role)
+			}
 
-			next = directive1
+			next = directive3
 			return next
 		},
 		ec.marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory,
@@ -3727,6 +3787,13 @@ func (ec *executionContext) _Mutation_deleteWatchHistory(ctx context.Context, fi
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
@@ -3736,10 +3803,10 @@ func (ec *executionContext) _Mutation_deleteWatchHistory(ctx context.Context, fi
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive2, role)
 			}
 
-			next = directive2
+			next = directive3
 			return next
 		},
 		ec.marshalNBoolean2bool,
@@ -4056,8 +4123,15 @@ func (ec *executionContext) _Query_getEpisode(ctx context.Context, field graphql
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal *model.Episode
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalOEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode,
@@ -4128,8 +4202,15 @@ func (ec *executionContext) _Query_listEpisodes(ctx context.Context, field graph
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal []*model.Episode
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ,
@@ -4200,8 +4281,15 @@ func (ec *executionContext) _Query_getMovie(ctx context.Context, field graphql.C
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal *model.Movie
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalOMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie,
@@ -4273,8 +4361,15 @@ func (ec *executionContext) _Query_listMovies(ctx context.Context, field graphql
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal []*model.Movie
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNMovie2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovieᚄ,
@@ -4336,8 +4431,20 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal *model.Profile
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal *model.Profile
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalOProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile,
@@ -4408,8 +4515,20 @@ func (ec *executionContext) _Query_listProfiles(ctx context.Context, field graph
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal []*model.Profile
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal []*model.Profile
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfileᚄ,
@@ -4480,8 +4599,15 @@ func (ec *executionContext) _Query_getReview(ctx context.Context, field graphql.
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalOReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
@@ -4550,8 +4676,15 @@ func (ec *executionContext) _Query_listReviews(ctx context.Context, field graphq
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal []*model.Review
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
@@ -4620,8 +4753,15 @@ func (ec *executionContext) _Query_getSeries(ctx context.Context, field graphql.
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal *model.Series
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalOSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries,
@@ -4689,8 +4829,15 @@ func (ec *executionContext) _Query_listSeries(ctx context.Context, field graphql
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal []*model.Series
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNSeries2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeriesᚄ,

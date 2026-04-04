@@ -231,5 +231,46 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 		return next(ctx)
 	}
 
+	graphConfig.Directives.ProfileSelectionIsRequired = func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
+		userID, ok := s.Get(ctx, resolvers.SessionUserIDKey).(uuid.UUID)
+		if !ok {
+			return nil, &gqlerror.Error{
+				Message: "authentication required",
+				Extensions: map[string]any{
+					"code": "UNAUTHENTICATED",
+				},
+			}
+		}
+
+		profileID, ok := s.Get(ctx, resolvers.SessionProfileKey).(int)
+		if !ok {
+			return nil, &gqlerror.Error{
+				Message: "you must select a profile to access this content",
+				Extensions: map[string]any{
+					"code": "PROFILE_SELECTION_REQUIRED",
+				},
+			}
+		}
+
+		profileIsFromUser := false
+		userProfiles, err := queries.ListProfilesByUser(ctx, userID)
+		for userProfileID := range userProfiles {
+			if userProfileID == profileID {
+				profileIsFromUser = true
+			}
+		}
+
+		if err != nil || !profileIsFromUser {
+			return nil, &gqlerror.Error{
+				Message: "invalid profile selection",
+				Extensions: map[string]any{
+					"code": "FORBIDDEN",
+				},
+			}
+		}
+
+		return next(ctx)
+	}
+
 	return graphConfig
 }

@@ -27,7 +27,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  createWatchHistory(input: CreateWatchHistoryInput!): WatchHistory! @auth
-  updateWatchHistory(id: ID!, input: UpdateWatchHistoryInput!): WatchHistory! @auth
-  deleteWatchHistory(id: ID!): Boolean! @auth @hasRole(role: MEMBER)
+  createWatchHistory(input: CreateWatchHistoryInput!): WatchHistory! @auth @profileSelectionIsRequired @hasRole(role: MEMBER)
+  updateWatchHistory(id: ID!, input: UpdateWatchHistoryInput!): WatchHistory! @auth @profileSelectionIsRequired @hasRole(role: MEMBER)
+  deleteWatchHistory(id: ID!): Boolean! @auth @profileSelectionIsRequired @hasRole(role: MEMBER)
 }
