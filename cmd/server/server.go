@@ -242,7 +242,7 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 			}
 		}
 
-		profileID, ok := s.Get(ctx, resolvers.SessionProfileKey).(int)
+		profileID, ok := s.Get(ctx, resolvers.SessionProfileIDKey).(int)
 		if !ok {
 			return nil, &gqlerror.Error{
 				Message: "you must select a profile to access this content",

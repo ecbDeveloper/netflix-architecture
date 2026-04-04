@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	SessionUserIDKey  = "AuthenticatedUserID"
-	SessionProfileKey = "ProfileID"
+	SessionUserIDKey    = "AuthenticatedUserID"
+	SessionProfileIDKey = "ProfileID"
 )
 
 // Login is the resolver for the login field.
