@@ -64,10 +64,12 @@ func main() {
 	loggerHandler := slog.NewJSONHandler(os.Stdout, nil)
 	logger := slog.New(loggerHandler)
 
-	err := godotenv.Load()
-	if err != nil {
-		logger.Error("failed to load .env file", slog.Any("error", err))
-		os.Exit(1)
+	if os.Getenv("ENV") == "development" {
+		err := godotenv.Load()
+		if err != nil {
+			logger.Error("failed to load .env file", slog.Any("error", err))
+			os.Exit(1)
+		}
 	}
 
 	pool, err := initializeDatabaseConnection(ctx)
@@ -110,7 +112,7 @@ func main() {
 		Cache: lru.New[string](100),
 	})
 
-	if os.Getenv("ENV") != "production" {
+	if os.Getenv("ENV") == "development" {
 		router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	}
 
