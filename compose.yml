@@ -20,6 +20,25 @@ services:
     volumes:
       - redis-data:/data
 
+  netflix_api:
+    container_name: netflix_api
+    build:
+      context: .
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_PORT=${DB_PORT}
+      - DB_HOST=${DB_HOST}
+      - ENV=${ENV}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASS=${REDIS_PASS}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    depends_on:
+      - db
+      - redis
+
 volumes:
   postgres-data:
   redis-data:
