@@ -27,6 +27,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/internal/review"
 	"github.com/ecbDeveloper/netflix-architecture/internal/series"
+	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/ecbDeveloper/netflix-architecture/internal/user"
 	"github.com/ecbDeveloper/netflix-architecture/internal/watchhistory"
 	"github.com/go-chi/chi/v5"
@@ -186,7 +187,7 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 	graphConfig := graph.Config{Resolvers: resolver}
 
 	graphConfig.Directives.Auth = func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
-		if !s.Exists(ctx, resolvers.SessionUserIDKey) {
+		if !s.Exists(ctx, shared.SessionUserIDKey) {
 			return nil, &gqlerror.Error{
 				Message: "must be logged in",
 				Extensions: map[string]any{
@@ -198,7 +199,7 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 	}
 
 	graphConfig.Directives.HasRole = func(ctx context.Context, obj any, next graphql.Resolver, role model.UserRole) (res any, err error) {
-		userID, ok := s.Get(ctx, resolvers.SessionUserIDKey).(uuid.UUID)
+		userID, ok := s.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
 		if !ok {
 			return nil, &gqlerror.Error{
 				Message: "access denied",
@@ -232,7 +233,7 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 	}
 
 	graphConfig.Directives.ProfileSelectionIsRequired = func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
-		userID, ok := s.Get(ctx, resolvers.SessionUserIDKey).(uuid.UUID)
+		userID, ok := s.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
 		if !ok {
 			return nil, &gqlerror.Error{
 				Message: "authentication required",
@@ -242,7 +243,7 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 			}
 		}
 
-		profileID, ok := s.Get(ctx, resolvers.SessionProfileIDKey).(int)
+		profileID, ok := s.Get(ctx, shared.SessionProfileIDKey).(int)
 		if !ok {
 			return nil, &gqlerror.Error{
 				Message: "you must select a profile to access this content",
