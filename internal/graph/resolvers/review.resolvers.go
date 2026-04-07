@@ -8,16 +8,22 @@ package resolvers
 import (
 	"context"
 	"log/slog"
-	"strconv"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateReview is the resolver for the createReview field.
 func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error) {
-	review, err := r.ReviewService.CreateReview(ctx, input)
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to create review")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	review, err := r.ReviewService.CreateReview(ctx, input, profileID)
 	if err != nil {
 		r.Logger.Error("failed to create review", slog.Any("error", err))
 		return nil, handleError(err)
@@ -28,13 +34,19 @@ func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateR
 
 // UpdateReview is the resolver for the updateReview field.
 func (r *mutationResolver) UpdateReview(ctx context.Context, id string, input model.UpdateReviewInput) (*model.Review, error) {
-	reviewID, err := strconv.Atoi(id)
+	reviewID, err := uuid.Parse(id)
 	if err != nil {
 		r.Logger.Error("failed to parse review id to update it", slog.Any("error", err))
 		return nil, gqlerror.Errorf("invalid review ID")
 	}
 
-	review, err := r.ReviewService.UpdateReview(ctx, int32(reviewID), input)
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to update review")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	review, err := r.ReviewService.UpdateReview(ctx, reviewID, input, profileID)
 	if err != nil {
 		r.Logger.Error("failed to update review", slog.Any("error", err))
 		return nil, handleError(err)
@@ -45,13 +57,19 @@ func (r *mutationResolver) UpdateReview(ctx context.Context, id string, input mo
 
 // DeleteReview is the resolver for the deleteReview field.
 func (r *mutationResolver) DeleteReview(ctx context.Context, id string) (bool, error) {
-	reviewID, err := strconv.Atoi(id)
+	reviewID, err := uuid.Parse(id)
 	if err != nil {
 		r.Logger.Error("failed to parse review id to delete it", slog.Any("error", err))
 		return false, gqlerror.Errorf("invalid review ID")
 	}
 
-	err = r.ReviewService.DeleteReview(ctx, int32(reviewID))
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to delete review")
+		return false, gqlerror.Errorf("invalid profile ID")
+	}
+
+	err = r.ReviewService.DeleteReview(ctx, reviewID, profileID)
 	if err != nil {
 		r.Logger.Error("failed to delete review", slog.Any("error", err))
 		return false, handleError(err)
@@ -62,13 +80,13 @@ func (r *mutationResolver) DeleteReview(ctx context.Context, id string) (bool, e
 
 // GetReview is the resolver for the getReview field.
 func (r *queryResolver) GetReview(ctx context.Context, id string) (*model.Review, error) {
-	reviewID, err := strconv.Atoi(id)
+	reviewID, err := uuid.Parse(id)
 	if err != nil {
 		r.Logger.Error("failed to parse review id to get it", slog.Any("error", err))
 		return nil, gqlerror.Errorf("invalid review ID")
 	}
 
-	review, err := r.ReviewService.GetReview(ctx, int32(reviewID))
+	review, err := r.ReviewService.GetReview(ctx, reviewID)
 	if err != nil {
 		r.Logger.Error("failed to get review", slog.Any("error", err))
 		return nil, handleError(err)
@@ -78,14 +96,14 @@ func (r *queryResolver) GetReview(ctx context.Context, id string) (*model.Review
 }
 
 // ListReviews is the resolver for the listReviews field.
-func (r *queryResolver) ListReviews(ctx context.Context, profileID string) ([]*model.Review, error) {
-	pid, err := uuid.Parse(profileID)
-	if err != nil {
-		r.Logger.Error("failed to parse profile id to list reviews", slog.Any("error", err))
+func (r *queryResolver) ListReviews(ctx context.Context) ([]*model.Review, error) {
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to list reviews")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	reviews, err := r.ReviewService.ListReviews(ctx, pid)
+	reviews, err := r.ReviewService.ListReviews(ctx, profileID)
 	if err != nil {
 		r.Logger.Error("failed to list reviews", slog.Any("error", err))
 		return nil, handleError(err)

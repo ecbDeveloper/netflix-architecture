@@ -107,18 +107,18 @@ type ComplexityRoot struct {
 	Query struct {
 		GetEpisode         func(childComplexity int, id string) int
 		GetMovie           func(childComplexity int, id string) int
-		GetProfile         func(childComplexity int, id string) int
+		GetProfile         func(childComplexity int) int
 		GetReview          func(childComplexity int, id string) int
 		GetSeries          func(childComplexity int, id string) int
 		GetUser            func(childComplexity int, id string) int
 		GetWatchHistory    func(childComplexity int, id string) int
 		ListEpisodes       func(childComplexity int, seriesID int32) int
 		ListMovies         func(childComplexity int) int
-		ListProfiles       func(childComplexity int, userID string) int
-		ListReviews        func(childComplexity int, profileID string) int
+		ListProfiles       func(childComplexity int) int
+		ListReviews        func(childComplexity int) int
 		ListSeries         func(childComplexity int) int
 		ListUsers          func(childComplexity int) int
-		ListWatchHistories func(childComplexity int, profileID string) int
+		ListWatchHistories func(childComplexity int) int
 	}
 
 	Review struct {
@@ -129,6 +129,7 @@ type ComplexityRoot struct {
 		MovieID   func(childComplexity int) int
 		ProfileID func(childComplexity int) int
 		Rating    func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
 	}
 
 	Series struct {
@@ -193,16 +194,16 @@ type QueryResolver interface {
 	ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error)
 	GetMovie(ctx context.Context, id string) (*model.Movie, error)
 	ListMovies(ctx context.Context) ([]*model.Movie, error)
-	GetProfile(ctx context.Context, id string) (*model.Profile, error)
-	ListProfiles(ctx context.Context, userID string) ([]*model.Profile, error)
+	GetProfile(ctx context.Context) (*model.Profile, error)
+	ListProfiles(ctx context.Context) ([]*model.Profile, error)
 	GetReview(ctx context.Context, id string) (*model.Review, error)
-	ListReviews(ctx context.Context, profileID string) ([]*model.Review, error)
+	ListReviews(ctx context.Context) ([]*model.Review, error)
 	GetSeries(ctx context.Context, id string) (*model.Series, error)
 	ListSeries(ctx context.Context) ([]*model.Series, error)
 	GetUser(ctx context.Context, id string) (*model.User, error)
 	ListUsers(ctx context.Context) ([]*model.User, error)
 	GetWatchHistory(ctx context.Context, id string) (*model.WatchHistory, error)
-	ListWatchHistories(ctx context.Context, profileID string) ([]*model.WatchHistory, error)
+	ListWatchHistories(ctx context.Context) ([]*model.WatchHistory, error)
 }
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -661,12 +662,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_getProfile_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.GetProfile(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetProfile(childComplexity), true
 	case "Query.getReview":
 		if e.ComplexityRoot.Query.GetReview == nil {
 			break
@@ -734,23 +730,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_listProfiles_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.ListProfiles(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.ListProfiles(childComplexity), true
 	case "Query.listReviews":
 		if e.ComplexityRoot.Query.ListReviews == nil {
 			break
 		}
 
-		args, err := ec.field_Query_listReviews_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.ListReviews(childComplexity, args["profileId"].(string)), true
+		return e.ComplexityRoot.Query.ListReviews(childComplexity), true
 	case "Query.listSeries":
 		if e.ComplexityRoot.Query.ListSeries == nil {
 			break
@@ -768,12 +754,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_listWatchHistories_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.ListWatchHistories(childComplexity, args["profileId"].(string)), true
+		return e.ComplexityRoot.Query.ListWatchHistories(childComplexity), true
 
 	case "Review.comment":
 		if e.ComplexityRoot.Review.Comment == nil {
@@ -817,6 +798,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Review.Rating(childComplexity), true
+	case "Review.updatedAt":
+		if e.ComplexityRoot.Review.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Review.UpdatedAt(childComplexity), true
 
 	case "Series.description":
 		if e.ComplexityRoot.Series.Description == nil {
@@ -1399,17 +1386,6 @@ func (ec *executionContext) field_Query_getMovie_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getProfile_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
-	if err != nil {
-		return nil, err
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_getReview_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1462,39 +1438,6 @@ func (ec *executionContext) field_Query_listEpisodes_args(ctx context.Context, r
 		return nil, err
 	}
 	args["seriesId"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_listProfiles_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId", ec.unmarshalNID2string)
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_listReviews_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "profileId", ec.unmarshalNID2string)
-	if err != nil {
-		return nil, err
-	}
-	args["profileId"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_listWatchHistories_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "profileId", ec.unmarshalNID2string)
-	if err != nil {
-		return nil, err
-	}
-	args["profileId"] = arg0
 	return args, nil
 }
 
@@ -1849,6 +1792,8 @@ func (ec *executionContext) fieldContext_Episode_reviews(_ context.Context, fiel
 				return ec.fieldContext_Review_comment(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 		},
@@ -2126,6 +2071,8 @@ func (ec *executionContext) fieldContext_Movie_reviews(_ context.Context, field 
 				return ec.fieldContext_Review_comment(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 		},
@@ -2993,6 +2940,8 @@ func (ec *executionContext) fieldContext_Mutation_createReview(ctx context.Conte
 				return ec.fieldContext_Review_comment(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 		},
@@ -3082,6 +3031,8 @@ func (ec *executionContext) fieldContext_Mutation_updateReview(ctx context.Conte
 				return ec.fieldContext_Review_comment(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 		},
@@ -4051,6 +4002,8 @@ func (ec *executionContext) fieldContext_Profile_reviews(_ context.Context, fiel
 				return ec.fieldContext_Review_comment(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 		},
@@ -4418,8 +4371,7 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_Query_getProfile,
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().GetProfile(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetProfile(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -4453,7 +4405,7 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_getProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getProfile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -4481,17 +4433,6 @@ func (ec *executionContext) fieldContext_Query_getProfile(ctx context.Context, f
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
 	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
 	return fc, nil
 }
 
@@ -4502,8 +4443,7 @@ func (ec *executionContext) _Query_listProfiles(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Query_listProfiles,
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().ListProfiles(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().ListProfiles(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -4537,7 +4477,7 @@ func (ec *executionContext) _Query_listProfiles(ctx context.Context, field graph
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_listProfiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_listProfiles(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -4564,17 +4504,6 @@ func (ec *executionContext) fieldContext_Query_listProfiles(ctx context.Context,
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_listProfiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -4638,6 +4567,8 @@ func (ec *executionContext) fieldContext_Query_getReview(ctx context.Context, fi
 				return ec.fieldContext_Review_comment(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 		},
@@ -4663,8 +4594,7 @@ func (ec *executionContext) _Query_listReviews(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_listReviews,
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().ListReviews(ctx, fc.Args["profileId"].(string))
+			return ec.Resolvers.Query().ListReviews(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -4693,7 +4623,7 @@ func (ec *executionContext) _Query_listReviews(ctx context.Context, field graphq
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_listReviews(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_listReviews(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -4715,20 +4645,11 @@ func (ec *executionContext) fieldContext_Query_listReviews(ctx context.Context, 
 				return ec.fieldContext_Review_comment(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_listReviews_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -5096,8 +5017,7 @@ func (ec *executionContext) _Query_listWatchHistories(ctx context.Context, field
 		field,
 		ec.fieldContext_Query_listWatchHistories,
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().ListWatchHistories(ctx, fc.Args["profileId"].(string))
+			return ec.Resolvers.Query().ListWatchHistories(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -5119,7 +5039,7 @@ func (ec *executionContext) _Query_listWatchHistories(ctx context.Context, field
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_listWatchHistories(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_listWatchHistories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -5144,17 +5064,6 @@ func (ec *executionContext) fieldContext_Query_listWatchHistories(ctx context.Co
 			}
 			return nil, fmt.Errorf("no field named %q was found under type WatchHistory", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_listWatchHistories_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -5458,6 +5367,35 @@ func (ec *executionContext) _Review_createdAt(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext_Review_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Review",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Review_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Review_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Review_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Review",
 		Field:      field,
@@ -7731,20 +7669,13 @@ func (ec *executionContext) unmarshalInputCreateProfileInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "name", "hasParentalControls"}
+	fieldsInOrder := [...]string{"name", "hasParentalControls"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "name":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -7775,20 +7706,13 @@ func (ec *executionContext) unmarshalInputCreateReviewInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"profileId", "movieId", "episodeId", "rating", "comment"}
+	fieldsInOrder := [...]string{"movieId", "episodeId", "rating", "comment"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "profileId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profileId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ProfileID = data
 		case "movieId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("movieId"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
@@ -7942,20 +7866,13 @@ func (ec *executionContext) unmarshalInputCreateWatchHistoryInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"profileId", "movieId", "episodeId", "lastPositionSeconds", "isCompleted"}
+	fieldsInOrder := [...]string{"movieId", "episodeId", "lastPositionSeconds", "isCompleted"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "profileId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profileId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ProfileID = data
 		case "movieId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("movieId"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
@@ -8197,13 +8114,20 @@ func (ec *executionContext) unmarshalInputUpdateReviewInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"rating", "comment"}
+	fieldsInOrder := [...]string{"id", "rating", "comment"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
 		case "rating":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rating"))
 			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
@@ -8336,13 +8260,20 @@ func (ec *executionContext) unmarshalInputUpdateWatchHistoryInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"lastPositionSeconds", "isCompleted"}
+	fieldsInOrder := [...]string{"id", "lastPositionSeconds", "isCompleted"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
 		case "lastPositionSeconds":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastPositionSeconds"))
 			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
@@ -9215,6 +9146,11 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = ec._Review_comment(ctx, field, obj)
 		case "createdAt":
 			out.Values[i] = ec._Review_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Review_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

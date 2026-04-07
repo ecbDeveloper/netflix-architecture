@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
@@ -15,11 +14,11 @@ import (
 )
 
 type Service interface {
-	CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error)
-	GetReview(ctx context.Context, id int32) (*model.Review, error)
+	CreateReview(ctx context.Context, input model.CreateReviewInput, profileID uuid.UUID) (*model.Review, error)
+	GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error)
 	ListReviews(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error)
-	UpdateReview(ctx context.Context, id int32, input model.UpdateReviewInput) (*model.Review, error)
-	DeleteReview(ctx context.Context, id int32) error
+	UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput, profileID uuid.UUID) (*model.Review, error)
+	DeleteReview(ctx context.Context, id uuid.UUID, profileID uuid.UUID) error
 }
 
 type ServiceImpl struct {
@@ -32,7 +31,7 @@ func NewService(queries *sqlc.Queries) Service {
 	}
 }
 
-func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error) {
+func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReviewInput, profileID uuid.UUID) (*model.Review, error) {
 	if input.Rating < 1 || input.Rating > 5 {
 		return nil, &apperror.ValidationError{Field: "rating", Message: "rating must be between 1 and 5"}
 	}
@@ -47,11 +46,7 @@ func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReview
 		Rating: input.Rating,
 	}
 
-	profileUUID, err := uuid.Parse(input.ProfileID)
-	if err != nil {
-		return nil, &apperror.ValidationError{Field: "profileId", Message: "invalid profile ID"}
-	}
-	params.ProfileID = profileUUID
+	params.ProfileID = profileID
 
 	if input.MovieID != nil {
 		movieUUID, err := uuid.Parse(*input.MovieID)
@@ -81,7 +76,7 @@ func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReview
 	return toGraphQLModel(r), nil
 }
 
-func (s *ServiceImpl) GetReview(ctx context.Context, id int32) (*model.Review, error) {
+func (s *ServiceImpl) GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error) {
 	r, err := s.Queries.GetReview(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -106,7 +101,7 @@ func (s *ServiceImpl) ListReviews(ctx context.Context, profileID uuid.UUID) ([]*
 	return result, nil
 }
 
-func (s *ServiceImpl) UpdateReview(ctx context.Context, id int32, input model.UpdateReviewInput) (*model.Review, error) {
+func (s *ServiceImpl) UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput, profileID uuid.UUID) (*model.Review, error) {
 	if input.Rating != nil && (*input.Rating < 1 || *input.Rating > 5) {
 		return nil, &apperror.ValidationError{Field: "rating", Message: "rating must be between 1 and 5"}
 	}
@@ -117,6 +112,10 @@ func (s *ServiceImpl) UpdateReview(ctx context.Context, id int32, input model.Up
 			return nil, &apperror.NotFoundError{Entity: "review"}
 		}
 		return nil, fmt.Errorf("failed to get review %v to update from database: %w", id, err)
+	}
+
+	if current.ProfileID != profileID {
+		return nil, fmt.Errorf("you can't update a review that isn't yours")
 	}
 
 	params := sqlc.UpdateReviewParams{
@@ -140,7 +139,19 @@ func (s *ServiceImpl) UpdateReview(ctx context.Context, id int32, input model.Up
 	return toGraphQLModel(r), nil
 }
 
-func (s *ServiceImpl) DeleteReview(ctx context.Context, id int32) error {
+func (s *ServiceImpl) DeleteReview(ctx context.Context, id uuid.UUID, profileID uuid.UUID) error {
+	current, err := s.Queries.GetReview(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &apperror.NotFoundError{Entity: "review"}
+		}
+		return fmt.Errorf("failed to get review %v to update from database: %w", id, err)
+	}
+
+	if current.ProfileID != profileID {
+		return fmt.Errorf("you can't delete a review that isn't yours")
+	}
+
 	if err := s.Queries.DeleteReview(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "review"}
@@ -152,7 +163,7 @@ func (s *ServiceImpl) DeleteReview(ctx context.Context, id int32) error {
 
 func toGraphQLModel(r sqlc.Review) *model.Review {
 	m := &model.Review{
-		ID:     strconv.Itoa(int(r.ID)),
+		ID:     r.ID.String(),
 		Rating: r.Rating,
 	}
 

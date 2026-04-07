@@ -11,12 +11,8 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-)
-
-const (
-	SessionUserIDKey    = "AuthenticatedUserID"
-	SessionProfileIDKey = "ProfileID"
 )
 
 // Login is the resolver for the login field.
@@ -39,14 +35,14 @@ func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (
 		return "", gqlerror.Errorf("error logging in, try again after")
 	}
 
-	r.Sessions.Put(ctx, SessionUserIDKey, userID)
+	r.Sessions.Put(ctx, shared.SessionUserIDKey, userID)
 
 	return "user authenticated successfully", nil
 }
 
 // Logout is the resolver for the logout field.
 func (r *mutationResolver) Logout(ctx context.Context) (string, error) {
-	if !r.Sessions.Exists(ctx, SessionUserIDKey) {
+	if !r.Sessions.Exists(ctx, shared.SessionUserIDKey) {
 		return "", ErrUserNotLoggedIn
 	}
 

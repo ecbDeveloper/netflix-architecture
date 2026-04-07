@@ -6,10 +6,10 @@ type Review {
   rating: Int!
   comment: String
   createdAt: String!
+  updatedAt: String!
 }
 
 input CreateReviewInput {
-  profileId: ID!
   movieId: ID
   episodeId: ID
   rating: Int!
@@ -17,13 +17,14 @@ input CreateReviewInput {
 }
 
 input UpdateReviewInput {
+  id: ID! 
   rating: Int
   comment: String
 }
 
 extend type Query {
   getReview(id: ID!): Review @auth @profileSelectionIsRequired
-  listReviews(profileId: ID!): [Review!]! @auth @profileSelectionIsRequired
+  listReviews: [Review!]! @auth @profileSelectionIsRequired
 }
 
 extend type Mutation {

@@ -10,13 +10,20 @@ import (
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateProfile is the resolver for the createProfile field.
 func (r *mutationResolver) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
-	profile, err := r.ProfileService.CreateProfile(ctx, input)
+	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to parse profile id to update it")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	profile, err := r.ProfileService.CreateProfile(ctx, input, userID)
 	if err != nil {
 		r.Logger.Error("failed to create profile", slog.Any("error", err))
 		return nil, handleError(err)
@@ -33,7 +40,13 @@ func (r *mutationResolver) UpdateProfile(ctx context.Context, id string, input m
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	profile, err := r.ProfileService.UpdateProfile(ctx, profileID, input)
+	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to parse profile id to update it")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	profile, err := r.ProfileService.UpdateProfile(ctx, profileID, input, userID)
 	if err != nil {
 		r.Logger.Error("failed to update profile", slog.Any("error", err))
 		return nil, handleError(err)
@@ -50,7 +63,13 @@ func (r *mutationResolver) DeleteProfile(ctx context.Context, id string) (bool, 
 		return false, gqlerror.Errorf("invalid profile ID")
 	}
 
-	err = r.ProfileService.DeleteProfile(ctx, profileID)
+	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to parse profile id to update it")
+		return false, gqlerror.Errorf("invalid profile ID")
+	}
+
+	err = r.ProfileService.DeleteProfile(ctx, profileID, userID)
 	if err != nil {
 		r.Logger.Error("failed to delete profile", slog.Any("error", err))
 		return false, handleError(err)
@@ -60,14 +79,20 @@ func (r *mutationResolver) DeleteProfile(ctx context.Context, id string) (bool, 
 }
 
 // GetProfile is the resolver for the getProfile field.
-func (r *queryResolver) GetProfile(ctx context.Context, id string) (*model.Profile, error) {
-	profileID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse profile id to get it", slog.Any("error", err))
+func (r *queryResolver) GetProfile(ctx context.Context) (*model.Profile, error) {
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to parse profile id to get it")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	profile, err := r.ProfileService.GetProfile(ctx, profileID)
+	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to parse profile id to update it")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	profile, err := r.ProfileService.GetProfile(ctx, profileID, userID)
 	if err != nil {
 		r.Logger.Error("failed to get profile", slog.Any("error", err))
 		return nil, handleError(err)
@@ -77,14 +102,14 @@ func (r *queryResolver) GetProfile(ctx context.Context, id string) (*model.Profi
 }
 
 // ListProfiles is the resolver for the listProfiles field.
-func (r *queryResolver) ListProfiles(ctx context.Context, userID string) ([]*model.Profile, error) {
-	uid, err := uuid.Parse(userID)
-	if err != nil {
-		r.Logger.Error("failed to parse user id to list profiles", slog.Any("error", err))
+func (r *queryResolver) ListProfiles(ctx context.Context) ([]*model.Profile, error) {
+	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to parse user id to list profiles")
 		return nil, gqlerror.Errorf("invalid user ID")
 	}
 
-	profiles, err := r.ProfileService.ListProfiles(ctx, uid)
+	profiles, err := r.ProfileService.ListProfiles(ctx, userID)
 	if err != nil {
 		r.Logger.Error("failed to list profiles", slog.Any("error", err))
 		return nil, handleError(err)

@@ -10,7 +10,6 @@ type Profile {
 }
 
 input CreateProfileInput {
-  userId: ID!
   name: String!
   hasParentalControls: Boolean
 }
@@ -21,8 +20,8 @@ input UpdateProfileInput {
 }
 
 extend type Query {
-  getProfile(id: ID!): Profile @auth @hasRole(role: MEMBER)
-  listProfiles(userId: ID!): [Profile!]! @auth @hasRole(role: MEMBER)
+  getProfile: Profile @auth @hasRole(role: MEMBER)
+  listProfiles: [Profile!]! @auth @hasRole(role: MEMBER)
 }
 
 extend type Mutation {

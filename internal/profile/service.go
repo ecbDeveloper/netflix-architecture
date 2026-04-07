@@ -14,11 +14,11 @@ import (
 )
 
 type Service interface {
-	CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error)
-	GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error)
+	CreateProfile(ctx context.Context, input model.CreateProfileInput, userID uuid.UUID) (*model.Profile, error)
+	GetProfile(ctx context.Context, id uuid.UUID, userID uuid.UUID) (*model.Profile, error)
 	ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.Profile, error)
-	UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error)
-	DeleteProfile(ctx context.Context, id uuid.UUID) error
+	UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput, userID uuid.UUID) (*model.Profile, error)
+	DeleteProfile(ctx context.Context, id uuid.UUID, userID uuid.UUID) error
 }
 
 type ServiceImpl struct {
@@ -31,17 +31,12 @@ func NewService(queries *sqlc.Queries) Service {
 	}
 }
 
-func (s *ServiceImpl) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
+func (s *ServiceImpl) CreateProfile(ctx context.Context, input model.CreateProfileInput, userID uuid.UUID) (*model.Profile, error) {
 	if strings.TrimSpace(input.Name) == "" {
 		return nil, &apperror.ValidationError{Field: "name", Message: "profile name is required"}
 	}
 
 	profileID := uuid.New()
-
-	userUUID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return nil, &apperror.ValidationError{Field: "userId", Message: "invalid user ID"}
-	}
 
 	hasParentalControls := false
 	if input.HasParentalControls != nil {
@@ -50,7 +45,7 @@ func (s *ServiceImpl) CreateProfile(ctx context.Context, input model.CreateProfi
 
 	p, err := s.Queries.CreateProfile(ctx, sqlc.CreateProfileParams{
 		ID:                  profileID,
-		UserID:              userUUID,
+		UserID:              userID,
 		Name:                input.Name,
 		HasParentalControls: hasParentalControls,
 	})
@@ -64,13 +59,17 @@ func (s *ServiceImpl) CreateProfile(ctx context.Context, input model.CreateProfi
 	return toGraphQLModel(p), nil
 }
 
-func (s *ServiceImpl) GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error) {
+func (s *ServiceImpl) GetProfile(ctx context.Context, id uuid.UUID, userID uuid.UUID) (*model.Profile, error) {
 	p, err := s.Queries.GetProfile(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "profile"}
 		}
 		return nil, fmt.Errorf("failed to fetch profile %v from database: %w", id, err)
+	}
+
+	if p.UserID != userID {
+		return nil, fmt.Errorf("you can't see profiles that's not yours")
 	}
 
 	return toGraphQLModel(p), nil
@@ -89,7 +88,7 @@ func (s *ServiceImpl) ListProfiles(ctx context.Context, userID uuid.UUID) ([]*mo
 	return result, nil
 }
 
-func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error) {
+func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput, userID uuid.UUID) (*model.Profile, error) {
 	if input.Name != nil && strings.TrimSpace(*input.Name) == "" {
 		return nil, &apperror.ValidationError{Field: "name", Message: "profile name cannot be empty"}
 	}
@@ -100,6 +99,10 @@ func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input mod
 			return nil, &apperror.NotFoundError{Entity: "profile"}
 		}
 		return nil, fmt.Errorf("failed to get profile %v to update from database: %w", id, err)
+	}
+
+	if current.UserID != userID {
+		return nil, fmt.Errorf("you can't update profiles that's not yours")
 	}
 
 	params := sqlc.UpdateProfileParams{
@@ -126,7 +129,19 @@ func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input mod
 	return toGraphQLModel(p), nil
 }
 
-func (s *ServiceImpl) DeleteProfile(ctx context.Context, id uuid.UUID) error {
+func (s *ServiceImpl) DeleteProfile(ctx context.Context, id uuid.UUID, userID uuid.UUID) error {
+	current, err := s.Queries.GetProfile(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &apperror.NotFoundError{Entity: "profile"}
+		}
+		return fmt.Errorf("failed to get profile %v to update from database: %w", id, err)
+	}
+
+	if current.UserID != userID {
+		return fmt.Errorf("you can't delete profiles that's not yours")
+	}
+
 	if err := s.Queries.DeleteProfile(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "profile"}

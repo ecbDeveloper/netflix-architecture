@@ -9,7 +9,6 @@ type WatchHistory {
 }
 
 input CreateWatchHistoryInput {
-  profileId: ID!
   movieId: ID
   episodeId: ID
   lastPositionSeconds: Int
@@ -17,13 +16,14 @@ input CreateWatchHistoryInput {
 }
 
 input UpdateWatchHistoryInput {
+  id: ID!
   lastPositionSeconds: Int
   isCompleted: Boolean
 }
 
 extend type Query {
   getWatchHistory(id: ID!): WatchHistory @auth
-  listWatchHistories(profileId: ID!): [WatchHistory!]! @auth
+  listWatchHistories: [WatchHistory!]! @auth
 }
 
 extend type Mutation {

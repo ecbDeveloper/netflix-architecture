@@ -14,11 +14,11 @@ import (
 )
 
 type Service interface {
-	CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error)
-	GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error)
+	CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput, profileID uuid.UUID) (*model.WatchHistory, error)
+	GetWatchHistory(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.WatchHistory, error)
 	ListWatchHistories(ctx context.Context, profileID uuid.UUID) ([]*model.WatchHistory, error)
-	UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error)
-	DeleteWatchHistory(ctx context.Context, id uuid.UUID) error
+	UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput, profileID uuid.UUID) (*model.WatchHistory, error)
+	DeleteWatchHistory(ctx context.Context, id uuid.UUID, profileID uuid.UUID) error
 }
 
 type ServiceImpl struct {
@@ -31,7 +31,7 @@ func NewService(queries *sqlc.Queries) Service {
 	}
 }
 
-func (s *ServiceImpl) CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
+func (s *ServiceImpl) CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput, profileID uuid.UUID) (*model.WatchHistory, error) {
 	if input.MovieID == nil && input.EpisodeID == nil {
 		return nil, &apperror.ValidationError{Field: "movieId/episodeId", Message: "movie or episode is required"}
 	}
@@ -45,11 +45,7 @@ func (s *ServiceImpl) CreateWatchHistory(ctx context.Context, input model.Create
 		ID: whID,
 	}
 
-	profileUUID, err := uuid.Parse(input.ProfileID)
-	if err != nil {
-		return nil, &apperror.ValidationError{Field: "profileId", Message: "invalid profile ID"}
-	}
-	params.ProfileID = profileUUID
+	params.ProfileID = profileID
 
 	if input.MovieID != nil {
 		movieUUID, err := uuid.Parse(*input.MovieID)
@@ -83,13 +79,17 @@ func (s *ServiceImpl) CreateWatchHistory(ctx context.Context, input model.Create
 	return toGraphQLModel(wh), nil
 }
 
-func (s *ServiceImpl) GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error) {
+func (s *ServiceImpl) GetWatchHistory(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.WatchHistory, error) {
 	wh, err := s.Queries.GetWatchHistory(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "watch history"}
 		}
 		return nil, fmt.Errorf("failed to fetch watch history %v from database: %w", id, err)
+	}
+
+	if wh.ProfileID != profileID {
+		return nil, fmt.Errorf("you can't see watch history that's not yours")
 	}
 
 	return toGraphQLModel(wh), nil
@@ -108,13 +108,17 @@ func (s *ServiceImpl) ListWatchHistories(ctx context.Context, profileID uuid.UUI
 	return result, nil
 }
 
-func (s *ServiceImpl) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
+func (s *ServiceImpl) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput, profileID uuid.UUID) (*model.WatchHistory, error) {
 	current, err := s.Queries.GetWatchHistory(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "watch history"}
 		}
 		return nil, fmt.Errorf("failed to get watch history %v to update from database: %w", id, err)
+	}
+
+	if current.ProfileID != profileID {
+		return nil, fmt.Errorf("you can't update watch history that's not yours")
 	}
 
 	params := sqlc.UpdateWatchProgressParams{
@@ -138,7 +142,19 @@ func (s *ServiceImpl) UpdateWatchHistory(ctx context.Context, id uuid.UUID, inpu
 	return toGraphQLModel(wh), nil
 }
 
-func (s *ServiceImpl) DeleteWatchHistory(ctx context.Context, id uuid.UUID) error {
+func (s *ServiceImpl) DeleteWatchHistory(ctx context.Context, id uuid.UUID, profileID uuid.UUID) error {
+	wh, err := s.Queries.GetWatchHistory(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &apperror.NotFoundError{Entity: "watch history"}
+		}
+		return fmt.Errorf("failed to fetch watch history %v from database: %w", id, err)
+	}
+
+	if wh.ProfileID != profileID {
+		return fmt.Errorf("you can't delete watch history that's not yours")
+	}
+
 	if err := s.Queries.DeleteWatchHistory(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "watch history"}

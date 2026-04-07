@@ -10,13 +10,20 @@ import (
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateWatchHistory is the resolver for the createWatchHistory field.
 func (r *mutationResolver) CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
-	wh, err := r.WatchhistoryService.CreateWatchHistory(ctx, input)
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to create watch history")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	wh, err := r.WatchhistoryService.CreateWatchHistory(ctx, input, profileID)
 	if err != nil {
 		r.Logger.Error("failed to create watch history", slog.Any("error", err))
 		return nil, handleError(err)
@@ -33,7 +40,13 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id string, in
 		return nil, gqlerror.Errorf("invalid watch history ID")
 	}
 
-	wh, err := r.WatchhistoryService.UpdateWatchHistory(ctx, whID, input)
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to update watch history")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	wh, err := r.WatchhistoryService.UpdateWatchHistory(ctx, whID, input, profileID)
 	if err != nil {
 		r.Logger.Error("failed to update watch history", slog.Any("error", err))
 		return nil, handleError(err)
@@ -50,7 +63,13 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id string) (b
 		return false, gqlerror.Errorf("invalid watch history ID")
 	}
 
-	err = r.WatchhistoryService.DeleteWatchHistory(ctx, whID)
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to delete watch history")
+		return false, gqlerror.Errorf("invalid profile ID")
+	}
+
+	err = r.WatchhistoryService.DeleteWatchHistory(ctx, whID, profileID)
 	if err != nil {
 		r.Logger.Error("failed to delete watch history", slog.Any("error", err))
 		return false, handleError(err)
@@ -67,7 +86,13 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id string) (*model.
 		return nil, gqlerror.Errorf("invalid watch history ID")
 	}
 
-	wh, err := r.WatchhistoryService.GetWatchHistory(ctx, whID)
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to get one watch history")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	wh, err := r.WatchhistoryService.GetWatchHistory(ctx, whID, profileID)
 	if err != nil {
 		r.Logger.Error("failed to get watch history", slog.Any("error", err))
 		return nil, handleError(err)
@@ -77,14 +102,14 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id string) (*model.
 }
 
 // ListWatchHistories is the resolver for the listWatchHistories field.
-func (r *queryResolver) ListWatchHistories(ctx context.Context, profileID string) ([]*model.WatchHistory, error) {
-	pid, err := uuid.Parse(profileID)
-	if err != nil {
-		r.Logger.Error("failed to parse profile id to list watch histories", slog.Any("error", err))
+func (r *queryResolver) ListWatchHistories(ctx context.Context) ([]*model.WatchHistory, error) {
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to list watch histories")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	watchHistories, err := r.WatchhistoryService.ListWatchHistories(ctx, pid)
+	watchHistories, err := r.WatchhistoryService.ListWatchHistories(ctx, profileID)
 	if err != nil {
 		r.Logger.Error("failed to list watch histories", slog.Any("error", err))
 		return nil, handleError(err)

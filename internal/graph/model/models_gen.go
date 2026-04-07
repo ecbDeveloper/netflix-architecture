@@ -33,13 +33,11 @@ type CreateMovieInput struct {
 }
 
 type CreateProfileInput struct {
-	UserID              string `json:"userId"`
 	Name                string `json:"name"`
 	HasParentalControls *bool  `json:"hasParentalControls,omitempty"`
 }
 
 type CreateReviewInput struct {
-	ProfileID string  `json:"profileId"`
 	MovieID   *string `json:"movieId,omitempty"`
 	EpisodeID *string `json:"episodeId,omitempty"`
 	Rating    int32   `json:"rating"`
@@ -62,7 +60,6 @@ type CreateUserInput struct {
 }
 
 type CreateWatchHistoryInput struct {
-	ProfileID           string  `json:"profileId"`
 	MovieID             *string `json:"movieId,omitempty"`
 	EpisodeID           *string `json:"episodeId,omitempty"`
 	LastPositionSeconds *int32  `json:"lastPositionSeconds,omitempty"`
@@ -122,6 +119,7 @@ type Review struct {
 	Rating    int32   `json:"rating"`
 	Comment   *string `json:"comment,omitempty"`
 	CreatedAt string  `json:"createdAt"`
+	UpdatedAt string  `json:"updatedAt"`
 }
 
 type Series struct {
@@ -157,6 +155,7 @@ type UpdateProfileInput struct {
 }
 
 type UpdateReviewInput struct {
+	ID      string  `json:"id"`
 	Rating  *int32  `json:"rating,omitempty"`
 	Comment *string `json:"comment,omitempty"`
 }
@@ -176,6 +175,7 @@ type UpdateUserInput struct {
 }
 
 type UpdateWatchHistoryInput struct {
+	ID                  string `json:"id"`
 	LastPositionSeconds *int32 `json:"lastPositionSeconds,omitempty"`
 	IsCompleted         *bool  `json:"isCompleted,omitempty"`
 }
