@@ -95,13 +95,14 @@ type Profile struct {
 }
 
 type Review struct {
-	ID        int32            `json:"id"`
+	ID        uuid.UUID        `json:"id"`
 	ProfileID uuid.UUID        `json:"profile_id"`
 	MovieID   pgtype.UUID      `json:"movie_id"`
 	EpisodeID pgtype.UUID      `json:"episode_id"`
 	Rating    int32            `json:"rating"`
 	Comment   pgtype.Text      `json:"comment"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
+	UpdatedAt pgtype.Timestamp `json:"updated_at"`
 }
 
 type Series struct {
@@ -111,12 +112,6 @@ type Series struct {
 	ReleaseDate    pgtype.Date    `json:"release_date"`
 	MaturityRating MaturityRating `json:"maturity_rating"`
 	GenreID        int32          `json:"genre_id"`
-}
-
-type Session struct {
-	Token  string    `json:"token"`
-	Data   []byte    `json:"data"`
-	Expiry time.Time `json:"expiry"`
 }
 
 type User struct {

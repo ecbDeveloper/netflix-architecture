@@ -17,3 +17,6 @@ RETURNING *;
 
 -- name: DeleteMovie :exec
 DELETE FROM movies WHERE id = $1;
+
+-- name: ListKidsMovies :many
+SELECT * FROM movies WHERE maturity_rating = 'L' ORDER BY release_date DESC;

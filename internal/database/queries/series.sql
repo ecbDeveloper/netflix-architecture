@@ -17,3 +17,6 @@ RETURNING *;
 
 -- name: DeleteSerie :exec
 DELETE FROM series WHERE id = $1;
+
+-- name: ListKidsSeries :many
+SELECT * FROM series WHERE maturity_rating = 'L' ORDER BY release_date DESC;

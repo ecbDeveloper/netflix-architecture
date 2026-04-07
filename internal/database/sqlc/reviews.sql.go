@@ -15,7 +15,7 @@ import (
 const createReview = `-- name: CreateReview :one
 INSERT INTO reviews (profile_id, movie_id, episode_id, rating, comment)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, profile_id, movie_id, episode_id, rating, comment, created_at
+RETURNING id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at
 `
 
 type CreateReviewParams struct {
@@ -43,6 +43,7 @@ func (q *Queries) CreateReview(ctx context.Context, arg CreateReviewParams) (Rev
 		&i.Rating,
 		&i.Comment,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -51,16 +52,16 @@ const deleteReview = `-- name: DeleteReview :exec
 DELETE FROM reviews WHERE id = $1
 `
 
-func (q *Queries) DeleteReview(ctx context.Context, id int32) error {
+func (q *Queries) DeleteReview(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteReview, id)
 	return err
 }
 
 const getReview = `-- name: GetReview :one
-SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at FROM reviews WHERE id = $1
+SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at FROM reviews WHERE id = $1
 `
 
-func (q *Queries) GetReview(ctx context.Context, id int32) (Review, error) {
+func (q *Queries) GetReview(ctx context.Context, id uuid.UUID) (Review, error) {
 	row := q.db.QueryRow(ctx, getReview, id)
 	var i Review
 	err := row.Scan(
@@ -71,12 +72,13 @@ func (q *Queries) GetReview(ctx context.Context, id int32) (Review, error) {
 		&i.Rating,
 		&i.Comment,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const listReviewsByEpisode = `-- name: ListReviewsByEpisode :many
-SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at FROM reviews WHERE episode_id = $1
+SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at FROM reviews WHERE episode_id = $1
 `
 
 func (q *Queries) ListReviewsByEpisode(ctx context.Context, episodeID pgtype.UUID) ([]Review, error) {
@@ -96,6 +98,7 @@ func (q *Queries) ListReviewsByEpisode(ctx context.Context, episodeID pgtype.UUI
 			&i.Rating,
 			&i.Comment,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -108,7 +111,7 @@ func (q *Queries) ListReviewsByEpisode(ctx context.Context, episodeID pgtype.UUI
 }
 
 const listReviewsByMovie = `-- name: ListReviewsByMovie :many
-SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at FROM reviews WHERE movie_id = $1
+SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at FROM reviews WHERE movie_id = $1
 `
 
 func (q *Queries) ListReviewsByMovie(ctx context.Context, movieID pgtype.UUID) ([]Review, error) {
@@ -128,6 +131,7 @@ func (q *Queries) ListReviewsByMovie(ctx context.Context, movieID pgtype.UUID) (
 			&i.Rating,
 			&i.Comment,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -140,7 +144,7 @@ func (q *Queries) ListReviewsByMovie(ctx context.Context, movieID pgtype.UUID) (
 }
 
 const listReviewsByProfile = `-- name: ListReviewsByProfile :many
-SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at FROM reviews WHERE profile_id = $1 ORDER BY created_at DESC
+SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at FROM reviews WHERE profile_id = $1 ORDER BY created_at DESC
 `
 
 func (q *Queries) ListReviewsByProfile(ctx context.Context, profileID uuid.UUID) ([]Review, error) {
@@ -160,6 +164,7 @@ func (q *Queries) ListReviewsByProfile(ctx context.Context, profileID uuid.UUID)
 			&i.Rating,
 			&i.Comment,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -175,11 +180,11 @@ const updateReview = `-- name: UpdateReview :one
 UPDATE reviews
 SET rating = $2, comment = $3
 WHERE id = $1
-RETURNING id, profile_id, movie_id, episode_id, rating, comment, created_at
+RETURNING id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at
 `
 
 type UpdateReviewParams struct {
-	ID      int32       `json:"id"`
+	ID      uuid.UUID   `json:"id"`
 	Rating  int32       `json:"rating"`
 	Comment pgtype.Text `json:"comment"`
 }
@@ -195,6 +200,7 @@ func (q *Queries) UpdateReview(ctx context.Context, arg UpdateReviewParams) (Rev
 		&i.Rating,
 		&i.Comment,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

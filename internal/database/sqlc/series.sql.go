@@ -72,6 +72,37 @@ func (q *Queries) GetSerie(ctx context.Context, id int32) (Series, error) {
 	return i, err
 }
 
+const listKidsSeries = `-- name: ListKidsSeries :many
+SELECT id, title, description, release_date, maturity_rating, genre_id FROM series WHERE maturity_rating = 'L' ORDER BY release_date DESC
+`
+
+func (q *Queries) ListKidsSeries(ctx context.Context) ([]Series, error) {
+	rows, err := q.db.Query(ctx, listKidsSeries)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Series
+	for rows.Next() {
+		var i Series
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.ReleaseDate,
+			&i.MaturityRating,
+			&i.GenreID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listSeries = `-- name: ListSeries :many
 SELECT id, title, description, release_date, maturity_rating, genre_id FROM series ORDER BY title
 `

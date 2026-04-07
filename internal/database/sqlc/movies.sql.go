@@ -83,6 +83,39 @@ func (q *Queries) GetMovie(ctx context.Context, id uuid.UUID) (Movie, error) {
 	return i, err
 }
 
+const listKidsMovies = `-- name: ListKidsMovies :many
+SELECT id, title, description, duration_minutes, release_date, content_url, maturity_rating, genre_id FROM movies WHERE maturity_rating = 'L' ORDER BY release_date DESC
+`
+
+func (q *Queries) ListKidsMovies(ctx context.Context) ([]Movie, error) {
+	rows, err := q.db.Query(ctx, listKidsMovies)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Movie
+	for rows.Next() {
+		var i Movie
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.DurationMinutes,
+			&i.ReleaseDate,
+			&i.ContentUrl,
+			&i.MaturityRating,
+			&i.GenreID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listMovies = `-- name: ListMovies :many
 SELECT id, title, description, duration_minutes, release_date, content_url, maturity_rating, genre_id FROM movies ORDER BY release_date DESC
 `
@@ -118,7 +151,7 @@ func (q *Queries) ListMovies(ctx context.Context) ([]Movie, error) {
 
 const updateMovie = `-- name: UpdateMovie :one
 UPDATE movies
-SET title = $2, description = $3, duration_minutes = $4, release_date = $5, maturity_rating = $6, content_url = $7
+SET title = $2, description = $3, duration_minutes = $4, release_date = $5, maturity_rating = $6, content_url = $7, genre_id = $8
 WHERE id = $1
 RETURNING id, title, description, duration_minutes, release_date, content_url, maturity_rating, genre_id
 `
@@ -131,6 +164,7 @@ type UpdateMovieParams struct {
 	ReleaseDate     pgtype.Date    `json:"release_date"`
 	MaturityRating  MaturityRating `json:"maturity_rating"`
 	ContentUrl      string         `json:"content_url"`
+	GenreID         int32          `json:"genre_id"`
 }
 
 func (q *Queries) UpdateMovie(ctx context.Context, arg UpdateMovieParams) (Movie, error) {
@@ -142,6 +176,7 @@ func (q *Queries) UpdateMovie(ctx context.Context, arg UpdateMovieParams) (Movie
 		arg.ReleaseDate,
 		arg.MaturityRating,
 		arg.ContentUrl,
+		arg.GenreID,
 	)
 	var i Movie
 	err := row.Scan(
