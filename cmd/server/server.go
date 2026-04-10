@@ -63,7 +63,6 @@ func main() {
 	err := godotenv.Load()
 	if err != nil {
 		logger.Error("failed to load .env file", slog.Any("error", err))
-		os.Exit(1)
 	}
 
 	port := os.Getenv("API_PORT")
