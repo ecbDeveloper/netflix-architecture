@@ -16,7 +16,7 @@ import (
 type Service interface {
 	CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error)
 	GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Episode, error)
-	ListEpisodes(ctx context.Context, seriesID int32, profileID uuid.UUID) ([]*model.Episode, error)
+	ListEpisodes(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID) ([]*model.Episode, error)
 	UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error)
 	DeleteEpisode(ctx context.Context, id uuid.UUID) error
 }
@@ -47,9 +47,15 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 
 	episodeID := uuid.New()
 
+	seriesID, err := uuid.Parse(input.SeriesID)
+	if err != nil {
+		return nil, &apperror.ValidationError{Field: "seriesId", Message: "invalid series id"}
+	}
+
 	ep, err := s.Queries.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
-		ID:       episodeID,
-		SeriesID: input.SeriesID, Season: input.Season,
+		ID:              episodeID,
+		SeriesID:        seriesID,
+		Season:          input.Season,
 		EpisodeNumber:   input.EpisodeNumber,
 		Title:           input.Title,
 		DurationMinutes: input.DurationMinutes,
@@ -90,13 +96,13 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 	}
 
 	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
-		return nil, apperror.ErrProfileCantAccessContent
+		return nil, &apperror.ForbiddenError{Message: apperror.ErrProfileCantAccessContent.Error()}
 	}
 
 	return toGraphQLModel(ep), nil
 }
 
-func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID int32, profileID uuid.UUID) ([]*model.Episode, error) {
+func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID) ([]*model.Episode, error) {
 	profile, err := s.Queries.GetProfile(ctx, profileID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -114,7 +120,7 @@ func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID int32, profileI
 	}
 
 	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
-		return nil, apperror.ErrProfileCantAccessContent
+		return nil, &apperror.ForbiddenError{Message: apperror.ErrProfileCantAccessContent.Error()}
 	}
 
 	episodes, err := s.Queries.ListEpisodesBySerie(ctx, seriesID)
@@ -197,7 +203,7 @@ func (s *ServiceImpl) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
 func toGraphQLModel(e sqlc.Episode) *model.Episode {
 	return &model.Episode{
 		ID:              e.ID.String(),
-		SeriesID:        e.SeriesID,
+		SeriesID:        e.SeriesID.String(),
 		Season:          e.Season,
 		EpisodeNumber:   e.EpisodeNumber,
 		Title:           e.Title,

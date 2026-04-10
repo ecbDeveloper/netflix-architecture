@@ -117,6 +117,7 @@ func main() {
 	}
 
 	serie, err := qtx.CreateSerie(ctx, sqlc.CreateSerieParams{
+		ID:             uuid.New(),
 		Title:          "Breaking Bugs",
 		Description:    "A programmer turned bug hunter.",
 		ReleaseDate:    pgtype.Date{Time: time.Now(), Valid: true},

@@ -1,6 +1,6 @@
 type Episode {
   id: ID!
-  seriesId: Int!
+  seriesId: ID!
   season: Int!
   episodeNumber: Int!
   title: String!
@@ -10,7 +10,7 @@ type Episode {
 }
 
 input CreateEpisodeInput {
-  seriesId: Int!
+  seriesId: ID!
   season: Int!
   episodeNumber: Int!
   title: String!
@@ -26,7 +26,7 @@ input UpdateEpisodeInput {
 
 extend type Query {
   getEpisode(id: ID!): Episode @auth @profileSelectionIsRequired
-  listEpisodes(seriesId: Int!): [Episode!]! @auth @profileSelectionIsRequired
+  listEpisodes(seriesId: ID!): [Episode!]! @auth @profileSelectionIsRequired
 }
 
 extend type Mutation {

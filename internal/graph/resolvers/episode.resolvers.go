@@ -84,14 +84,20 @@ func (r *queryResolver) GetEpisode(ctx context.Context, id string) (*model.Episo
 }
 
 // ListEpisodes is the resolver for the listEpisodes field.
-func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error) {
+func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID string) ([]*model.Episode, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
 		r.Logger.Error("failed to get profile id to create watch history")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	episodes, err := r.EpisodeService.ListEpisodes(ctx, seriesID, profileID)
+	seriesUUID, err := uuid.Parse(seriesID)
+	if err != nil {
+		r.Logger.Error("failed to parse series id to list episodes", slog.Any("error", err))
+		return nil, gqlerror.Errorf("invalid series ID")
+	}
+
+	episodes, err := r.EpisodeService.ListEpisodes(ctx, seriesUUID, profileID)
 	if err != nil {
 		r.Logger.Error("failed to list all episodes from a series", slog.Any("error", err))
 		return nil, handleError(err)

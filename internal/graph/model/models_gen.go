@@ -15,7 +15,7 @@ type ContentGenre struct {
 }
 
 type CreateEpisodeInput struct {
-	SeriesID        int32  `json:"seriesId"`
+	SeriesID        string `json:"seriesId"`
 	Season          int32  `json:"season"`
 	EpisodeNumber   int32  `json:"episodeNumber"`
 	Title           string `json:"title"`
@@ -68,7 +68,7 @@ type CreateWatchHistoryInput struct {
 
 type Episode struct {
 	ID              string    `json:"id"`
-	SeriesID        int32     `json:"seriesId"`
+	SeriesID        string    `json:"seriesId"`
 	Season          int32     `json:"season"`
 	EpisodeNumber   int32     `json:"episodeNumber"`
 	Title           string    `json:"title"`

@@ -66,7 +66,7 @@ type ContentGenre struct {
 
 type Episode struct {
 	ID              uuid.UUID `json:"id"`
-	SeriesID        int32     `json:"series_id"`
+	SeriesID        uuid.UUID `json:"series_id"`
 	Season          int32     `json:"season"`
 	EpisodeNumber   int32     `json:"episode_number"`
 	Title           string    `json:"title"`
@@ -106,7 +106,7 @@ type Review struct {
 }
 
 type Series struct {
-	ID             int32          `json:"id"`
+	ID             uuid.UUID      `json:"id"`
 	Title          string         `json:"title"`
 	Description    string         `json:"description"`
 	ReleaseDate    pgtype.Date    `json:"release_date"`

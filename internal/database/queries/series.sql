@@ -1,6 +1,6 @@
 -- name: CreateSerie :one
-INSERT INTO series (title, description, release_date, maturity_rating, genre_id)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO series (id, title, description, release_date, maturity_rating, genre_id)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: GetSerie :one

@@ -8,16 +8,18 @@ package sqlc
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createSerie = `-- name: CreateSerie :one
-INSERT INTO series (title, description, release_date, maturity_rating, genre_id)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO series (id, title, description, release_date, maturity_rating, genre_id)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id, title, description, release_date, maturity_rating, genre_id
 `
 
 type CreateSerieParams struct {
+	ID             uuid.UUID      `json:"id"`
 	Title          string         `json:"title"`
 	Description    string         `json:"description"`
 	ReleaseDate    pgtype.Date    `json:"release_date"`
@@ -27,6 +29,7 @@ type CreateSerieParams struct {
 
 func (q *Queries) CreateSerie(ctx context.Context, arg CreateSerieParams) (Series, error) {
 	row := q.db.QueryRow(ctx, createSerie,
+		arg.ID,
 		arg.Title,
 		arg.Description,
 		arg.ReleaseDate,
@@ -49,7 +52,7 @@ const deleteSerie = `-- name: DeleteSerie :exec
 DELETE FROM series WHERE id = $1
 `
 
-func (q *Queries) DeleteSerie(ctx context.Context, id int32) error {
+func (q *Queries) DeleteSerie(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteSerie, id)
 	return err
 }
@@ -58,7 +61,7 @@ const getSerie = `-- name: GetSerie :one
 SELECT id, title, description, release_date, maturity_rating, genre_id FROM series WHERE id = $1
 `
 
-func (q *Queries) GetSerie(ctx context.Context, id int32) (Series, error) {
+func (q *Queries) GetSerie(ctx context.Context, id uuid.UUID) (Series, error) {
 	row := q.db.QueryRow(ctx, getSerie, id)
 	var i Series
 	err := row.Scan(
@@ -142,7 +145,7 @@ RETURNING id, title, description, release_date, maturity_rating, genre_id
 `
 
 type UpdateSerieParams struct {
-	ID             int32          `json:"id"`
+	ID             uuid.UUID      `json:"id"`
 	Title          string         `json:"title"`
 	Description    string         `json:"description"`
 	ReleaseDate    pgtype.Date    `json:"release_date"`

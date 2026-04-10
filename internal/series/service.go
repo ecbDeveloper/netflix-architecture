@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -18,10 +17,10 @@ import (
 
 type Service interface {
 	CreateSeries(ctx context.Context, input model.CreateSeriesInput) (*model.Series, error)
-	GetSeries(ctx context.Context, id int32, profileID uuid.UUID) (*model.Series, error)
+	GetSeries(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Series, error)
 	ListSeries(ctx context.Context, profileID uuid.UUID) ([]*model.Series, error)
-	UpdateSeries(ctx context.Context, id int32, input model.UpdateSeriesInput) (*model.Series, error)
-	DeleteSeries(ctx context.Context, id int32) error
+	UpdateSeries(ctx context.Context, id uuid.UUID, input model.UpdateSeriesInput) (*model.Series, error)
+	DeleteSeries(ctx context.Context, id uuid.UUID) error
 }
 
 type ServiceImpl struct {
@@ -69,7 +68,7 @@ func (s *ServiceImpl) CreateSeries(ctx context.Context, input model.CreateSeries
 	return toGraphQLModel(serie), nil
 }
 
-func (s *ServiceImpl) GetSeries(ctx context.Context, id int32, profileID uuid.UUID) (*model.Series, error) {
+func (s *ServiceImpl) GetSeries(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Series, error) {
 	profile, err := s.Queries.GetProfile(ctx, profileID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -87,7 +86,7 @@ func (s *ServiceImpl) GetSeries(ctx context.Context, id int32, profileID uuid.UU
 	}
 
 	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
-		return nil, apperror.ErrProfileCantAccessContent
+		return nil, &apperror.ForbiddenError{Message: apperror.ErrProfileCantAccessContent.Error()}
 	}
 
 	return toGraphQLModel(series), nil
@@ -123,7 +122,7 @@ func (s *ServiceImpl) ListSeries(ctx context.Context, profileID uuid.UUID) ([]*m
 	return result, nil
 }
 
-func (s *ServiceImpl) UpdateSeries(ctx context.Context, id int32, input model.UpdateSeriesInput) (*model.Series, error) {
+func (s *ServiceImpl) UpdateSeries(ctx context.Context, id uuid.UUID, input model.UpdateSeriesInput) (*model.Series, error) {
 	if input.Title != nil && strings.TrimSpace(*input.Title) == "" {
 		return nil, &apperror.ValidationError{Field: "title", Message: "title cannot be empty"}
 	}
@@ -179,7 +178,7 @@ func (s *ServiceImpl) UpdateSeries(ctx context.Context, id int32, input model.Up
 	return toGraphQLModel(serie), nil
 }
 
-func (s *ServiceImpl) DeleteSeries(ctx context.Context, id int32) error {
+func (s *ServiceImpl) DeleteSeries(ctx context.Context, id uuid.UUID) error {
 	if err := s.Queries.DeleteSerie(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "series"}
@@ -191,7 +190,7 @@ func (s *ServiceImpl) DeleteSeries(ctx context.Context, id int32) error {
 
 func toGraphQLModel(s sqlc.Series) *model.Series {
 	m := &model.Series{
-		ID:             strconv.Itoa(int(s.ID)),
+		ID:             s.ID.String(),
 		Title:          s.Title,
 		Description:    s.Description,
 		MaturityRating: model.MaturityRating(s.MaturityRating),

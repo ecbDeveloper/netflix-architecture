@@ -19,7 +19,7 @@ RETURNING id, series_id, season, episode_number, title, duration_minutes, create
 
 type CreateEpisodeParams struct {
 	ID              uuid.UUID `json:"id"`
-	SeriesID        int32     `json:"series_id"`
+	SeriesID        uuid.UUID `json:"series_id"`
 	Season          int32     `json:"season"`
 	EpisodeNumber   int32     `json:"episode_number"`
 	Title           string    `json:"title"`
@@ -80,7 +80,7 @@ const listEpisodesBySerie = `-- name: ListEpisodesBySerie :many
 SELECT id, series_id, season, episode_number, title, duration_minutes, created_at FROM episodes WHERE series_id = $1 ORDER BY season, episode_number
 `
 
-func (q *Queries) ListEpisodesBySerie(ctx context.Context, seriesID int32) ([]Episode, error) {
+func (q *Queries) ListEpisodesBySerie(ctx context.Context, seriesID uuid.UUID) ([]Episode, error) {
 	rows, err := q.db.Query(ctx, listEpisodesBySerie, seriesID)
 	if err != nil {
 		return nil, err
