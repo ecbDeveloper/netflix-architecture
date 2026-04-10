@@ -245,8 +245,8 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 
 		profileIsFromUser := false
 		userProfiles, err := queries.ListProfilesByUser(ctx, userID)
-		for userProfileID := range userProfiles {
-			if userProfileID == profileID {
+		for _, userProfile := range userProfiles {
+			if userProfile.ID == profileID {
 				profileIsFromUser = true
 			}
 		}
