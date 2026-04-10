@@ -44,6 +44,15 @@ func handleError(err error) *gqlerror.Error {
 		}
 	}
 
+	if errors.Is(err, apperror.ErrProfileCantAccessContent) {
+		return &gqlerror.Error{
+			Message: fmt.Sprintf(err.Error()),
+			Extensions: map[string]any{
+				"code": "UNPROCESSABLE_ENTITY",
+			},
+		}
+	}
+
 	return &gqlerror.Error{
 		Message: "internal error, try again later",
 		Extensions: map[string]any{

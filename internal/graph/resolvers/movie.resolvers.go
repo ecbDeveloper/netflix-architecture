@@ -10,6 +10,7 @@ import (
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -61,13 +62,19 @@ func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, er
 
 // GetMovie is the resolver for the getMovie field.
 func (r *queryResolver) GetMovie(ctx context.Context, id string) (*model.Movie, error) {
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to create watch history")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
 	movieID, err := uuid.Parse(id)
 	if err != nil {
 		r.Logger.Error("failed to parse movie id to get it", slog.Any("error", err))
 		return nil, gqlerror.Errorf("invalid movie ID")
 	}
 
-	movie, err := r.MovieService.GetMovie(ctx, movieID)
+	movie, err := r.MovieService.GetMovie(ctx, movieID, profileID)
 	if err != nil {
 		r.Logger.Error("failed to get movie", slog.Any("error", err))
 		return nil, handleError(err)
@@ -78,7 +85,13 @@ func (r *queryResolver) GetMovie(ctx context.Context, id string) (*model.Movie, 
 
 // ListMovies is the resolver for the listMovies field.
 func (r *queryResolver) ListMovies(ctx context.Context) ([]*model.Movie, error) {
-	movies, err := r.MovieService.ListMovies(ctx)
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to create watch history")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	movies, err := r.MovieService.ListMovies(ctx, profileID)
 	if err != nil {
 		r.Logger.Error("failed to get all movies", slog.Any("error", err))
 		return nil, handleError(err)

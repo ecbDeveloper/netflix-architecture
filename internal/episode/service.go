@@ -15,8 +15,8 @@ import (
 
 type Service interface {
 	CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error)
-	GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error)
-	ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error)
+	GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Episode, error)
+	ListEpisodes(ctx context.Context, seriesID int32, profileID uuid.UUID) ([]*model.Episode, error)
 	UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error)
 	DeleteEpisode(ctx context.Context, id uuid.UUID) error
 }
@@ -64,7 +64,15 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 	return toGraphQLModel(ep), nil
 }
 
-func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error) {
+func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Episode, error) {
+	profile, err := s.Queries.GetProfile(ctx, profileID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
+		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+	}
+
 	ep, err := s.Queries.GetEpisode(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -73,10 +81,42 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Epis
 		return nil, fmt.Errorf("failed to fetch episode %v from database: %w", id, err)
 	}
 
+	series, err := s.Queries.GetSerie(ctx, ep.SeriesID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "series"}
+		}
+		return nil, fmt.Errorf("failed to get series %v from database: %w", ep.SeriesID, err)
+	}
+
+	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
+		return nil, apperror.ErrProfileCantAccessContent
+	}
+
 	return toGraphQLModel(ep), nil
 }
 
-func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error) {
+func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID int32, profileID uuid.UUID) ([]*model.Episode, error) {
+	profile, err := s.Queries.GetProfile(ctx, profileID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
+		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+	}
+
+	series, err := s.Queries.GetSerie(ctx, seriesID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "series"}
+		}
+		return nil, fmt.Errorf("failed to get series %v from database: %w", seriesID, err)
+	}
+
+	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
+		return nil, apperror.ErrProfileCantAccessContent
+	}
+
 	episodes, err := s.Queries.ListEpisodesBySerie(ctx, seriesID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all episodes from series %v from database: %w", seriesID, err)

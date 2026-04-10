@@ -17,8 +17,8 @@ import (
 
 type Service interface {
 	CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error)
-	GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error)
-	ListMovies(ctx context.Context) ([]*model.Movie, error)
+	GetMovie(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Movie, error)
+	ListMovies(ctx context.Context, profileID uuid.UUID) ([]*model.Movie, error)
 	UpdateMovie(ctx context.Context, id uuid.UUID, input model.UpdateMovieInput) (*model.Movie, error)
 	DeleteMovie(ctx context.Context, id uuid.UUID) error
 }
@@ -80,7 +80,15 @@ func (s *ServiceImpl) CreateMovie(ctx context.Context, input model.CreateMovieIn
 	return toGraphQLModel(movie), nil
 }
 
-func (s *ServiceImpl) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error) {
+func (s *ServiceImpl) GetMovie(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Movie, error) {
+	profile, err := s.Queries.GetProfile(ctx, profileID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
+		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+	}
+
 	movie, err := s.Queries.GetMovie(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -89,13 +97,33 @@ func (s *ServiceImpl) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie,
 		return nil, fmt.Errorf("failed to fetch movie %v from database: %w", id, err)
 	}
 
+	if movie.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
+		return nil, apperror.ErrProfileCantAccessContent
+	}
+
 	return toGraphQLModel(movie), nil
 }
 
-func (s *ServiceImpl) ListMovies(ctx context.Context) ([]*model.Movie, error) {
-	movies, err := s.Queries.ListMovies(ctx)
+func (s *ServiceImpl) ListMovies(ctx context.Context, profileID uuid.UUID) ([]*model.Movie, error) {
+	profile, err := s.Queries.GetProfile(ctx, profileID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch all movies from database: %w", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
+		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+	}
+
+	var movies []sqlc.Movie
+	if profile.HasParentalControls {
+		movies, err = s.Queries.ListKidsMovies(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch all movies from database: %w", err)
+		}
+	} else {
+		movies, err = s.Queries.ListMovies(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch all movies from database: %w", err)
+		}
 	}
 
 	result := make([]*model.Movie, len(movies))

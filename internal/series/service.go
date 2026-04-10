@@ -11,14 +11,15 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Service interface {
 	CreateSeries(ctx context.Context, input model.CreateSeriesInput) (*model.Series, error)
-	GetSeries(ctx context.Context, id int32) (*model.Series, error)
-	ListSeries(ctx context.Context) ([]*model.Series, error)
+	GetSeries(ctx context.Context, id int32, profileID uuid.UUID) (*model.Series, error)
+	ListSeries(ctx context.Context, profileID uuid.UUID) ([]*model.Series, error)
 	UpdateSeries(ctx context.Context, id int32, input model.UpdateSeriesInput) (*model.Series, error)
 	DeleteSeries(ctx context.Context, id int32) error
 }
@@ -68,8 +69,16 @@ func (s *ServiceImpl) CreateSeries(ctx context.Context, input model.CreateSeries
 	return toGraphQLModel(serie), nil
 }
 
-func (s *ServiceImpl) GetSeries(ctx context.Context, id int32) (*model.Series, error) {
-	serie, err := s.Queries.GetSerie(ctx, id)
+func (s *ServiceImpl) GetSeries(ctx context.Context, id int32, profileID uuid.UUID) (*model.Series, error) {
+	profile, err := s.Queries.GetProfile(ctx, profileID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
+		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+	}
+
+	series, err := s.Queries.GetSerie(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "series"}
@@ -77,13 +86,34 @@ func (s *ServiceImpl) GetSeries(ctx context.Context, id int32) (*model.Series, e
 		return nil, fmt.Errorf("failed to fetch series %v from database: %w", id, err)
 	}
 
-	return toGraphQLModel(serie), nil
+	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
+		return nil, apperror.ErrProfileCantAccessContent
+	}
+
+	return toGraphQLModel(series), nil
 }
 
-func (s *ServiceImpl) ListSeries(ctx context.Context) ([]*model.Series, error) {
-	seriesList, err := s.Queries.ListSeries(ctx)
+func (s *ServiceImpl) ListSeries(ctx context.Context, profileID uuid.UUID) ([]*model.Series, error) {
+	profile, err := s.Queries.GetProfile(ctx, profileID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch all series from database: %w", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
+		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+	}
+
+	var seriesList []sqlc.Series
+	if profile.HasParentalControls {
+		seriesList, err = s.Queries.ListKidsSeries(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch all series from database: %w", err)
+		}
+	} else {
+
+		seriesList, err = s.Queries.ListSeries(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch all series from database: %w", err)
+		}
 	}
 
 	result := make([]*model.Series, len(seriesList))

@@ -10,6 +10,7 @@ import (
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -61,13 +62,19 @@ func (r *mutationResolver) DeleteEpisode(ctx context.Context, id string) (bool, 
 
 // GetEpisode is the resolver for the getEpisode field.
 func (r *queryResolver) GetEpisode(ctx context.Context, id string) (*model.Episode, error) {
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to create watch history")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
 	episodeID, err := uuid.Parse(id)
 	if err != nil {
 		r.Logger.Error("failed to parse episode id to get it", slog.Any("error", err))
 		return nil, gqlerror.Errorf("invalid episode ID")
 	}
 
-	episode, err := r.EpisodeService.GetEpisode(ctx, episodeID)
+	episode, err := r.EpisodeService.GetEpisode(ctx, episodeID, profileID)
 	if err != nil {
 		r.Logger.Error("failed to get episode", slog.Any("error", err))
 		return nil, handleError(err)
@@ -78,7 +85,13 @@ func (r *queryResolver) GetEpisode(ctx context.Context, id string) (*model.Episo
 
 // ListEpisodes is the resolver for the listEpisodes field.
 func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error) {
-	episodes, err := r.EpisodeService.ListEpisodes(ctx, seriesID)
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to create watch history")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	episodes, err := r.EpisodeService.ListEpisodes(ctx, seriesID, profileID)
 	if err != nil {
 		r.Logger.Error("failed to list all episodes from a series", slog.Any("error", err))
 		return nil, handleError(err)

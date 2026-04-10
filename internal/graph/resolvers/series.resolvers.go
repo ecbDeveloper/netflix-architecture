@@ -11,6 +11,8 @@ import (
 	"strconv"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
+	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -61,13 +63,18 @@ func (r *mutationResolver) DeleteSeries(ctx context.Context, id string) (bool, e
 
 // GetSeries is the resolver for the getSeries field.
 func (r *queryResolver) GetSeries(ctx context.Context, id string) (*model.Series, error) {
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to create watch history")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
 	seriesID, err := strconv.Atoi(id)
 	if err != nil {
 		r.Logger.Error("failed to parse series id to get it", slog.Any("error", err))
 		return nil, gqlerror.Errorf("invalid series ID")
 	}
 
-	s, err := r.SeriesService.GetSeries(ctx, int32(seriesID))
+	s, err := r.SeriesService.GetSeries(ctx, int32(seriesID), profileID)
 	if err != nil {
 		r.Logger.Error("failed to get series", slog.Any("error", err))
 		return nil, handleError(err)
@@ -78,7 +85,13 @@ func (r *queryResolver) GetSeries(ctx context.Context, id string) (*model.Series
 
 // ListSeries is the resolver for the listSeries field.
 func (r *queryResolver) ListSeries(ctx context.Context) ([]*model.Series, error) {
-	series, err := r.SeriesService.ListSeries(ctx)
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to create watch history")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	series, err := r.SeriesService.ListSeries(ctx, profileID)
 	if err != nil {
 		r.Logger.Error("failed to list all series", slog.Any("error", err))
 		return nil, handleError(err)
