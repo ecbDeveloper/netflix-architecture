@@ -78,6 +78,11 @@ func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.User, er
 		return nil, gqlerror.Errorf("invalid user ID")
 	}
 
+	sessionUserID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
+	if !ok || sessionUserID != userID {
+		return nil, gqlerror.Errorf("access denied")
+	}
+
 	user, err := r.UserService.GetUser(ctx, userID)
 	if err != nil {
 		r.Logger.Error("failed to get user", slog.Any("error", err))
