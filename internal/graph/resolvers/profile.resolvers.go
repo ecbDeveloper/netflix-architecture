@@ -118,8 +118,8 @@ func (r *queryResolver) ListProfiles(ctx context.Context) ([]*model.Profile, err
 	return profiles, nil
 }
 
-// ProfileSelection is the resolver for the profileSelection field.
-func (r *mutationResolver) ProfileSelection(ctx context.Context, id string) (bool, error) {
+// SelectProfile is the resolver for the selectProfile field.
+func (r *mutationResolver) SelectProfile(ctx context.Context, id string) (bool, error) {
 	profileID, err := uuid.Parse(id)
 	if err != nil {
 		r.Logger.Error("failed to parse profile id to select it", slog.Any("error", err))

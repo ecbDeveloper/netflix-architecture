@@ -84,7 +84,7 @@ type ComplexityRoot struct {
 		DeleteWatchHistory func(childComplexity int, id string) int
 		Login              func(childComplexity int, input *model.LoginInput) int
 		Logout             func(childComplexity int) int
-		ProfileSelection   func(childComplexity int, id string) int
+		SelectProfile      func(childComplexity int, id string) int
 		UpdateEpisode      func(childComplexity int, id string, input model.UpdateEpisodeInput) int
 		UpdateMovie        func(childComplexity int, id string, input model.UpdateMovieInput) int
 		UpdateProfile      func(childComplexity int, id string, input model.UpdateProfileInput) int
@@ -177,7 +177,7 @@ type MutationResolver interface {
 	CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error)
 	UpdateProfile(ctx context.Context, id string, input model.UpdateProfileInput) (*model.Profile, error)
 	DeleteProfile(ctx context.Context, id string) (bool, error)
-	ProfileSelection(ctx context.Context, id string) (bool, error)
+	SelectProfile(ctx context.Context, id string) (bool, error)
 	CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error)
 	UpdateReview(ctx context.Context, id string, input model.UpdateReviewInput) (*model.Review, error)
 	DeleteReview(ctx context.Context, id string) (bool, error)
@@ -510,17 +510,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.Logout(childComplexity), true
-	case "Mutation.profileSelection":
-		if e.ComplexityRoot.Mutation.ProfileSelection == nil {
+	case "Mutation.selectProfile":
+		if e.ComplexityRoot.Mutation.SelectProfile == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_profileSelection_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_selectProfile_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.ProfileSelection(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Mutation.SelectProfile(childComplexity, args["id"].(string)), true
 	case "Mutation.updateEpisode":
 		if e.ComplexityRoot.Mutation.UpdateEpisode == nil {
 			break
@@ -1254,7 +1254,7 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_profileSelection_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_selectProfile_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
@@ -2893,15 +2893,15 @@ func (ec *executionContext) fieldContext_Mutation_deleteProfile(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_profileSelection(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_selectProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_profileSelection,
+		ec.fieldContext_Mutation_selectProfile,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().ProfileSelection(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Mutation().SelectProfile(ctx, fc.Args["id"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -2935,7 +2935,7 @@ func (ec *executionContext) _Mutation_profileSelection(ctx context.Context, fiel
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_profileSelection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_selectProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -2952,7 +2952,7 @@ func (ec *executionContext) fieldContext_Mutation_profileSelection(ctx context.C
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_profileSelection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_selectProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -8684,9 +8684,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "profileSelection":
+		case "selectProfile":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_profileSelection(ctx, field)
+				return ec._Mutation_selectProfile(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
