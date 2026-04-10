@@ -29,7 +29,7 @@ func handleError(err error) *gqlerror.Error {
 		return &gqlerror.Error{
 			Message: fmt.Sprintf("%s is already in use", conflictErr.Field),
 			Extensions: map[string]any{
-				"code": "BAD_REQUEST",
+				"code": "CONFLICT",
 			},
 		}
 	}
