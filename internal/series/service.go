@@ -86,7 +86,7 @@ func (s *ServiceImpl) GetSeries(ctx context.Context, id uuid.UUID, profileID uui
 	}
 
 	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
-		return nil, &apperror.ForbiddenError{Message: apperror.ErrProfileCantAccessContent.Error()}
+		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
 	return toGraphQLModel(series), nil

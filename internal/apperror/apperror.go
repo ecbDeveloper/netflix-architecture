@@ -8,8 +8,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-var ErrProfileCantAccessContent = errors.New("You can't access this content, with your profile")
-
 type ValidationError struct {
 	Field   string
 	Message string

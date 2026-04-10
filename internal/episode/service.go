@@ -96,7 +96,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 	}
 
 	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
-		return nil, &apperror.ForbiddenError{Message: apperror.ErrProfileCantAccessContent.Error()}
+		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
 	return toGraphQLModel(ep), nil
@@ -120,7 +120,7 @@ func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID uuid.UUID, prof
 	}
 
 	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
-		return nil, &apperror.ForbiddenError{Message: apperror.ErrProfileCantAccessContent.Error()}
+		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
 	episodes, err := s.Queries.ListEpisodesBySerie(ctx, seriesID)
