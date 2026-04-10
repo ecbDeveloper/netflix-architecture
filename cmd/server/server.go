@@ -199,16 +199,6 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 	}
 
 	graphConfig.Directives.HasRole = func(ctx context.Context, obj any, next graphql.Resolver, role model.UserRole) (res any, err error) {
-		userID, ok := s.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
-		if !ok {
-			return nil, &gqlerror.Error{
-				Message: "access denied",
-				Extensions: map[string]any{
-					"code": "FORBIDDEN",
-				},
-			}
-		}
-
 		dbRole, ok := userRoleOnDB[role]
 		if !ok {
 			return nil, &gqlerror.Error{
@@ -219,8 +209,8 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 			}
 		}
 
-		user, err := queries.GetUser(ctx, userID)
-		if err != nil || user.RoleID != dbRole {
+		storedRoleID, ok := s.Get(ctx, shared.SessionRoleIDKey).(int32)
+		if !ok || storedRoleID != dbRole {
 			return nil, &gqlerror.Error{
 				Message: "access denied",
 				Extensions: map[string]any{
@@ -243,7 +233,7 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 			}
 		}
 
-		profileID, ok := s.Get(ctx, shared.SessionProfileIDKey).(int)
+		profileID, ok := s.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 		if !ok {
 			return nil, &gqlerror.Error{
 				Message: "you must select a profile to access this content",

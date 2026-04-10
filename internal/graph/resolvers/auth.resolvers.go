@@ -17,7 +17,7 @@ import (
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (string, error) {
-	userID, err := r.AuthService.Login(ctx, *input)
+	user, err := r.AuthService.Login(ctx, *input)
 	if err != nil {
 		r.Logger.Error("failed to make login", slog.Any("error", err))
 
@@ -35,7 +35,8 @@ func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (
 		return "", gqlerror.Errorf("error logging in, try again after")
 	}
 
-	r.Sessions.Put(ctx, shared.SessionUserIDKey, userID)
+	r.Sessions.Put(ctx, shared.SessionUserIDKey, user.ID)
+	r.Sessions.Put(ctx, shared.SessionRoleIDKey, user.RoleID)
 
 	return "user authenticated successfully", nil
 }
