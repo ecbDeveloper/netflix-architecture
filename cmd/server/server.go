@@ -55,22 +55,21 @@ var userRoleOnDB = map[model.UserRole]int32{
 }
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
-	}
 
 	ctx := context.Background()
 
 	loggerHandler := slog.NewJSONHandler(os.Stdout, nil)
 	logger := slog.New(loggerHandler)
 
-	if os.Getenv("ENV") == "development" {
-		err := godotenv.Load()
-		if err != nil {
-			logger.Error("failed to load .env file", slog.Any("error", err))
-			os.Exit(1)
-		}
+	err := godotenv.Load()
+	if err != nil {
+		logger.Error("failed to load .env file", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
 	}
 
 	pool, err := initializeDatabaseConnection(ctx)
@@ -82,12 +81,13 @@ func main() {
 
 	redisPort := os.Getenv("REDIS_PORT")
 	redisPass := os.Getenv("REDIS_PASS")
+	redisHost := os.Getenv("REDIS_HOST")
 
 	redisPool := &redis.Pool{
 		MaxIdle:     10,
 		IdleTimeout: 240 * time.Second,
 		DialContext: func(ctx context.Context) (redis.Conn, error) {
-			return redis.Dial("tcp", "host:"+redisPort,
+			return redis.Dial("tcp", redisHost+":"+redisPort,
 				redis.DialPassword(redisPass),
 			)
 		},
@@ -108,7 +108,9 @@ func main() {
 
 	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
 
-	srv.Use(extension.Introspection{})
+	if os.Getenv("ENV") == "development" {
+		srv.Use(extension.Introspection{})
+	}
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
 	})
