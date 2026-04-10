@@ -213,7 +213,7 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 		storedRoleID, ok := s.Get(ctx, shared.SessionRoleIDKey).(int32)
 		if !ok || storedRoleID != dbRole {
 			return nil, &gqlerror.Error{
-				Message: "access denied",
+				Message: "you don't have permission to perform this action",
 				Extensions: map[string]any{
 					"code": "FORBIDDEN",
 				},
