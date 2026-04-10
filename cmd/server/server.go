@@ -55,7 +55,6 @@ var userRoleOnDB = map[model.UserRole]int32{
 }
 
 func main() {
-
 	ctx := context.Background()
 
 	loggerHandler := slog.NewJSONHandler(os.Stdout, nil)
@@ -67,7 +66,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	port := os.Getenv("PORT")
+	port := os.Getenv("API_PORT")
 	if port == "" {
 		port = defaultPort
 	}
