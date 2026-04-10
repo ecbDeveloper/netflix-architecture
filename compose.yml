@@ -22,6 +22,8 @@ services:
 
   netflix_api:
     container_name: netflix_api
+    ports:
+      - "${API_PORT}:${API_PORT}"
     build:
       context: .
     environment:
