@@ -69,7 +69,7 @@ func (s *ServiceImpl) GetProfile(ctx context.Context, id uuid.UUID, userID uuid.
 	}
 
 	if p.UserID != userID {
-		return nil, fmt.Errorf("you can't see profiles that's not yours")
+		return nil, &apperror.ForbiddenError{Message: "you can't see profiles that's not yours"}
 	}
 
 	return toGraphQLModel(p), nil
@@ -102,7 +102,7 @@ func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input mod
 	}
 
 	if current.UserID != userID {
-		return nil, fmt.Errorf("you can't update profiles that's not yours")
+		return nil, &apperror.ForbiddenError{Message: "you can't update profiles that's not yours"}
 	}
 
 	params := sqlc.UpdateProfileParams{
@@ -139,7 +139,7 @@ func (s *ServiceImpl) DeleteProfile(ctx context.Context, id uuid.UUID, userID uu
 	}
 
 	if current.UserID != userID {
-		return fmt.Errorf("you can't delete profiles that's not yours")
+		return &apperror.ForbiddenError{Message: "you can't delete profiles that's not yours"}
 	}
 
 	if err := s.Queries.DeleteProfile(ctx, id); err != nil {

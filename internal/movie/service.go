@@ -98,7 +98,7 @@ func (s *ServiceImpl) GetMovie(ctx context.Context, id uuid.UUID, profileID uuid
 	}
 
 	if movie.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
-		return nil, apperror.ErrProfileCantAccessContent
+		return nil, &apperror.ForbiddenError{Message: apperror.ErrProfileCantAccessContent.Error()}
 	}
 
 	return toGraphQLModel(movie), nil

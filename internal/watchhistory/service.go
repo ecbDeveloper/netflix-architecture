@@ -89,7 +89,7 @@ func (s *ServiceImpl) GetWatchHistory(ctx context.Context, id uuid.UUID, profile
 	}
 
 	if wh.ProfileID != profileID {
-		return nil, fmt.Errorf("you can't see watch history that's not yours")
+		return nil, &apperror.ForbiddenError{Message: "you can't see watch histories that's not yours"}
 	}
 
 	return toGraphQLModel(wh), nil
@@ -118,7 +118,7 @@ func (s *ServiceImpl) UpdateWatchHistory(ctx context.Context, id uuid.UUID, inpu
 	}
 
 	if current.ProfileID != profileID {
-		return nil, fmt.Errorf("you can't update watch history that's not yours")
+		return nil, &apperror.ForbiddenError{Message: "you can't update watch histories that's not yours"}
 	}
 
 	params := sqlc.UpdateWatchProgressParams{
@@ -152,7 +152,7 @@ func (s *ServiceImpl) DeleteWatchHistory(ctx context.Context, id uuid.UUID, prof
 	}
 
 	if wh.ProfileID != profileID {
-		return fmt.Errorf("you can't delete watch history that's not yours")
+		return &apperror.ForbiddenError{Message: "you can't delete watch histories that's not yours"}
 	}
 
 	if err := s.Queries.DeleteWatchHistory(ctx, id); err != nil {

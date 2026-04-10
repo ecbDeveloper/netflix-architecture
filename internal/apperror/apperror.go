@@ -35,6 +35,14 @@ func (e *NotFoundError) Error() string {
 	return fmt.Sprintf("%s not found", e.Entity)
 }
 
+type ForbiddenError struct {
+	Message string
+}
+
+func (e *ForbiddenError) Error() string {
+	return e.Message
+}
+
 func IsUniqueViolation(err error) bool {
 	var pgErr *pgconn.PgError
 	return errors.As(err, &pgErr) && pgErr.Code == "23505"

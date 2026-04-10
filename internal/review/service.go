@@ -115,7 +115,7 @@ func (s *ServiceImpl) UpdateReview(ctx context.Context, id uuid.UUID, input mode
 	}
 
 	if current.ProfileID != profileID {
-		return nil, fmt.Errorf("you can't update a review that isn't yours")
+		return nil, &apperror.ForbiddenError{Message: "you can't update reviews that's not yours"}
 	}
 
 	params := sqlc.UpdateReviewParams{
@@ -149,7 +149,7 @@ func (s *ServiceImpl) DeleteReview(ctx context.Context, id uuid.UUID, profileID 
 	}
 
 	if current.ProfileID != profileID {
-		return fmt.Errorf("you can't delete a review that isn't yours")
+		return &apperror.ForbiddenError{Message: "you can't delete reviews that's not yours"}
 	}
 
 	if err := s.Queries.DeleteReview(ctx, id); err != nil {

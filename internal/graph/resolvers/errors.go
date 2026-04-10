@@ -44,11 +44,12 @@ func handleError(err error) *gqlerror.Error {
 		}
 	}
 
-	if errors.Is(err, apperror.ErrProfileCantAccessContent) {
+	var forbiddenErr *apperror.ForbiddenError
+	if errors.As(err, &forbiddenErr) {
 		return &gqlerror.Error{
-			Message: fmt.Sprintf(err.Error()),
+			Message: forbiddenErr.Message,
 			Extensions: map[string]any{
-				"code": "UNPROCESSABLE_ENTITY",
+				"code": "FORBIDDEN",
 			},
 		}
 	}
