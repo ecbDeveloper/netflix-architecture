@@ -47,5 +47,10 @@ func (r *mutationResolver) Logout(ctx context.Context) (string, error) {
 		return "", ErrUserNotLoggedIn
 	}
 
+	if err := r.Sessions.Destroy(ctx); err != nil {
+		r.Logger.Error("failed to destroy session", slog.Any("error", err))
+		return "", gqlerror.Errorf("error logging out, try again later")
+	}
+
 	return "user successfully logged out", nil
 }
