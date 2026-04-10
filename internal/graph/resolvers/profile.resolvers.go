@@ -117,3 +117,28 @@ func (r *queryResolver) ListProfiles(ctx context.Context) ([]*model.Profile, err
 
 	return profiles, nil
 }
+
+// ProfileSelection is the resolver for the profileSelection field.
+func (r *mutationResolver) ProfileSelection(ctx context.Context, id string) (bool, error) {
+	profileID, err := uuid.Parse(id)
+	if err != nil {
+		r.Logger.Error("failed to parse profile id to select it", slog.Any("error", err))
+		return false, gqlerror.Errorf("invalid profile ID")
+	}
+
+	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to parse profile id to select it")
+		return false, gqlerror.Errorf("invalid profile ID")
+	}
+
+	_, err = r.ProfileService.GetProfile(ctx, profileID, userID)
+	if err != nil {
+		r.Logger.Error("failed to select profile", slog.Any("error", err))
+		return false, handleError(err)
+	}
+
+	r.Sessions.Put(ctx, shared.SessionProfileIDKey, profileID)
+
+	return true, nil
+}

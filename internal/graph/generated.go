@@ -84,6 +84,7 @@ type ComplexityRoot struct {
 		DeleteWatchHistory func(childComplexity int, id string) int
 		Login              func(childComplexity int, input *model.LoginInput) int
 		Logout             func(childComplexity int) int
+		ProfileSelection   func(childComplexity int, id string) int
 		UpdateEpisode      func(childComplexity int, id string, input model.UpdateEpisodeInput) int
 		UpdateMovie        func(childComplexity int, id string, input model.UpdateMovieInput) int
 		UpdateProfile      func(childComplexity int, id string, input model.UpdateProfileInput) int
@@ -112,7 +113,7 @@ type ComplexityRoot struct {
 		GetSeries          func(childComplexity int, id string) int
 		GetUser            func(childComplexity int, id string) int
 		GetWatchHistory    func(childComplexity int, id string) int
-		ListEpisodes       func(childComplexity int, seriesID int32) int
+		ListEpisodes       func(childComplexity int, seriesID string) int
 		ListMovies         func(childComplexity int) int
 		ListProfiles       func(childComplexity int) int
 		ListReviews        func(childComplexity int) int
@@ -176,6 +177,7 @@ type MutationResolver interface {
 	CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error)
 	UpdateProfile(ctx context.Context, id string, input model.UpdateProfileInput) (*model.Profile, error)
 	DeleteProfile(ctx context.Context, id string) (bool, error)
+	ProfileSelection(ctx context.Context, id string) (bool, error)
 	CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error)
 	UpdateReview(ctx context.Context, id string, input model.UpdateReviewInput) (*model.Review, error)
 	DeleteReview(ctx context.Context, id string) (bool, error)
@@ -191,7 +193,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	GetEpisode(ctx context.Context, id string) (*model.Episode, error)
-	ListEpisodes(ctx context.Context, seriesID int32) ([]*model.Episode, error)
+	ListEpisodes(ctx context.Context, seriesID string) ([]*model.Episode, error)
 	GetMovie(ctx context.Context, id string) (*model.Movie, error)
 	ListMovies(ctx context.Context) ([]*model.Movie, error)
 	GetProfile(ctx context.Context) (*model.Profile, error)
@@ -508,6 +510,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.Logout(childComplexity), true
+	case "Mutation.profileSelection":
+		if e.ComplexityRoot.Mutation.ProfileSelection == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_profileSelection_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.ProfileSelection(childComplexity, args["id"].(string)), true
 	case "Mutation.updateEpisode":
 		if e.ComplexityRoot.Mutation.UpdateEpisode == nil {
 			break
@@ -718,7 +731,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.ListEpisodes(childComplexity, args["seriesId"].(int32)), true
+		return e.ComplexityRoot.Query.ListEpisodes(childComplexity, args["seriesId"].(string)), true
 	case "Query.listMovies":
 		if e.ComplexityRoot.Query.ListMovies == nil {
 			break
@@ -1241,6 +1254,17 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_profileSelection_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateEpisode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1433,7 +1457,7 @@ func (ec *executionContext) field_Query_getWatchHistory_args(ctx context.Context
 func (ec *executionContext) field_Query_listEpisodes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "seriesId", ec.unmarshalNInt2int32)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "seriesId", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
@@ -1590,7 +1614,7 @@ func (ec *executionContext) _Episode_seriesId(ctx context.Context, field graphql
 			return obj.SeriesID, nil
 		},
 		nil,
-		ec.marshalNInt2int32,
+		ec.marshalNID2string,
 		true,
 		true,
 	)
@@ -1603,7 +1627,7 @@ func (ec *executionContext) fieldContext_Episode_seriesId(_ context.Context, fie
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2863,6 +2887,72 @@ func (ec *executionContext) fieldContext_Mutation_deleteProfile(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_profileSelection(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_profileSelection,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().ProfileSelection(ctx, fc.Args["id"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.HasRole == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
+			}
+
+			next = directive2
+			return next
+		},
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_profileSelection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_profileSelection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4143,7 +4233,7 @@ func (ec *executionContext) _Query_listEpisodes(ctx context.Context, field graph
 		ec.fieldContext_Query_listEpisodes,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().ListEpisodes(ctx, fc.Args["seriesId"].(int32))
+			return ec.Resolvers.Query().ListEpisodes(ctx, fc.Args["seriesId"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -7548,7 +7638,7 @@ func (ec *executionContext) unmarshalInputCreateEpisodeInput(ctx context.Context
 		switch k {
 		case "seriesId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("seriesId"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
+			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8590,6 +8680,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteProfile":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteProfile(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "profileSelection":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_profileSelection(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
