@@ -18,12 +18,12 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	Queries *sqlc.Queries
+	queries *sqlc.Queries
 }
 
 func NewService(queries *sqlc.Queries) Service {
 	return &ServiceImpl{
-		Queries: queries,
+		queries: queries,
 	}
 }
 
@@ -35,7 +35,7 @@ func (s *ServiceImpl) Login(ctx context.Context, input model.LoginInput) (sqlc.U
 		return sqlc.User{}, &apperror.ValidationError{Field: "password", Message: "password is required"}
 	}
 
-	user, err := s.Queries.GetUserByEmail(ctx, input.Email)
+	user, err := s.queries.GetUserByEmail(ctx, input.Email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return sqlc.User{}, &apperror.NotFoundError{Entity: "user"}

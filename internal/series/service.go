@@ -24,12 +24,12 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	Queries *sqlc.Queries
+	queries *sqlc.Queries
 }
 
 func NewService(queries *sqlc.Queries) Service {
 	return &ServiceImpl{
-		Queries: queries,
+		queries: queries,
 	}
 }
 
@@ -60,7 +60,7 @@ func (s *ServiceImpl) CreateSeries(ctx context.Context, input model.CreateSeries
 	}
 	params.ReleaseDate = pgtype.Date{Time: releaseDate, Valid: true}
 
-	serie, err := s.Queries.CreateSerie(ctx, params)
+	serie, err := s.queries.CreateSerie(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert series on database: %w", err)
 	}
@@ -69,7 +69,7 @@ func (s *ServiceImpl) CreateSeries(ctx context.Context, input model.CreateSeries
 }
 
 func (s *ServiceImpl) GetSeries(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Series, error) {
-	profile, err := s.Queries.GetProfile(ctx, profileID)
+	profile, err := s.queries.GetProfile(ctx, profileID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "profile"}
@@ -77,7 +77,7 @@ func (s *ServiceImpl) GetSeries(ctx context.Context, id uuid.UUID, profileID uui
 		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
 	}
 
-	series, err := s.Queries.GetSerie(ctx, id)
+	series, err := s.queries.GetSerie(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "series"}
@@ -93,7 +93,7 @@ func (s *ServiceImpl) GetSeries(ctx context.Context, id uuid.UUID, profileID uui
 }
 
 func (s *ServiceImpl) ListSeries(ctx context.Context, profileID uuid.UUID) ([]*model.Series, error) {
-	profile, err := s.Queries.GetProfile(ctx, profileID)
+	profile, err := s.queries.GetProfile(ctx, profileID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "profile"}
@@ -103,13 +103,13 @@ func (s *ServiceImpl) ListSeries(ctx context.Context, profileID uuid.UUID) ([]*m
 
 	var seriesList []sqlc.Series
 	if profile.HasParentalControls {
-		seriesList, err = s.Queries.ListKidsSeries(ctx)
+		seriesList, err = s.queries.ListKidsSeries(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch all series from database: %w", err)
 		}
 	} else {
 
-		seriesList, err = s.Queries.ListSeries(ctx)
+		seriesList, err = s.queries.ListSeries(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch all series from database: %w", err)
 		}
@@ -133,7 +133,7 @@ func (s *ServiceImpl) UpdateSeries(ctx context.Context, id uuid.UUID, input mode
 		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating cannot be empty"}
 	}
 
-	current, err := s.Queries.GetSerie(ctx, id)
+	current, err := s.queries.GetSerie(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "series"}
@@ -170,7 +170,7 @@ func (s *ServiceImpl) UpdateSeries(ctx context.Context, id uuid.UUID, input mode
 		params.GenreID = *input.GenreID
 	}
 
-	serie, err := s.Queries.UpdateSerie(ctx, params)
+	serie, err := s.queries.UpdateSerie(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update series %v from database: %w", id, err)
 	}
@@ -179,7 +179,7 @@ func (s *ServiceImpl) UpdateSeries(ctx context.Context, id uuid.UUID, input mode
 }
 
 func (s *ServiceImpl) DeleteSeries(ctx context.Context, id uuid.UUID) error {
-	if err := s.Queries.DeleteSerie(ctx, id); err != nil {
+	if err := s.queries.DeleteSerie(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "series"}
 		}

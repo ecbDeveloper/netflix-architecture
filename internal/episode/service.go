@@ -22,12 +22,12 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	Queries *sqlc.Queries
+	queries *sqlc.Queries
 }
 
 func NewService(queries *sqlc.Queries) Service {
 	return &ServiceImpl{
-		Queries: queries,
+		queries: queries,
 	}
 }
 
@@ -52,7 +52,7 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 		return nil, &apperror.ValidationError{Field: "seriesId", Message: "invalid series id"}
 	}
 
-	ep, err := s.Queries.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
+	ep, err := s.queries.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
 		ID:              episodeID,
 		SeriesID:        seriesID,
 		Season:          input.Season,
@@ -71,7 +71,7 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 }
 
 func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Episode, error) {
-	profile, err := s.Queries.GetProfile(ctx, profileID)
+	profile, err := s.queries.GetProfile(ctx, profileID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "profile"}
@@ -79,7 +79,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
 	}
 
-	ep, err := s.Queries.GetEpisode(ctx, id)
+	ep, err := s.queries.GetEpisode(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "episode"}
@@ -87,7 +87,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, fmt.Errorf("failed to fetch episode %v from database: %w", id, err)
 	}
 
-	series, err := s.Queries.GetSerie(ctx, ep.SeriesID)
+	series, err := s.queries.GetSerie(ctx, ep.SeriesID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "series"}
@@ -103,7 +103,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 }
 
 func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID) ([]*model.Episode, error) {
-	profile, err := s.Queries.GetProfile(ctx, profileID)
+	profile, err := s.queries.GetProfile(ctx, profileID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "profile"}
@@ -111,7 +111,7 @@ func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID uuid.UUID, prof
 		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
 	}
 
-	series, err := s.Queries.GetSerie(ctx, seriesID)
+	series, err := s.queries.GetSerie(ctx, seriesID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "series"}
@@ -123,7 +123,7 @@ func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID uuid.UUID, prof
 		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
-	episodes, err := s.Queries.ListEpisodesBySerie(ctx, seriesID)
+	episodes, err := s.queries.ListEpisodesBySerie(ctx, seriesID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all episodes from series %v from database: %w", seriesID, err)
 	}
@@ -149,7 +149,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: "duration must be greater than zero"}
 	}
 
-	current, err := s.Queries.GetEpisode(ctx, id)
+	current, err := s.queries.GetEpisode(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "episode"}
@@ -178,7 +178,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		params.DurationMinutes = *input.DurationMinutes
 	}
 
-	ep, err := s.Queries.UpdateEpisode(ctx, params)
+	ep, err := s.queries.UpdateEpisode(ctx, params)
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
 			return nil, &apperror.ConflictError{Field: "episode (season + number) in this series"}
@@ -190,7 +190,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 }
 
 func (s *ServiceImpl) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
-	if err := s.Queries.DeleteEpisode(ctx, id); err != nil {
+	if err := s.queries.DeleteEpisode(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "episode"}
 		}

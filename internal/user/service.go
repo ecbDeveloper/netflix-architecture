@@ -23,12 +23,12 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	Queries *sqlc.Queries
+	queries *sqlc.Queries
 }
 
 func NewService(queries *sqlc.Queries) Service {
 	return &ServiceImpl{
-		Queries: queries,
+		queries: queries,
 	}
 }
 
@@ -53,7 +53,7 @@ func (s *ServiceImpl) CreateUser(ctx context.Context, input model.CreateUserInpu
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	user, err := s.Queries.CreateUser(ctx, sqlc.CreateUserParams{
+	user, err := s.queries.CreateUser(ctx, sqlc.CreateUserParams{
 		ID:       userID,
 		Email:    input.Email,
 		Name:     input.Name,
@@ -72,7 +72,7 @@ func (s *ServiceImpl) CreateUser(ctx context.Context, input model.CreateUserInpu
 }
 
 func (s *ServiceImpl) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
-	user, err := s.Queries.GetUser(ctx, id)
+	user, err := s.queries.GetUser(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "user"}
@@ -84,7 +84,7 @@ func (s *ServiceImpl) GetUser(ctx context.Context, id uuid.UUID) (*model.User, e
 }
 
 func (s *ServiceImpl) ListUsers(ctx context.Context) ([]*model.User, error) {
-	users, err := s.Queries.ListUsers(ctx)
+	users, err := s.queries.ListUsers(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all users from database: %w", err)
 	}
@@ -125,7 +125,7 @@ func (s *ServiceImpl) UpdateUser(ctx context.Context, id uuid.UUID, input model.
 		updateParams.Password = string(hashedPassword)
 	}
 
-	user, err := s.Queries.UpdateUser(ctx, updateParams)
+	user, err := s.queries.UpdateUser(ctx, updateParams)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "user"}
@@ -141,7 +141,7 @@ func (s *ServiceImpl) UpdateUser(ctx context.Context, id uuid.UUID, input model.
 }
 
 func (s *ServiceImpl) DeleteUser(ctx context.Context, id uuid.UUID) error {
-	if err := s.Queries.DeleteUser(ctx, id); err != nil {
+	if err := s.queries.DeleteUser(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "user"}
 		}

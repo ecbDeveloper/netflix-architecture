@@ -24,12 +24,12 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	Queries *sqlc.Queries
+	queries *sqlc.Queries
 }
 
 func NewService(queries *sqlc.Queries) Service {
 	return &ServiceImpl{
-		Queries: queries,
+		queries: queries,
 	}
 }
 
@@ -57,7 +57,7 @@ func (s *ServiceImpl) CreateMovie(ctx context.Context, input model.CreateMovieIn
 		return nil, &apperror.ValidationError{Field: "releaseDate", Message: "invalid date format, use YYYY-MM-DD"}
 	}
 
-	movie, err := s.Queries.CreateMovie(ctx, sqlc.CreateMovieParams{
+	movie, err := s.queries.CreateMovie(ctx, sqlc.CreateMovieParams{
 		ID:              movieID,
 		Title:           input.Title,
 		Description:     input.Description,
@@ -81,7 +81,7 @@ func (s *ServiceImpl) CreateMovie(ctx context.Context, input model.CreateMovieIn
 }
 
 func (s *ServiceImpl) GetMovie(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Movie, error) {
-	profile, err := s.Queries.GetProfile(ctx, profileID)
+	profile, err := s.queries.GetProfile(ctx, profileID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "profile"}
@@ -89,7 +89,7 @@ func (s *ServiceImpl) GetMovie(ctx context.Context, id uuid.UUID, profileID uuid
 		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
 	}
 
-	movie, err := s.Queries.GetMovie(ctx, id)
+	movie, err := s.queries.GetMovie(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "movie"}
@@ -105,7 +105,7 @@ func (s *ServiceImpl) GetMovie(ctx context.Context, id uuid.UUID, profileID uuid
 }
 
 func (s *ServiceImpl) ListMovies(ctx context.Context, profileID uuid.UUID) ([]*model.Movie, error) {
-	profile, err := s.Queries.GetProfile(ctx, profileID)
+	profile, err := s.queries.GetProfile(ctx, profileID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "profile"}
@@ -115,12 +115,12 @@ func (s *ServiceImpl) ListMovies(ctx context.Context, profileID uuid.UUID) ([]*m
 
 	var movies []sqlc.Movie
 	if profile.HasParentalControls {
-		movies, err = s.Queries.ListKidsMovies(ctx)
+		movies, err = s.queries.ListKidsMovies(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch all movies from database: %w", err)
 		}
 	} else {
-		movies, err = s.Queries.ListMovies(ctx)
+		movies, err = s.queries.ListMovies(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch all movies from database: %w", err)
 		}
@@ -150,7 +150,7 @@ func (s *ServiceImpl) UpdateMovie(ctx context.Context, id uuid.UUID, input model
 		return nil, &apperror.ValidationError{Field: "contentUrl", Message: "content URL cannot be empty"}
 	}
 
-	current, err := s.Queries.GetMovie(ctx, id)
+	current, err := s.queries.GetMovie(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "movie"}
@@ -191,7 +191,7 @@ func (s *ServiceImpl) UpdateMovie(ctx context.Context, id uuid.UUID, input model
 		params.ContentUrl = *input.ContentURL
 	}
 
-	movie, err := s.Queries.UpdateMovie(ctx, params)
+	movie, err := s.queries.UpdateMovie(ctx, params)
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
 			return nil, &apperror.ConflictError{Field: "title"}
@@ -203,7 +203,7 @@ func (s *ServiceImpl) UpdateMovie(ctx context.Context, id uuid.UUID, input model
 }
 
 func (s *ServiceImpl) DeleteMovie(ctx context.Context, id uuid.UUID) error {
-	if err := s.Queries.DeleteMovie(ctx, id); err != nil {
+	if err := s.queries.DeleteMovie(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "movie"}
 		}

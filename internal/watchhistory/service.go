@@ -22,12 +22,12 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	Queries *sqlc.Queries
+	queries *sqlc.Queries
 }
 
 func NewService(queries *sqlc.Queries) Service {
 	return &ServiceImpl{
-		Queries: queries,
+		queries: queries,
 	}
 }
 
@@ -71,7 +71,7 @@ func (s *ServiceImpl) CreateWatchHistory(ctx context.Context, input model.Create
 		params.IsCompleted = pgtype.Bool{Bool: *input.IsCompleted, Valid: true}
 	}
 
-	wh, err := s.Queries.CreateWatchHistory(ctx, params)
+	wh, err := s.queries.CreateWatchHistory(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert watch history on database: %w", err)
 	}
@@ -80,7 +80,7 @@ func (s *ServiceImpl) CreateWatchHistory(ctx context.Context, input model.Create
 }
 
 func (s *ServiceImpl) GetWatchHistory(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.WatchHistory, error) {
-	wh, err := s.Queries.GetWatchHistory(ctx, id)
+	wh, err := s.queries.GetWatchHistory(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "watch history"}
@@ -96,7 +96,7 @@ func (s *ServiceImpl) GetWatchHistory(ctx context.Context, id uuid.UUID, profile
 }
 
 func (s *ServiceImpl) ListWatchHistories(ctx context.Context, profileID uuid.UUID) ([]*model.WatchHistory, error) {
-	histories, err := s.Queries.ListWatchHistoryByProfile(ctx, profileID)
+	histories, err := s.queries.ListWatchHistoryByProfile(ctx, profileID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all watch histories from database: %w", err)
 	}
@@ -109,7 +109,7 @@ func (s *ServiceImpl) ListWatchHistories(ctx context.Context, profileID uuid.UUI
 }
 
 func (s *ServiceImpl) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput, profileID uuid.UUID) (*model.WatchHistory, error) {
-	current, err := s.Queries.GetWatchHistory(ctx, id)
+	current, err := s.queries.GetWatchHistory(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "watch history"}
@@ -134,7 +134,7 @@ func (s *ServiceImpl) UpdateWatchHistory(ctx context.Context, id uuid.UUID, inpu
 		params.IsCompleted = pgtype.Bool{Bool: *input.IsCompleted, Valid: true}
 	}
 
-	wh, err := s.Queries.UpdateWatchProgress(ctx, params)
+	wh, err := s.queries.UpdateWatchProgress(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update watch history %v from database: %w", id, err)
 	}
@@ -143,7 +143,7 @@ func (s *ServiceImpl) UpdateWatchHistory(ctx context.Context, id uuid.UUID, inpu
 }
 
 func (s *ServiceImpl) DeleteWatchHistory(ctx context.Context, id uuid.UUID, profileID uuid.UUID) error {
-	wh, err := s.Queries.GetWatchHistory(ctx, id)
+	wh, err := s.queries.GetWatchHistory(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "watch history"}
@@ -155,7 +155,7 @@ func (s *ServiceImpl) DeleteWatchHistory(ctx context.Context, id uuid.UUID, prof
 		return &apperror.ForbiddenError{Message: "you can't delete watch histories that's not yours"}
 	}
 
-	if err := s.Queries.DeleteWatchHistory(ctx, id); err != nil {
+	if err := s.queries.DeleteWatchHistory(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "watch history"}
 		}
