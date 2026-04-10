@@ -65,8 +65,8 @@ func (r *mutationResolver) DeleteProfile(ctx context.Context, id string) (bool, 
 
 	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
 	if !ok {
-		r.Logger.Error("failed to parse profile id to update it")
-		return false, gqlerror.Errorf("invalid profile ID")
+		r.Logger.Error("failed to parse user id to delete profile")
+		return false, gqlerror.Errorf("invalid user ID")
 	}
 
 	err = r.ProfileService.DeleteProfile(ctx, profileID, userID)
@@ -88,8 +88,8 @@ func (r *queryResolver) GetProfile(ctx context.Context) (*model.Profile, error) 
 
 	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
 	if !ok {
-		r.Logger.Error("failed to parse profile id to update it")
-		return nil, gqlerror.Errorf("invalid profile ID")
+		r.Logger.Error("failed to parse user id to get profile")
+		return nil, gqlerror.Errorf("invalid user ID")
 	}
 
 	profile, err := r.ProfileService.GetProfile(ctx, profileID, userID)
@@ -128,8 +128,8 @@ func (r *mutationResolver) SelectProfile(ctx context.Context, id string) (bool, 
 
 	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
 	if !ok {
-		r.Logger.Error("failed to parse profile id to select it")
-		return false, gqlerror.Errorf("invalid profile ID")
+		r.Logger.Error("failed to parse user id to select profile")
+		return false, gqlerror.Errorf("invalid user ID")
 	}
 
 	_, err = r.ProfileService.GetProfile(ctx, profileID, userID)
