@@ -10,6 +10,7 @@ import (
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -33,6 +34,11 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 		return nil, gqlerror.Errorf("invalid user ID")
 	}
 
+	sessionUserID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
+	if !ok || sessionUserID != userID {
+		return nil, gqlerror.Errorf("access denied")
+	}
+
 	user, err := r.UserService.UpdateUser(ctx, userID, input)
 	if err != nil {
 		r.Logger.Error("failed to update user", slog.Any("error", err))
@@ -48,6 +54,11 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 	if err != nil {
 		r.Logger.Error("failed to parse user id to delete it", slog.Any("error", err))
 		return false, gqlerror.Errorf("invalid user ID")
+	}
+
+	sessionUserID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
+	if !ok || sessionUserID != userID {
+		return false, gqlerror.Errorf("access denied")
 	}
 
 	err = r.UserService.DeleteUser(ctx, userID)
