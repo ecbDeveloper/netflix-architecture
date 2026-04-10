@@ -19,8 +19,8 @@ import (
 func (r *mutationResolver) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
 	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
 	if !ok {
-		r.Logger.Error("failed to parse profile id to update it")
-		return nil, gqlerror.Errorf("invalid profile ID")
+		r.Logger.Error("failed to parse user id to create profile")
+		return nil, gqlerror.Errorf("invalid user ID")
 	}
 
 	profile, err := r.ProfileService.CreateProfile(ctx, input, userID)
@@ -42,8 +42,8 @@ func (r *mutationResolver) UpdateProfile(ctx context.Context, id string, input m
 
 	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
 	if !ok {
-		r.Logger.Error("failed to parse profile id to update it")
-		return nil, gqlerror.Errorf("invalid profile ID")
+		r.Logger.Error("failed to parse user id to update profile")
+		return nil, gqlerror.Errorf("invalid user ID")
 	}
 
 	profile, err := r.ProfileService.UpdateProfile(ctx, profileID, input, userID)

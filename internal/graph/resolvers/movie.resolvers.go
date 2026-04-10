@@ -64,7 +64,7 @@ func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, er
 func (r *queryResolver) GetMovie(ctx context.Context, id string) (*model.Movie, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
-		r.Logger.Error("failed to get profile id to create watch history")
+		r.Logger.Error("failed to get profile id to get movie")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 

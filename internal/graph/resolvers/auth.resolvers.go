@@ -19,13 +19,12 @@ import (
 func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (string, error) {
 	user, err := r.AuthService.Login(ctx, *input)
 	if err != nil {
-		r.Logger.Error("failed to make login", slog.Any("error", err))
-
 		var validationErr *apperror.ValidationError
 		if errors.As(err, &validationErr) {
 			return "", handleError(err)
 		}
 
+		r.Logger.Error("failed to make login", slog.Any("error", err))
 		return "", ErrInvalidEmailOrPassword
 	}
 
