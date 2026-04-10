@@ -165,6 +165,7 @@ func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *s
 	s.Lifetime = 24 * time.Hour
 	s.Cookie.HttpOnly = true
 	s.Cookie.SameSite = http.SameSiteLaxMode
+	s.Cookie.Secure = os.Getenv("ENV") != "development"
 
 	resolver := resolvers.NewResolver(
 		queries,
