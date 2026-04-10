@@ -246,9 +246,19 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 
 		profileIsFromUser := false
 		userProfiles, err := queries.ListProfilesByUser(ctx, userID)
+		if err != nil {
+			return nil, &gqlerror.Error{
+				Message: "internal error",
+				Extensions: map[string]any{
+					"code": "INTERNAL_SERVER",
+				},
+			}
+		}
+
 		for _, userProfile := range userProfiles {
 			if userProfile.ID == profileID {
 				profileIsFromUser = true
+				break
 			}
 		}
 
