@@ -46,6 +46,14 @@ func (s *ServiceImpl) CreateUser(ctx context.Context, input model.CreateUserInpu
 		return nil, &apperror.ValidationError{Field: "password", Message: "password is required"}
 	}
 
+	if len(input.Password) < 8 {
+		return nil, &apperror.ValidationError{Field: "password", Message: "password must be at least 8 characters"}
+	}
+
+	if len(input.Password) > 72 {
+		return nil, &apperror.ValidationError{Field: "password", Message: "password must be at most 72 characters"}
+	}
+
 	userID := uuid.New()
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
@@ -97,18 +105,28 @@ func (s *ServiceImpl) ListUsers(ctx context.Context) ([]*model.User, error) {
 }
 
 func (s *ServiceImpl) UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error) {
-	if input.Email != nil && strings.TrimSpace(*input.Email) == "" {
-		return nil, &apperror.ValidationError{Field: "email", Message: "email cannot be empty"}
+	storedUser, err := s.queries.GetUser(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "user"}
+		}
+		return nil, fmt.Errorf("failed to fetch user %v from database: %w", id, err)
 	}
-	if input.Name != nil && strings.TrimSpace(*input.Name) == "" {
-		return nil, &apperror.ValidationError{Field: "name", Message: "name cannot be empty"}
+
+	if input.Password != nil && len(*input.Password) < 8 {
+		return nil, &apperror.ValidationError{Field: "password", Message: "password must be at least 8 characters"}
 	}
-	if input.Password != nil && strings.TrimSpace(*input.Password) == "" {
-		return nil, &apperror.ValidationError{Field: "password", Message: "password cannot be empty"}
+
+	if input.Password != nil && len(*input.Password) > 72 {
+		return nil, &apperror.ValidationError{Field: "password", Message: "password must be at most 72 characters"}
 	}
 
 	updateParams := sqlc.UpdateUserParams{
-		ID: id,
+		ID:       id,
+		Email:    storedUser.Email,
+		Name:     storedUser.Name,
+		Password: storedUser.Password,
+		Cpf:      storedUser.Cpf,
 	}
 
 	if input.Email != nil {
