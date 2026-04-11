@@ -10,10 +10,10 @@ SELECT * FROM reviews WHERE id = $1;
 SELECT * FROM reviews WHERE profile_id = $1 ORDER BY created_at DESC;
 
 -- name: ListReviewsByMovie :many
-SELECT * FROM reviews WHERE movie_id = $1;
+SELECT * FROM reviews WHERE movie_id = $1 ORDER BY created_at DESC;
 
 -- name: ListReviewsByEpisode :many
-SELECT * FROM reviews WHERE episode_id = $1;
+SELECT * FROM reviews WHERE episode_id = $1 ORDER BY created_at DESC;
 
 -- name: UpdateReview :one
 UPDATE reviews

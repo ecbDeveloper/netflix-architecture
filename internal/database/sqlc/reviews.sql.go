@@ -78,7 +78,7 @@ func (q *Queries) GetReview(ctx context.Context, id uuid.UUID) (Review, error) {
 }
 
 const listReviewsByEpisode = `-- name: ListReviewsByEpisode :many
-SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at FROM reviews WHERE episode_id = $1
+SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at FROM reviews WHERE episode_id = $1 ORDER BY created_at DESC
 `
 
 func (q *Queries) ListReviewsByEpisode(ctx context.Context, episodeID pgtype.UUID) ([]Review, error) {
@@ -111,7 +111,7 @@ func (q *Queries) ListReviewsByEpisode(ctx context.Context, episodeID pgtype.UUI
 }
 
 const listReviewsByMovie = `-- name: ListReviewsByMovie :many
-SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at FROM reviews WHERE movie_id = $1
+SELECT id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at FROM reviews WHERE movie_id = $1 ORDER BY created_at DESC
 `
 
 func (q *Queries) ListReviewsByMovie(ctx context.Context, movieID pgtype.UUID) ([]Review, error) {
