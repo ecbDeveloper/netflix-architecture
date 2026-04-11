@@ -27,14 +27,8 @@ func (r *mutationResolver) CreateEpisode(ctx context.Context, input model.Create
 }
 
 // UpdateEpisode is the resolver for the updateEpisode field.
-func (r *mutationResolver) UpdateEpisode(ctx context.Context, id string, input model.UpdateEpisodeInput) (*model.Episode, error) {
-	episodeID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse episode id to update it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid episode ID")
-	}
-
-	episode, err := r.EpisodeService.UpdateEpisode(ctx, episodeID, input)
+func (r *mutationResolver) UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error) {
+	episode, err := r.EpisodeService.UpdateEpisode(ctx, id, input)
 	if err != nil {
 		r.Logger.Error("failed to update episode", slog.Any("error", err))
 		return nil, handleError(err)
@@ -44,14 +38,8 @@ func (r *mutationResolver) UpdateEpisode(ctx context.Context, id string, input m
 }
 
 // DeleteEpisode is the resolver for the deleteEpisode field.
-func (r *mutationResolver) DeleteEpisode(ctx context.Context, id string) (bool, error) {
-	episodeID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse episode id to delete it", slog.Any("error", err))
-		return false, gqlerror.Errorf("invalid episode ID")
-	}
-
-	err = r.EpisodeService.DeleteEpisode(ctx, episodeID)
+func (r *mutationResolver) DeleteEpisode(ctx context.Context, id uuid.UUID) (bool, error) {
+	err := r.EpisodeService.DeleteEpisode(ctx, id)
 	if err != nil {
 		r.Logger.Error("failed to delete episode", slog.Any("error", err))
 		return false, handleError(err)
@@ -61,20 +49,14 @@ func (r *mutationResolver) DeleteEpisode(ctx context.Context, id string) (bool, 
 }
 
 // GetEpisode is the resolver for the getEpisode field.
-func (r *queryResolver) GetEpisode(ctx context.Context, id string) (*model.Episode, error) {
+func (r *queryResolver) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
 		r.Logger.Error("failed to get profile id to create watch history")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	episodeID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse episode id to get it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid episode ID")
-	}
-
-	episode, err := r.EpisodeService.GetEpisode(ctx, episodeID, profileID)
+	episode, err := r.EpisodeService.GetEpisode(ctx, id, profileID)
 	if err != nil {
 		r.Logger.Error("failed to get episode", slog.Any("error", err))
 		return nil, handleError(err)
@@ -84,20 +66,14 @@ func (r *queryResolver) GetEpisode(ctx context.Context, id string) (*model.Episo
 }
 
 // ListEpisodes is the resolver for the listEpisodes field.
-func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID string) ([]*model.Episode, error) {
+func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([]*model.Episode, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
 		r.Logger.Error("failed to get profile id to create watch history")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	seriesUUID, err := uuid.Parse(seriesID)
-	if err != nil {
-		r.Logger.Error("failed to parse series id to list episodes", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid series ID")
-	}
-
-	episodes, err := r.EpisodeService.ListEpisodes(ctx, seriesUUID, profileID)
+	episodes, err := r.EpisodeService.ListEpisodes(ctx, seriesID, profileID)
 	if err != nil {
 		r.Logger.Error("failed to list all episodes from a series", slog.Any("error", err))
 		return nil, handleError(err)

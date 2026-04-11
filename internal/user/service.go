@@ -153,7 +153,7 @@ func (s *ServiceImpl) DeleteUser(ctx context.Context, id uuid.UUID) error {
 
 func toGraphQLModel(u sqlc.User) *model.User {
 	return &model.User{
-		ID:        u.ID.String(),
+		ID:        u.ID,
 		Email:     u.Email,
 		Name:      u.Name,
 		Cpf:       u.Cpf,

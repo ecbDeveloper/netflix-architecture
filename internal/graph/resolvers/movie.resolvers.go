@@ -27,14 +27,8 @@ func (r *mutationResolver) CreateMovie(ctx context.Context, input model.CreateMo
 }
 
 // UpdateMovie is the resolver for the updateMovie field.
-func (r *mutationResolver) UpdateMovie(ctx context.Context, id string, input model.UpdateMovieInput) (*model.Movie, error) {
-	movieID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse movie id to update it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid movie ID")
-	}
-
-	movie, err := r.MovieService.UpdateMovie(ctx, movieID, input)
+func (r *mutationResolver) UpdateMovie(ctx context.Context, id uuid.UUID, input model.UpdateMovieInput) (*model.Movie, error) {
+	movie, err := r.MovieService.UpdateMovie(ctx, id, input)
 	if err != nil {
 		r.Logger.Error("failed to update movie", slog.Any("error", err))
 		return nil, handleError(err)
@@ -44,14 +38,8 @@ func (r *mutationResolver) UpdateMovie(ctx context.Context, id string, input mod
 }
 
 // DeleteMovie is the resolver for the deleteMovie field.
-func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, error) {
-	movieID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse movie id to delete it", slog.Any("error", err))
-		return false, gqlerror.Errorf("invalid movie ID")
-	}
-
-	err = r.MovieService.DeleteMovie(ctx, movieID)
+func (r *mutationResolver) DeleteMovie(ctx context.Context, id uuid.UUID) (bool, error) {
+	err := r.MovieService.DeleteMovie(ctx, id)
 	if err != nil {
 		r.Logger.Error("failed to delete movie", slog.Any("error", err))
 		return false, handleError(err)
@@ -61,20 +49,14 @@ func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, er
 }
 
 // GetMovie is the resolver for the getMovie field.
-func (r *queryResolver) GetMovie(ctx context.Context, id string) (*model.Movie, error) {
+func (r *queryResolver) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
 		r.Logger.Error("failed to get profile id to get movie")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	movieID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse movie id to get it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid movie ID")
-	}
-
-	movie, err := r.MovieService.GetMovie(ctx, movieID, profileID)
+	movie, err := r.MovieService.GetMovie(ctx, id, profileID)
 	if err != nil {
 		r.Logger.Error("failed to get movie", slog.Any("error", err))
 		return nil, handleError(err)

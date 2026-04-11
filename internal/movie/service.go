@@ -219,7 +219,7 @@ func toGraphQLModel(m sqlc.Movie) *model.Movie {
 	}
 
 	return &model.Movie{
-		ID:              m.ID.String(),
+		ID:              m.ID,
 		Title:           m.Title,
 		Description:     m.Description,
 		DurationMinutes: m.DurationMinutes,

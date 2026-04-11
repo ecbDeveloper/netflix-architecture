@@ -49,19 +49,11 @@ func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReview
 	params.ProfileID = profileID
 
 	if input.MovieID != nil {
-		movieUUID, err := uuid.Parse(*input.MovieID)
-		if err != nil {
-			return nil, &apperror.ValidationError{Field: "movieId", Message: "invalid movie ID"}
-		}
-		params.MovieID = pgtype.UUID{Bytes: movieUUID, Valid: true}
+		params.MovieID = pgtype.UUID{Bytes: *input.MovieID, Valid: true}
 	}
 
 	if input.EpisodeID != nil {
-		episodeUUID, err := uuid.Parse(*input.EpisodeID)
-		if err != nil {
-			return nil, &apperror.ValidationError{Field: "episodeId", Message: "invalid episode ID"}
-		}
-		params.EpisodeID = pgtype.UUID{Bytes: episodeUUID, Valid: true}
+		params.EpisodeID = pgtype.UUID{Bytes: *input.EpisodeID, Valid: true}
 	}
 
 	if input.Comment != nil {
@@ -163,20 +155,20 @@ func (s *ServiceImpl) DeleteReview(ctx context.Context, id uuid.UUID, profileID 
 
 func toGraphQLModel(r sqlc.Review) *model.Review {
 	m := &model.Review{
-		ID:     r.ID.String(),
+		ID:     r.ID,
 		Rating: r.Rating,
 	}
 
 	if r.ProfileID != uuid.Nil {
-		m.ProfileID = r.ProfileID.String()
+		m.ProfileID = r.ProfileID
 	}
 	if r.MovieID.Valid {
-		mid := uuid.UUID(r.MovieID.Bytes).String()
-		m.MovieID = &mid
+		movieID, _ := uuid.Parse(r.MovieID.String())
+		m.MovieID = &movieID
 	}
 	if r.EpisodeID.Valid {
-		eid := uuid.UUID(r.EpisodeID.Bytes).String()
-		m.EpisodeID = &eid
+		episodeID, _ := uuid.Parse(r.EpisodeID.String())
+		m.EpisodeID = &episodeID
 	}
 	if r.Comment.Valid {
 		m.Comment = &r.Comment.String

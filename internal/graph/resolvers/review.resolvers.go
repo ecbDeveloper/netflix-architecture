@@ -33,20 +33,14 @@ func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateR
 }
 
 // UpdateReview is the resolver for the updateReview field.
-func (r *mutationResolver) UpdateReview(ctx context.Context, id string, input model.UpdateReviewInput) (*model.Review, error) {
-	reviewID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse review id to update it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid review ID")
-	}
-
+func (r *mutationResolver) UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput) (*model.Review, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
 		r.Logger.Error("failed to get profile id to update review")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	review, err := r.ReviewService.UpdateReview(ctx, reviewID, input, profileID)
+	review, err := r.ReviewService.UpdateReview(ctx, id, input, profileID)
 	if err != nil {
 		r.Logger.Error("failed to update review", slog.Any("error", err))
 		return nil, handleError(err)
@@ -56,20 +50,14 @@ func (r *mutationResolver) UpdateReview(ctx context.Context, id string, input mo
 }
 
 // DeleteReview is the resolver for the deleteReview field.
-func (r *mutationResolver) DeleteReview(ctx context.Context, id string) (bool, error) {
-	reviewID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse review id to delete it", slog.Any("error", err))
-		return false, gqlerror.Errorf("invalid review ID")
-	}
-
+func (r *mutationResolver) DeleteReview(ctx context.Context, id uuid.UUID) (bool, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
 		r.Logger.Error("failed to get profile id to delete review")
 		return false, gqlerror.Errorf("invalid profile ID")
 	}
 
-	err = r.ReviewService.DeleteReview(ctx, reviewID, profileID)
+	err := r.ReviewService.DeleteReview(ctx, id, profileID)
 	if err != nil {
 		r.Logger.Error("failed to delete review", slog.Any("error", err))
 		return false, handleError(err)
@@ -79,14 +67,8 @@ func (r *mutationResolver) DeleteReview(ctx context.Context, id string) (bool, e
 }
 
 // GetReview is the resolver for the getReview field.
-func (r *queryResolver) GetReview(ctx context.Context, id string) (*model.Review, error) {
-	reviewID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse review id to get it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid review ID")
-	}
-
-	review, err := r.ReviewService.GetReview(ctx, reviewID)
+func (r *queryResolver) GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error) {
+	review, err := r.ReviewService.GetReview(ctx, id)
 	if err != nil {
 		r.Logger.Error("failed to get review", slog.Any("error", err))
 		return nil, handleError(err)

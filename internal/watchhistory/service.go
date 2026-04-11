@@ -48,19 +48,11 @@ func (s *ServiceImpl) CreateWatchHistory(ctx context.Context, input model.Create
 	params.ProfileID = profileID
 
 	if input.MovieID != nil {
-		movieUUID, err := uuid.Parse(*input.MovieID)
-		if err != nil {
-			return nil, &apperror.ValidationError{Field: "movieId", Message: "invalid movie ID"}
-		}
-		params.MovieID = pgtype.UUID{Bytes: movieUUID, Valid: true}
+		params.MovieID = pgtype.UUID{Bytes: *input.MovieID, Valid: true}
 	}
 
 	if input.EpisodeID != nil {
-		episodeUUID, err := uuid.Parse(*input.EpisodeID)
-		if err != nil {
-			return nil, &apperror.ValidationError{Field: "episodeId", Message: "invalid episode ID"}
-		}
-		params.EpisodeID = pgtype.UUID{Bytes: episodeUUID, Valid: true}
+		params.EpisodeID = pgtype.UUID{Bytes: *input.EpisodeID, Valid: true}
 	}
 
 	if input.LastPositionSeconds != nil {
@@ -166,19 +158,19 @@ func (s *ServiceImpl) DeleteWatchHistory(ctx context.Context, id uuid.UUID, prof
 
 func toGraphQLModel(wh sqlc.WatchHistory) *model.WatchHistory {
 	m := &model.WatchHistory{
-		ID: wh.ID.String(),
+		ID: wh.ID,
 	}
 
 	if wh.ProfileID != uuid.Nil {
-		m.ProfileID = wh.ProfileID.String()
+		m.ProfileID = wh.ProfileID
 	}
 	if wh.MovieID.Valid {
-		mid := uuid.UUID(wh.MovieID.Bytes).String()
-		m.MovieID = &mid
+		movieID, _ := uuid.Parse(wh.MovieID.String())
+		m.MovieID = &movieID
 	}
 	if wh.EpisodeID.Valid {
-		eid := uuid.UUID(wh.EpisodeID.Bytes).String()
-		m.EpisodeID = &eid
+		episodeID, _ := uuid.Parse(wh.EpisodeID.String())
+		m.EpisodeID = &episodeID
 	}
 	if wh.WatchedAt.Valid {
 		m.WatchedAt = wh.WatchedAt.Time.String()

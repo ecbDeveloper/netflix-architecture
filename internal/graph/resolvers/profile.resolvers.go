@@ -33,20 +33,14 @@ func (r *mutationResolver) CreateProfile(ctx context.Context, input model.Create
 }
 
 // UpdateProfile is the resolver for the updateProfile field.
-func (r *mutationResolver) UpdateProfile(ctx context.Context, id string, input model.UpdateProfileInput) (*model.Profile, error) {
-	profileID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse profile id to update it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid profile ID")
-	}
-
+func (r *mutationResolver) UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error) {
 	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
 	if !ok {
 		r.Logger.Error("failed to parse user id to update profile")
 		return nil, gqlerror.Errorf("invalid user ID")
 	}
 
-	profile, err := r.ProfileService.UpdateProfile(ctx, profileID, input, userID)
+	profile, err := r.ProfileService.UpdateProfile(ctx, id, input, userID)
 	if err != nil {
 		r.Logger.Error("failed to update profile", slog.Any("error", err))
 		return nil, handleError(err)
@@ -56,20 +50,14 @@ func (r *mutationResolver) UpdateProfile(ctx context.Context, id string, input m
 }
 
 // DeleteProfile is the resolver for the deleteProfile field.
-func (r *mutationResolver) DeleteProfile(ctx context.Context, id string) (bool, error) {
-	profileID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse profile id to delete it", slog.Any("error", err))
-		return false, gqlerror.Errorf("invalid profile ID")
-	}
-
+func (r *mutationResolver) DeleteProfile(ctx context.Context, id uuid.UUID) (bool, error) {
 	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
 	if !ok {
 		r.Logger.Error("failed to parse user id to delete profile")
 		return false, gqlerror.Errorf("invalid user ID")
 	}
 
-	err = r.ProfileService.DeleteProfile(ctx, profileID, userID)
+	err := r.ProfileService.DeleteProfile(ctx, id, userID)
 	if err != nil {
 		r.Logger.Error("failed to delete profile", slog.Any("error", err))
 		return false, handleError(err)
@@ -119,26 +107,20 @@ func (r *queryResolver) ListProfiles(ctx context.Context) ([]*model.Profile, err
 }
 
 // SelectProfile is the resolver for the selectProfile field.
-func (r *mutationResolver) SelectProfile(ctx context.Context, id string) (bool, error) {
-	profileID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse profile id to select it", slog.Any("error", err))
-		return false, gqlerror.Errorf("invalid profile ID")
-	}
-
+func (r *mutationResolver) SelectProfile(ctx context.Context, id uuid.UUID) (bool, error) {
 	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
 	if !ok {
 		r.Logger.Error("failed to parse user id to select profile")
 		return false, gqlerror.Errorf("invalid user ID")
 	}
 
-	_, err = r.ProfileService.GetProfile(ctx, profileID, userID)
+	_, err := r.ProfileService.GetProfile(ctx, id, userID)
 	if err != nil {
 		r.Logger.Error("failed to select profile", slog.Any("error", err))
 		return false, handleError(err)
 	}
 
-	r.Sessions.Put(ctx, shared.SessionProfileIDKey, profileID)
+	r.Sessions.Put(ctx, shared.SessionProfileIDKey, id)
 
 	return true, nil
 }

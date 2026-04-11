@@ -27,19 +27,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 }
 
 // UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input model.UpdateUserInput) (*model.User, error) {
-	userID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse user id to update it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid user ID")
-	}
-
+func (r *mutationResolver) UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error) {
 	sessionUserID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
-	if !ok || sessionUserID != userID {
+	if !ok || sessionUserID != id {
 		return nil, gqlerror.Errorf("access denied")
 	}
 
-	user, err := r.UserService.UpdateUser(ctx, userID, input)
+	user, err := r.UserService.UpdateUser(ctx, id, input)
 	if err != nil {
 		r.Logger.Error("failed to update user", slog.Any("error", err))
 		return nil, handleError(err)
@@ -49,19 +43,13 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 }
 
 // DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, error) {
-	userID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse user id to delete it", slog.Any("error", err))
-		return false, gqlerror.Errorf("invalid user ID")
-	}
-
+func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, error) {
 	sessionUserID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
-	if !ok || sessionUserID != userID {
+	if !ok || sessionUserID != id {
 		return false, gqlerror.Errorf("access denied")
 	}
 
-	err = r.UserService.DeleteUser(ctx, userID)
+	err := r.UserService.DeleteUser(ctx, id)
 	if err != nil {
 		r.Logger.Error("failed to delete user", slog.Any("error", err))
 		return false, handleError(err)
@@ -71,19 +59,13 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 }
 
 // GetUser is the resolver for the getUser field.
-func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.User, error) {
-	userID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse user id to get it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid user ID")
-	}
-
+func (r *queryResolver) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
 	sessionUserID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
-	if !ok || sessionUserID != userID {
+	if !ok || sessionUserID != id {
 		return nil, gqlerror.Errorf("access denied")
 	}
 
-	user, err := r.UserService.GetUser(ctx, userID)
+	user, err := r.UserService.GetUser(ctx, id)
 	if err != nil {
 		r.Logger.Error("failed to get user", slog.Any("error", err))
 		return nil, handleError(err)

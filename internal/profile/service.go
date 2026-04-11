@@ -152,14 +152,9 @@ func (s *ServiceImpl) DeleteProfile(ctx context.Context, id uuid.UUID, userID uu
 }
 
 func toGraphQLModel(p sqlc.Profile) *model.Profile {
-	userIDStr := ""
-	if p.UserID != uuid.Nil {
-		userIDStr = p.UserID.String()
-	}
-
 	return &model.Profile{
-		ID:                  p.ID.String(),
-		UserID:              userIDStr,
+		ID:                  p.ID,
+		UserID:              p.UserID,
 		Name:                p.Name,
 		HasParentalControls: p.HasParentalControls,
 		CreatedAt:           p.CreatedAt.String(),

@@ -47,14 +47,9 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 
 	episodeID := uuid.New()
 
-	seriesID, err := uuid.Parse(input.SeriesID)
-	if err != nil {
-		return nil, &apperror.ValidationError{Field: "seriesId", Message: "invalid series id"}
-	}
-
 	ep, err := s.queries.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
 		ID:              episodeID,
-		SeriesID:        seriesID,
+		SeriesID:        input.SeriesID,
 		Season:          input.Season,
 		EpisodeNumber:   input.EpisodeNumber,
 		Title:           input.Title,
@@ -202,8 +197,8 @@ func (s *ServiceImpl) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
 
 func toGraphQLModel(e sqlc.Episode) *model.Episode {
 	return &model.Episode{
-		ID:              e.ID.String(),
-		SeriesID:        e.SeriesID.String(),
+		ID:              e.ID,
+		SeriesID:        e.SeriesID,
 		Season:          e.Season,
 		EpisodeNumber:   e.EpisodeNumber,
 		Title:           e.Title,

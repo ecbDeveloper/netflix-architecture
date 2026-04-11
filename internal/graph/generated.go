@@ -14,6 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/google/uuid"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -75,23 +76,23 @@ type ComplexityRoot struct {
 		CreateSeries       func(childComplexity int, input model.CreateSeriesInput) int
 		CreateUser         func(childComplexity int, input model.CreateUserInput) int
 		CreateWatchHistory func(childComplexity int, input model.CreateWatchHistoryInput) int
-		DeleteEpisode      func(childComplexity int, id string) int
-		DeleteMovie        func(childComplexity int, id string) int
-		DeleteProfile      func(childComplexity int, id string) int
-		DeleteReview       func(childComplexity int, id string) int
-		DeleteSeries       func(childComplexity int, id string) int
-		DeleteUser         func(childComplexity int, id string) int
-		DeleteWatchHistory func(childComplexity int, id string) int
+		DeleteEpisode      func(childComplexity int, id uuid.UUID) int
+		DeleteMovie        func(childComplexity int, id uuid.UUID) int
+		DeleteProfile      func(childComplexity int, id uuid.UUID) int
+		DeleteReview       func(childComplexity int, id uuid.UUID) int
+		DeleteSeries       func(childComplexity int, id uuid.UUID) int
+		DeleteUser         func(childComplexity int, id uuid.UUID) int
+		DeleteWatchHistory func(childComplexity int, id uuid.UUID) int
 		Login              func(childComplexity int, input *model.LoginInput) int
 		Logout             func(childComplexity int) int
-		SelectProfile      func(childComplexity int, id string) int
-		UpdateEpisode      func(childComplexity int, id string, input model.UpdateEpisodeInput) int
-		UpdateMovie        func(childComplexity int, id string, input model.UpdateMovieInput) int
-		UpdateProfile      func(childComplexity int, id string, input model.UpdateProfileInput) int
-		UpdateReview       func(childComplexity int, id string, input model.UpdateReviewInput) int
-		UpdateSeries       func(childComplexity int, id string, input model.UpdateSeriesInput) int
-		UpdateUser         func(childComplexity int, id string, input model.UpdateUserInput) int
-		UpdateWatchHistory func(childComplexity int, id string, input model.UpdateWatchHistoryInput) int
+		SelectProfile      func(childComplexity int, id uuid.UUID) int
+		UpdateEpisode      func(childComplexity int, id uuid.UUID, input model.UpdateEpisodeInput) int
+		UpdateMovie        func(childComplexity int, id uuid.UUID, input model.UpdateMovieInput) int
+		UpdateProfile      func(childComplexity int, id uuid.UUID, input model.UpdateProfileInput) int
+		UpdateReview       func(childComplexity int, id uuid.UUID, input model.UpdateReviewInput) int
+		UpdateSeries       func(childComplexity int, id uuid.UUID, input model.UpdateSeriesInput) int
+		UpdateUser         func(childComplexity int, id uuid.UUID, input model.UpdateUserInput) int
+		UpdateWatchHistory func(childComplexity int, id uuid.UUID, input model.UpdateWatchHistoryInput) int
 	}
 
 	Profile struct {
@@ -106,14 +107,14 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetEpisode         func(childComplexity int, id string) int
-		GetMovie           func(childComplexity int, id string) int
+		GetEpisode         func(childComplexity int, id uuid.UUID) int
+		GetMovie           func(childComplexity int, id uuid.UUID) int
 		GetProfile         func(childComplexity int) int
-		GetReview          func(childComplexity int, id string) int
-		GetSeries          func(childComplexity int, id string) int
-		GetUser            func(childComplexity int, id string) int
-		GetWatchHistory    func(childComplexity int, id string) int
-		ListEpisodes       func(childComplexity int, seriesID string) int
+		GetReview          func(childComplexity int, id uuid.UUID) int
+		GetSeries          func(childComplexity int, id uuid.UUID) int
+		GetUser            func(childComplexity int, id uuid.UUID) int
+		GetWatchHistory    func(childComplexity int, id uuid.UUID) int
+		ListEpisodes       func(childComplexity int, seriesID uuid.UUID) int
 		ListMovies         func(childComplexity int) int
 		ListProfiles       func(childComplexity int) int
 		ListReviews        func(childComplexity int) int
@@ -169,42 +170,42 @@ type MutationResolver interface {
 	Login(ctx context.Context, input *model.LoginInput) (string, error)
 	Logout(ctx context.Context) (string, error)
 	CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error)
-	UpdateEpisode(ctx context.Context, id string, input model.UpdateEpisodeInput) (*model.Episode, error)
-	DeleteEpisode(ctx context.Context, id string) (bool, error)
+	UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error)
+	DeleteEpisode(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error)
-	UpdateMovie(ctx context.Context, id string, input model.UpdateMovieInput) (*model.Movie, error)
-	DeleteMovie(ctx context.Context, id string) (bool, error)
+	UpdateMovie(ctx context.Context, id uuid.UUID, input model.UpdateMovieInput) (*model.Movie, error)
+	DeleteMovie(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error)
-	UpdateProfile(ctx context.Context, id string, input model.UpdateProfileInput) (*model.Profile, error)
-	DeleteProfile(ctx context.Context, id string) (bool, error)
-	SelectProfile(ctx context.Context, id string) (bool, error)
+	UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error)
+	DeleteProfile(ctx context.Context, id uuid.UUID) (bool, error)
+	SelectProfile(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error)
-	UpdateReview(ctx context.Context, id string, input model.UpdateReviewInput) (*model.Review, error)
-	DeleteReview(ctx context.Context, id string) (bool, error)
+	UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput) (*model.Review, error)
+	DeleteReview(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateSeries(ctx context.Context, input model.CreateSeriesInput) (*model.Series, error)
-	UpdateSeries(ctx context.Context, id string, input model.UpdateSeriesInput) (*model.Series, error)
-	DeleteSeries(ctx context.Context, id string) (bool, error)
+	UpdateSeries(ctx context.Context, id uuid.UUID, input model.UpdateSeriesInput) (*model.Series, error)
+	DeleteSeries(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error)
-	UpdateUser(ctx context.Context, id string, input model.UpdateUserInput) (*model.User, error)
-	DeleteUser(ctx context.Context, id string) (bool, error)
+	UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error)
+	DeleteUser(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error)
-	UpdateWatchHistory(ctx context.Context, id string, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error)
-	DeleteWatchHistory(ctx context.Context, id string) (bool, error)
+	UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error)
+	DeleteWatchHistory(ctx context.Context, id uuid.UUID) (bool, error)
 }
 type QueryResolver interface {
-	GetEpisode(ctx context.Context, id string) (*model.Episode, error)
-	ListEpisodes(ctx context.Context, seriesID string) ([]*model.Episode, error)
-	GetMovie(ctx context.Context, id string) (*model.Movie, error)
+	GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error)
+	ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([]*model.Episode, error)
+	GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error)
 	ListMovies(ctx context.Context) ([]*model.Movie, error)
 	GetProfile(ctx context.Context) (*model.Profile, error)
 	ListProfiles(ctx context.Context) ([]*model.Profile, error)
-	GetReview(ctx context.Context, id string) (*model.Review, error)
+	GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error)
 	ListReviews(ctx context.Context) ([]*model.Review, error)
-	GetSeries(ctx context.Context, id string) (*model.Series, error)
+	GetSeries(ctx context.Context, id uuid.UUID) (*model.Series, error)
 	ListSeries(ctx context.Context) ([]*model.Series, error)
-	GetUser(ctx context.Context, id string) (*model.User, error)
+	GetUser(ctx context.Context, id uuid.UUID) (*model.User, error)
 	ListUsers(ctx context.Context) ([]*model.User, error)
-	GetWatchHistory(ctx context.Context, id string) (*model.WatchHistory, error)
+	GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error)
 	ListWatchHistories(ctx context.Context) ([]*model.WatchHistory, error)
 }
 
@@ -426,7 +427,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.DeleteEpisode(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Mutation.DeleteEpisode(childComplexity, args["id"].(uuid.UUID)), true
 	case "Mutation.deleteMovie":
 		if e.ComplexityRoot.Mutation.DeleteMovie == nil {
 			break
@@ -437,7 +438,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.DeleteMovie(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Mutation.DeleteMovie(childComplexity, args["id"].(uuid.UUID)), true
 	case "Mutation.deleteProfile":
 		if e.ComplexityRoot.Mutation.DeleteProfile == nil {
 			break
@@ -448,7 +449,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.DeleteProfile(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Mutation.DeleteProfile(childComplexity, args["id"].(uuid.UUID)), true
 	case "Mutation.deleteReview":
 		if e.ComplexityRoot.Mutation.DeleteReview == nil {
 			break
@@ -459,7 +460,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.DeleteReview(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Mutation.DeleteReview(childComplexity, args["id"].(uuid.UUID)), true
 	case "Mutation.deleteSeries":
 		if e.ComplexityRoot.Mutation.DeleteSeries == nil {
 			break
@@ -470,7 +471,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.DeleteSeries(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Mutation.DeleteSeries(childComplexity, args["id"].(uuid.UUID)), true
 	case "Mutation.deleteUser":
 		if e.ComplexityRoot.Mutation.DeleteUser == nil {
 			break
@@ -481,7 +482,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.DeleteUser(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Mutation.DeleteUser(childComplexity, args["id"].(uuid.UUID)), true
 	case "Mutation.deleteWatchHistory":
 		if e.ComplexityRoot.Mutation.DeleteWatchHistory == nil {
 			break
@@ -492,7 +493,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.DeleteWatchHistory(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Mutation.DeleteWatchHistory(childComplexity, args["id"].(uuid.UUID)), true
 	case "Mutation.login":
 		if e.ComplexityRoot.Mutation.Login == nil {
 			break
@@ -520,7 +521,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.SelectProfile(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Mutation.SelectProfile(childComplexity, args["id"].(uuid.UUID)), true
 	case "Mutation.updateEpisode":
 		if e.ComplexityRoot.Mutation.UpdateEpisode == nil {
 			break
@@ -531,7 +532,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateEpisode(childComplexity, args["id"].(string), args["input"].(model.UpdateEpisodeInput)), true
+		return e.ComplexityRoot.Mutation.UpdateEpisode(childComplexity, args["id"].(uuid.UUID), args["input"].(model.UpdateEpisodeInput)), true
 	case "Mutation.updateMovie":
 		if e.ComplexityRoot.Mutation.UpdateMovie == nil {
 			break
@@ -542,7 +543,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateMovie(childComplexity, args["id"].(string), args["input"].(model.UpdateMovieInput)), true
+		return e.ComplexityRoot.Mutation.UpdateMovie(childComplexity, args["id"].(uuid.UUID), args["input"].(model.UpdateMovieInput)), true
 	case "Mutation.updateProfile":
 		if e.ComplexityRoot.Mutation.UpdateProfile == nil {
 			break
@@ -553,7 +554,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateProfile(childComplexity, args["id"].(string), args["input"].(model.UpdateProfileInput)), true
+		return e.ComplexityRoot.Mutation.UpdateProfile(childComplexity, args["id"].(uuid.UUID), args["input"].(model.UpdateProfileInput)), true
 	case "Mutation.updateReview":
 		if e.ComplexityRoot.Mutation.UpdateReview == nil {
 			break
@@ -564,7 +565,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateReview(childComplexity, args["id"].(string), args["input"].(model.UpdateReviewInput)), true
+		return e.ComplexityRoot.Mutation.UpdateReview(childComplexity, args["id"].(uuid.UUID), args["input"].(model.UpdateReviewInput)), true
 	case "Mutation.updateSeries":
 		if e.ComplexityRoot.Mutation.UpdateSeries == nil {
 			break
@@ -575,7 +576,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateSeries(childComplexity, args["id"].(string), args["input"].(model.UpdateSeriesInput)), true
+		return e.ComplexityRoot.Mutation.UpdateSeries(childComplexity, args["id"].(uuid.UUID), args["input"].(model.UpdateSeriesInput)), true
 	case "Mutation.updateUser":
 		if e.ComplexityRoot.Mutation.UpdateUser == nil {
 			break
@@ -586,7 +587,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateUser(childComplexity, args["id"].(string), args["input"].(model.UpdateUserInput)), true
+		return e.ComplexityRoot.Mutation.UpdateUser(childComplexity, args["id"].(uuid.UUID), args["input"].(model.UpdateUserInput)), true
 	case "Mutation.updateWatchHistory":
 		if e.ComplexityRoot.Mutation.UpdateWatchHistory == nil {
 			break
@@ -597,7 +598,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateWatchHistory(childComplexity, args["id"].(string), args["input"].(model.UpdateWatchHistoryInput)), true
+		return e.ComplexityRoot.Mutation.UpdateWatchHistory(childComplexity, args["id"].(uuid.UUID), args["input"].(model.UpdateWatchHistoryInput)), true
 
 	case "Profile.createdAt":
 		if e.ComplexityRoot.Profile.CreatedAt == nil {
@@ -658,7 +659,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.GetEpisode(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetEpisode(childComplexity, args["id"].(uuid.UUID)), true
 	case "Query.getMovie":
 		if e.ComplexityRoot.Query.GetMovie == nil {
 			break
@@ -669,7 +670,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.GetMovie(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetMovie(childComplexity, args["id"].(uuid.UUID)), true
 	case "Query.getProfile":
 		if e.ComplexityRoot.Query.GetProfile == nil {
 			break
@@ -686,7 +687,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.GetReview(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetReview(childComplexity, args["id"].(uuid.UUID)), true
 	case "Query.getSeries":
 		if e.ComplexityRoot.Query.GetSeries == nil {
 			break
@@ -697,7 +698,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.GetSeries(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetSeries(childComplexity, args["id"].(uuid.UUID)), true
 	case "Query.getUser":
 		if e.ComplexityRoot.Query.GetUser == nil {
 			break
@@ -708,7 +709,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.GetUser(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetUser(childComplexity, args["id"].(uuid.UUID)), true
 	case "Query.getWatchHistory":
 		if e.ComplexityRoot.Query.GetWatchHistory == nil {
 			break
@@ -719,7 +720,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.GetWatchHistory(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetWatchHistory(childComplexity, args["id"].(uuid.UUID)), true
 
 	case "Query.listEpisodes":
 		if e.ComplexityRoot.Query.ListEpisodes == nil {
@@ -731,7 +732,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.ListEpisodes(childComplexity, args["seriesId"].(string)), true
+		return e.ComplexityRoot.Query.ListEpisodes(childComplexity, args["seriesId"].(uuid.UUID)), true
 	case "Query.listMovies":
 		if e.ComplexityRoot.Query.ListMovies == nil {
 			break
@@ -1169,7 +1170,7 @@ func (ec *executionContext) field_Mutation_createWatchHistory_args(ctx context.C
 func (ec *executionContext) field_Mutation_deleteEpisode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1180,7 +1181,7 @@ func (ec *executionContext) field_Mutation_deleteEpisode_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_deleteMovie_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1191,7 +1192,7 @@ func (ec *executionContext) field_Mutation_deleteMovie_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_deleteProfile_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1202,7 +1203,7 @@ func (ec *executionContext) field_Mutation_deleteProfile_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_deleteReview_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1213,7 +1214,7 @@ func (ec *executionContext) field_Mutation_deleteReview_args(ctx context.Context
 func (ec *executionContext) field_Mutation_deleteSeries_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1224,7 +1225,7 @@ func (ec *executionContext) field_Mutation_deleteSeries_args(ctx context.Context
 func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1235,7 +1236,7 @@ func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deleteWatchHistory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1257,7 +1258,7 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Mutation_selectProfile_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1268,7 +1269,7 @@ func (ec *executionContext) field_Mutation_selectProfile_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_updateEpisode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1284,7 +1285,7 @@ func (ec *executionContext) field_Mutation_updateEpisode_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_updateMovie_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1300,7 +1301,7 @@ func (ec *executionContext) field_Mutation_updateMovie_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_updateProfile_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1316,7 +1317,7 @@ func (ec *executionContext) field_Mutation_updateProfile_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_updateReview_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1332,7 +1333,7 @@ func (ec *executionContext) field_Mutation_updateReview_args(ctx context.Context
 func (ec *executionContext) field_Mutation_updateSeries_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1348,7 +1349,7 @@ func (ec *executionContext) field_Mutation_updateSeries_args(ctx context.Context
 func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1364,7 +1365,7 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateWatchHistory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1391,7 +1392,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_getEpisode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1402,7 +1403,7 @@ func (ec *executionContext) field_Query_getEpisode_args(ctx context.Context, raw
 func (ec *executionContext) field_Query_getMovie_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1413,7 +1414,7 @@ func (ec *executionContext) field_Query_getMovie_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_getReview_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1424,7 +1425,7 @@ func (ec *executionContext) field_Query_getReview_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_getSeries_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1435,7 +1436,7 @@ func (ec *executionContext) field_Query_getSeries_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_getUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1446,7 +1447,7 @@ func (ec *executionContext) field_Query_getUser_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Query_getWatchHistory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1457,7 +1458,7 @@ func (ec *executionContext) field_Query_getWatchHistory_args(ctx context.Context
 func (ec *executionContext) field_Query_listEpisodes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "seriesId", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "seriesId", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -1585,7 +1586,7 @@ func (ec *executionContext) _Episode_id(ctx context.Context, field graphql.Colle
 			return obj.ID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -1614,7 +1615,7 @@ func (ec *executionContext) _Episode_seriesId(ctx context.Context, field graphql
 			return obj.SeriesID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -1835,7 +1836,7 @@ func (ec *executionContext) _Movie_id(ctx context.Context, field graphql.Collect
 			return obj.ID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -2279,7 +2280,7 @@ func (ec *executionContext) _Mutation_updateEpisode(ctx context.Context, field g
 		ec.fieldContext_Mutation_updateEpisode,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateEpisode(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateEpisodeInput))
+			return ec.Resolvers.Mutation().UpdateEpisode(ctx, fc.Args["id"].(uuid.UUID), fc.Args["input"].(model.UpdateEpisodeInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -2363,7 +2364,7 @@ func (ec *executionContext) _Mutation_deleteEpisode(ctx context.Context, field g
 		ec.fieldContext_Mutation_deleteEpisode,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().DeleteEpisode(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Mutation().DeleteEpisode(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -2515,7 +2516,7 @@ func (ec *executionContext) _Mutation_updateMovie(ctx context.Context, field gra
 		ec.fieldContext_Mutation_updateMovie,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateMovie(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateMovieInput))
+			return ec.Resolvers.Mutation().UpdateMovie(ctx, fc.Args["id"].(uuid.UUID), fc.Args["input"].(model.UpdateMovieInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -2601,7 +2602,7 @@ func (ec *executionContext) _Mutation_deleteMovie(ctx context.Context, field gra
 		ec.fieldContext_Mutation_deleteMovie,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().DeleteMovie(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Mutation().DeleteMovie(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -2751,7 +2752,7 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 		ec.fieldContext_Mutation_updateProfile,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateProfile(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateProfileInput))
+			return ec.Resolvers.Mutation().UpdateProfile(ctx, fc.Args["id"].(uuid.UUID), fc.Args["input"].(model.UpdateProfileInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -2835,7 +2836,7 @@ func (ec *executionContext) _Mutation_deleteProfile(ctx context.Context, field g
 		ec.fieldContext_Mutation_deleteProfile,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().DeleteProfile(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Mutation().DeleteProfile(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -2901,7 +2902,7 @@ func (ec *executionContext) _Mutation_selectProfile(ctx context.Context, field g
 		ec.fieldContext_Mutation_selectProfile,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().SelectProfile(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Mutation().SelectProfile(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -3046,7 +3047,7 @@ func (ec *executionContext) _Mutation_updateReview(ctx context.Context, field gr
 		ec.fieldContext_Mutation_updateReview,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateReview(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateReviewInput))
+			return ec.Resolvers.Mutation().UpdateReview(ctx, fc.Args["id"].(uuid.UUID), fc.Args["input"].(model.UpdateReviewInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -3137,7 +3138,7 @@ func (ec *executionContext) _Mutation_deleteReview(ctx context.Context, field gr
 		ec.fieldContext_Mutation_deleteReview,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().DeleteReview(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Mutation().DeleteReview(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -3292,7 +3293,7 @@ func (ec *executionContext) _Mutation_updateSeries(ctx context.Context, field gr
 		ec.fieldContext_Mutation_updateSeries,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateSeries(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateSeriesInput))
+			return ec.Resolvers.Mutation().UpdateSeries(ctx, fc.Args["id"].(uuid.UUID), fc.Args["input"].(model.UpdateSeriesInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -3374,7 +3375,7 @@ func (ec *executionContext) _Mutation_deleteSeries(ctx context.Context, field gr
 		ec.fieldContext_Mutation_deleteSeries,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().DeleteSeries(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Mutation().DeleteSeries(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -3499,7 +3500,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 		ec.fieldContext_Mutation_updateUser,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateUser(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateUserInput))
+			return ec.Resolvers.Mutation().UpdateUser(ctx, fc.Args["id"].(uuid.UUID), fc.Args["input"].(model.UpdateUserInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -3571,7 +3572,7 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 		ec.fieldContext_Mutation_deleteUser,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().DeleteUser(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Mutation().DeleteUser(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -3714,7 +3715,7 @@ func (ec *executionContext) _Mutation_updateWatchHistory(ctx context.Context, fi
 		ec.fieldContext_Mutation_updateWatchHistory,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateWatchHistory(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateWatchHistoryInput))
+			return ec.Resolvers.Mutation().UpdateWatchHistory(ctx, fc.Args["id"].(uuid.UUID), fc.Args["input"].(model.UpdateWatchHistoryInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -3803,7 +3804,7 @@ func (ec *executionContext) _Mutation_deleteWatchHistory(ctx context.Context, fi
 		ec.fieldContext_Mutation_deleteWatchHistory,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().DeleteWatchHistory(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Mutation().DeleteWatchHistory(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -3878,7 +3879,7 @@ func (ec *executionContext) _Profile_id(ctx context.Context, field graphql.Colle
 			return obj.ID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -3907,7 +3908,7 @@ func (ec *executionContext) _Profile_userId(ctx context.Context, field graphql.C
 			return obj.UserID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -4142,7 +4143,7 @@ func (ec *executionContext) _Query_getEpisode(ctx context.Context, field graphql
 		ec.fieldContext_Query_getEpisode,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().GetEpisode(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetEpisode(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -4221,7 +4222,7 @@ func (ec *executionContext) _Query_listEpisodes(ctx context.Context, field graph
 		ec.fieldContext_Query_listEpisodes,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().ListEpisodes(ctx, fc.Args["seriesId"].(string))
+			return ec.Resolvers.Query().ListEpisodes(ctx, fc.Args["seriesId"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -4300,7 +4301,7 @@ func (ec *executionContext) _Query_getMovie(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_getMovie,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().GetMovie(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetMovie(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -4582,7 +4583,7 @@ func (ec *executionContext) _Query_getReview(ctx context.Context, field graphql.
 		ec.fieldContext_Query_getReview,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().GetReview(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetReview(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -4728,7 +4729,7 @@ func (ec *executionContext) _Query_getSeries(ctx context.Context, field graphql.
 		ec.fieldContext_Query_getSeries,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().GetSeries(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetSeries(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -4870,7 +4871,7 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 		ec.fieldContext_Query_getUser,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().GetUser(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetUser(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -5014,7 +5015,7 @@ func (ec *executionContext) _Query_getWatchHistory(ctx context.Context, field gr
 		ec.fieldContext_Query_getWatchHistory,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().GetWatchHistory(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetWatchHistory(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -5252,7 +5253,7 @@ func (ec *executionContext) _Review_id(ctx context.Context, field graphql.Collec
 			return obj.ID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -5281,7 +5282,7 @@ func (ec *executionContext) _Review_profileId(ctx context.Context, field graphql
 			return obj.ProfileID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -5310,7 +5311,7 @@ func (ec *executionContext) _Review_movieId(ctx context.Context, field graphql.C
 			return obj.MovieID, nil
 		},
 		nil,
-		ec.marshalOID2ᚖstring,
+		ec.marshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		false,
 	)
@@ -5339,7 +5340,7 @@ func (ec *executionContext) _Review_episodeId(ctx context.Context, field graphql
 			return obj.EpisodeID, nil
 		},
 		nil,
-		ec.marshalOID2ᚖstring,
+		ec.marshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		false,
 	)
@@ -5484,7 +5485,7 @@ func (ec *executionContext) _Series_id(ctx context.Context, field graphql.Collec
 			return obj.ID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -5705,7 +5706,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 			return obj.ID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -5955,7 +5956,7 @@ func (ec *executionContext) _WatchHistory_id(ctx context.Context, field graphql.
 			return obj.ID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -5984,7 +5985,7 @@ func (ec *executionContext) _WatchHistory_profileId(ctx context.Context, field g
 			return obj.ProfileID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -6013,7 +6014,7 @@ func (ec *executionContext) _WatchHistory_movieId(ctx context.Context, field gra
 			return obj.MovieID, nil
 		},
 		nil,
-		ec.marshalOID2ᚖstring,
+		ec.marshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		false,
 	)
@@ -6042,7 +6043,7 @@ func (ec *executionContext) _WatchHistory_episodeId(ctx context.Context, field g
 			return obj.EpisodeID, nil
 		},
 		nil,
-		ec.marshalOID2ᚖstring,
+		ec.marshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		false,
 	)
@@ -7614,7 +7615,7 @@ func (ec *executionContext) unmarshalInputCreateEpisodeInput(ctx context.Context
 		switch k {
 		case "seriesId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("seriesId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
+			data, err := ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7781,14 +7782,14 @@ func (ec *executionContext) unmarshalInputCreateReviewInput(ctx context.Context,
 		switch k {
 		case "movieId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("movieId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.MovieID = data
 		case "episodeId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("episodeId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7941,14 +7942,14 @@ func (ec *executionContext) unmarshalInputCreateWatchHistoryInput(ctx context.Co
 		switch k {
 		case "movieId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("movieId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.MovieID = data
 		case "episodeId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("episodeId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8189,7 +8190,7 @@ func (ec *executionContext) unmarshalInputUpdateReviewInput(ctx context.Context,
 		switch k {
 		case "id":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
+			data, err := ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8335,7 +8336,7 @@ func (ec *executionContext) unmarshalInputUpdateWatchHistoryInput(ctx context.Co
 		switch k {
 		case "id":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
+			data, err := ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9866,14 +9867,14 @@ func (ec *executionContext) marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnet
 	return ec._Episode(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
-	res, err := graphql.UnmarshalID(v)
+func (ec *executionContext) unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, v any) (uuid.UUID, error) {
+	res, err := graphql.UnmarshalUUID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+func (ec *executionContext) marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, sel ast.SelectionSet, v uuid.UUID) graphql.Marshaler {
 	_ = sel
-	res := graphql.MarshalID(v)
+	res := graphql.MarshalUUID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -10327,21 +10328,21 @@ func (ec *executionContext) marshalOEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnet
 	return ec._Episode(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
+func (ec *executionContext) unmarshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, v any) (*uuid.UUID, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := graphql.UnmarshalID(v)
+	res, err := graphql.UnmarshalUUID(v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+func (ec *executionContext) marshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, sel ast.SelectionSet, v *uuid.UUID) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	_ = sel
 	_ = ctx
-	res := graphql.MarshalID(*v)
+	res := graphql.MarshalUUID(*v)
 	return res
 }
 

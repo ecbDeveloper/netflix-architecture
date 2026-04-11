@@ -27,14 +27,8 @@ func (r *mutationResolver) CreateSeries(ctx context.Context, input model.CreateS
 }
 
 // UpdateSeries is the resolver for the updateSeries field.
-func (r *mutationResolver) UpdateSeries(ctx context.Context, id string, input model.UpdateSeriesInput) (*model.Series, error) {
-	seriesID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse series id to update it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid series ID")
-	}
-
-	s, err := r.SeriesService.UpdateSeries(ctx, seriesID, input)
+func (r *mutationResolver) UpdateSeries(ctx context.Context, id uuid.UUID, input model.UpdateSeriesInput) (*model.Series, error) {
+	s, err := r.SeriesService.UpdateSeries(ctx, id, input)
 	if err != nil {
 		r.Logger.Error("failed to update series", slog.Any("error", err))
 		return nil, handleError(err)
@@ -44,14 +38,8 @@ func (r *mutationResolver) UpdateSeries(ctx context.Context, id string, input mo
 }
 
 // DeleteSeries is the resolver for the deleteSeries field.
-func (r *mutationResolver) DeleteSeries(ctx context.Context, id string) (bool, error) {
-	seriesID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse series id to delete it", slog.Any("error", err))
-		return false, gqlerror.Errorf("invalid series ID")
-	}
-
-	err = r.SeriesService.DeleteSeries(ctx, seriesID)
+func (r *mutationResolver) DeleteSeries(ctx context.Context, id uuid.UUID) (bool, error) {
+	err := r.SeriesService.DeleteSeries(ctx, id)
 	if err != nil {
 		r.Logger.Error("failed to delete series", slog.Any("error", err))
 		return false, handleError(err)
@@ -61,19 +49,14 @@ func (r *mutationResolver) DeleteSeries(ctx context.Context, id string) (bool, e
 }
 
 // GetSeries is the resolver for the getSeries field.
-func (r *queryResolver) GetSeries(ctx context.Context, id string) (*model.Series, error) {
+func (r *queryResolver) GetSeries(ctx context.Context, id uuid.UUID) (*model.Series, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
 		r.Logger.Error("failed to get profile id to get series")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
-	seriesID, err := uuid.Parse(id)
-	if err != nil {
-		r.Logger.Error("failed to parse series id to get it", slog.Any("error", err))
-		return nil, gqlerror.Errorf("invalid series ID")
-	}
 
-	s, err := r.SeriesService.GetSeries(ctx, seriesID, profileID)
+	s, err := r.SeriesService.GetSeries(ctx, id, profileID)
 	if err != nil {
 		r.Logger.Error("failed to get series", slog.Any("error", err))
 		return nil, handleError(err)

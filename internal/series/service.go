@@ -190,7 +190,7 @@ func (s *ServiceImpl) DeleteSeries(ctx context.Context, id uuid.UUID) error {
 
 func toGraphQLModel(s sqlc.Series) *model.Series {
 	m := &model.Series{
-		ID:             s.ID.String(),
+		ID:             s.ID,
 		Title:          s.Title,
 		Description:    s.Description,
 		MaturityRating: model.MaturityRating(s.MaturityRating),
