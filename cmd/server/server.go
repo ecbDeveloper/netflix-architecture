@@ -43,15 +43,9 @@ func init() {
 	gob.Register(uuid.UUID{})
 }
 
-const (
-	defaultPort        = "8080"
-	dbRoleAdmin  int32 = 1
-	dbRoleMember int32 = 2
-)
-
 var userRoleOnDB = map[model.UserRole]int32{
-	model.UserRoleAdmin:  dbRoleAdmin,
-	model.UserRoleMember: dbRoleMember,
+	model.UserRoleAdmin:  shared.DBRoleAdmin,
+	model.UserRoleMember: shared.DBRoleMember,
 }
 
 func main() {
