@@ -85,7 +85,7 @@ func (r *queryResolver) ListReviews(ctx context.Context) ([]*model.Review, error
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	reviews, err := r.ReviewService.ListReviews(ctx, profileID)
+	reviews, err := r.ReviewService.ListReviewsByProfile(ctx, profileID)
 	if err != nil {
 		r.Logger.Error("failed to list reviews", slog.Any("error", err))
 		return nil, handleError(err)

@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
@@ -19,7 +18,13 @@ import (
 
 // Reviews is the resolver for the reviews field.
 func (r *movieResolver) Reviews(ctx context.Context, obj *model.Movie) ([]*model.Review, error) {
-	panic(fmt.Errorf("not implemented: Reviews - reviews"))
+	reviews, err := r.ReviewService.ListReviewsByMovie(ctx, obj.ID)
+	if err != nil {
+		r.Logger.Error("failed to list reviews", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	return reviews, nil
 }
 
 // CreateMovie is the resolver for the createMovie field.

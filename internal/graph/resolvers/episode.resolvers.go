@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
@@ -19,7 +18,13 @@ import (
 
 // Reviews is the resolver for the reviews field.
 func (r *episodeResolver) Reviews(ctx context.Context, obj *model.Episode) ([]*model.Review, error) {
-	panic(fmt.Errorf("not implemented: Reviews - reviews"))
+	reviews, err := r.ReviewService.ListReviewsByEpisode(ctx, obj.ID)
+	if err != nil {
+		r.Logger.Error("failed to list reviews", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	return reviews, nil
 }
 
 // CreateEpisode is the resolver for the createEpisode field.
@@ -80,7 +85,7 @@ func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	episodes, err := r.EpisodeService.ListEpisodes(ctx, seriesID, profileID)
+	episodes, err := r.EpisodeService.ListEpisodesBySeries(ctx, seriesID, profileID)
 	if err != nil {
 		r.Logger.Error("failed to list all episodes from a series", slog.Any("error", err))
 		return nil, handleError(err)

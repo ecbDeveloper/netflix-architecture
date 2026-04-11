@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
@@ -16,6 +15,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+// Profiles is the resolver for the profiles field.
+func (r *userResolver) Profiles(ctx context.Context, obj *model.User) ([]*model.Profile, error) {
+	profiles, err := r.ProfileService.ListProfilesByUser(ctx, obj.ID)
+	if err != nil {
+		r.Logger.Error("failed to list profiles", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	return profiles, nil
+}
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
@@ -85,11 +95,6 @@ func (r *queryResolver) ListUsers(ctx context.Context) ([]*model.User, error) {
 	}
 
 	return users, nil
-}
-
-// Profiles is the resolver for the profiles field.
-func (r *userResolver) Profiles(ctx context.Context, obj *model.User) ([]*model.Profile, error) {
-	panic(fmt.Errorf("not implemented: Profiles - profiles"))
 }
 
 // User returns graph.UserResolver implementation.

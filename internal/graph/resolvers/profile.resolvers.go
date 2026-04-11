@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
@@ -16,6 +15,28 @@ import (
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+// Reviews is the resolver for the reviews field.
+func (r *profileResolver) Reviews(ctx context.Context, obj *model.Profile) ([]*model.Review, error) {
+	reviews, err := r.ReviewService.ListReviewsByProfile(ctx, obj.ID)
+	if err != nil {
+		r.Logger.Error("failed to list reviews", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	return reviews, nil
+}
+
+// WatchHistories is the resolver for the watchHistories field.
+func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile) ([]*model.WatchHistory, error) {
+	watchHistories, err := r.WatchHistoryService.ListWatchHistories(ctx, obj.ID)
+	if err != nil {
+		r.Logger.Error("failed to list watch histories", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	return watchHistories, nil
+}
 
 // CreateProfile is the resolver for the createProfile field.
 func (r *mutationResolver) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
@@ -87,16 +108,6 @@ func (r *mutationResolver) SelectProfile(ctx context.Context, id uuid.UUID) (boo
 	return true, nil
 }
 
-// Reviews is the resolver for the reviews field.
-func (r *profileResolver) Reviews(ctx context.Context, obj *model.Profile) ([]*model.Review, error) {
-	panic(fmt.Errorf("not implemented: Reviews - reviews"))
-}
-
-// WatchHistories is the resolver for the watchHistories field.
-func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile) ([]*model.WatchHistory, error) {
-	panic(fmt.Errorf("not implemented: WatchHistories - watchHistories"))
-}
-
 // GetProfile is the resolver for the getProfile field.
 func (r *queryResolver) GetProfile(ctx context.Context) (*model.Profile, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
@@ -128,7 +139,7 @@ func (r *queryResolver) ListProfiles(ctx context.Context) ([]*model.Profile, err
 		return nil, gqlerror.Errorf("invalid user ID")
 	}
 
-	profiles, err := r.ProfileService.ListProfiles(ctx, userID)
+	profiles, err := r.ProfileService.ListProfilesByUser(ctx, userID)
 	if err != nil {
 		r.Logger.Error("failed to list profiles", slog.Any("error", err))
 		return nil, handleError(err)
