@@ -16,7 +16,7 @@ import (
 type Service interface {
 	CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error)
 	GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Episode, error)
-	ListEpisodes(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID) ([]*model.Episode, error)
+	ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID) ([]*model.Episode, error)
 	UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error)
 	DeleteEpisode(ctx context.Context, id uuid.UUID) error
 }
@@ -97,7 +97,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 	return toGraphQLModel(ep), nil
 }
 
-func (s *ServiceImpl) ListEpisodes(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID) ([]*model.Episode, error) {
+func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID) ([]*model.Episode, error) {
 	profile, err := s.queries.GetProfile(ctx, profileID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

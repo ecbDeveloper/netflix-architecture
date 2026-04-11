@@ -16,7 +16,7 @@ import (
 type Service interface {
 	CreateProfile(ctx context.Context, input model.CreateProfileInput, userID uuid.UUID) (*model.Profile, error)
 	GetProfile(ctx context.Context, id uuid.UUID, userID uuid.UUID) (*model.Profile, error)
-	ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.Profile, error)
+	ListProfilesByUser(ctx context.Context, userID uuid.UUID) ([]*model.Profile, error)
 	UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput, userID uuid.UUID) (*model.Profile, error)
 	DeleteProfile(ctx context.Context, id uuid.UUID, userID uuid.UUID) error
 }
@@ -75,7 +75,7 @@ func (s *ServiceImpl) GetProfile(ctx context.Context, id uuid.UUID, userID uuid.
 	return toGraphQLModel(p), nil
 }
 
-func (s *ServiceImpl) ListProfiles(ctx context.Context, userID uuid.UUID) ([]*model.Profile, error) {
+func (s *ServiceImpl) ListProfilesByUser(ctx context.Context, userID uuid.UUID) ([]*model.Profile, error) {
 	profiles, err := s.queries.ListProfilesByUser(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all profiles from database: %w", err)

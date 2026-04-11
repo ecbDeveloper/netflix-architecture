@@ -80,7 +80,7 @@ func (s *ServiceImpl) GetReview(ctx context.Context, id uuid.UUID) (*model.Revie
 	return toGraphQLModel(r), nil
 }
 
-func (s *ServiceImpl) ListReviews(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error) {
+func (s *ServiceImpl) ListReviewsByProfile(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error) {
 	reviews, err := s.queries.ListReviewsByProfile(ctx, profileID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all reviews from database: %w", err)
