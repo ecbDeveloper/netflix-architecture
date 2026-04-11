@@ -22,8 +22,8 @@ input UpdateWatchHistoryInput {
 }
 
 extend type Query {
-  getWatchHistory(id: ID!): WatchHistory @auth
-  listWatchHistories: [WatchHistory!]! @auth
+  getWatchHistory(id: ID!): WatchHistory @auth @profileSelectionIsRequired
+  listWatchHistories: [WatchHistory!]! @auth @profileSelectionIsRequired
 }
 
 extend type Mutation {

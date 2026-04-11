@@ -5048,8 +5048,15 @@ func (ec *executionContext) _Query_getWatchHistory(ctx context.Context, field gr
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalOWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory,
@@ -5117,8 +5124,15 @@ func (ec *executionContext) _Query_listWatchHistories(ctx context.Context, field
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal []*model.WatchHistory
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
 
-			next = directive1
+			next = directive2
 			return next
 		},
 		ec.marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ,

@@ -16,28 +16,6 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-// Reviews is the resolver for the reviews field.
-func (r *profileResolver) Reviews(ctx context.Context, obj *model.Profile) ([]*model.Review, error) {
-	reviews, err := r.ReviewService.ListReviewsByProfile(ctx, obj.ID)
-	if err != nil {
-		r.Logger.Error("failed to list reviews", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	return reviews, nil
-}
-
-// WatchHistories is the resolver for the watchHistories field.
-func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile) ([]*model.WatchHistory, error) {
-	watchHistories, err := r.WatchHistoryService.ListWatchHistories(ctx, obj.ID)
-	if err != nil {
-		r.Logger.Error("failed to list watch histories", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	return watchHistories, nil
-}
-
 // CreateProfile is the resolver for the createProfile field.
 func (r *mutationResolver) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
 	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
@@ -106,6 +84,28 @@ func (r *mutationResolver) SelectProfile(ctx context.Context, id uuid.UUID) (boo
 	r.Sessions.Put(ctx, shared.SessionProfileIDKey, id)
 
 	return true, nil
+}
+
+// Reviews is the resolver for the reviews field.
+func (r *profileResolver) Reviews(ctx context.Context, obj *model.Profile) ([]*model.Review, error) {
+	reviews, err := r.ReviewService.ListReviewsByProfile(ctx, obj.ID)
+	if err != nil {
+		r.Logger.Error("failed to list reviews", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	return reviews, nil
+}
+
+// WatchHistories is the resolver for the watchHistories field.
+func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile) ([]*model.WatchHistory, error) {
+	watchHistories, err := r.WatchHistoryService.ListWatchHistories(ctx, obj.ID)
+	if err != nil {
+		r.Logger.Error("failed to list watch histories", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	return watchHistories, nil
 }
 
 // GetProfile is the resolver for the getProfile field.

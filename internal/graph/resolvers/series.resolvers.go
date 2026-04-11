@@ -16,23 +16,6 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-// Episodes is the resolver for the episodes field.
-func (r *seriesResolver) Episodes(ctx context.Context, obj *model.Series) ([]*model.Episode, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to get series")
-		return nil, gqlerror.Errorf("invalid profile ID")
-	}
-
-	episodes, err := r.EpisodeService.ListEpisodesBySeries(ctx, obj.ID, profileID)
-	if err != nil {
-		r.Logger.Error("failed to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	return episodes, nil
-}
-
 // CreateSeries is the resolver for the createSeries field.
 func (r *mutationResolver) CreateSeries(ctx context.Context, input model.CreateSeriesInput) (*model.Series, error) {
 	s, err := r.SeriesService.CreateSeries(ctx, input)
@@ -98,6 +81,23 @@ func (r *queryResolver) ListSeries(ctx context.Context) ([]*model.Series, error)
 	}
 
 	return series, nil
+}
+
+// Episodes is the resolver for the episodes field.
+func (r *seriesResolver) Episodes(ctx context.Context, obj *model.Series) ([]*model.Episode, error) {
+	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to get profile id to get series")
+		return nil, gqlerror.Errorf("invalid profile ID")
+	}
+
+	episodes, err := r.EpisodeService.ListEpisodesBySeries(ctx, obj.ID, profileID)
+	if err != nil {
+		r.Logger.Error("failed to list episodes", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	return episodes, nil
 }
 
 // Series returns graph.SeriesResolver implementation.
