@@ -23,7 +23,7 @@ func (r *mutationResolver) CreateWatchHistory(ctx context.Context, input model.C
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	wh, err := r.WatchhistoryService.CreateWatchHistory(ctx, input, profileID)
+	wh, err := r.WatchHistoryService.CreateWatchHistory(ctx, input, profileID)
 	if err != nil {
 		r.Logger.Error("failed to create watch history", slog.Any("error", err))
 		return nil, handleError(err)
@@ -40,7 +40,7 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID,
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	wh, err := r.WatchhistoryService.UpdateWatchHistory(ctx, id, input, profileID)
+	wh, err := r.WatchHistoryService.UpdateWatchHistory(ctx, id, input, profileID)
 	if err != nil {
 		r.Logger.Error("failed to update watch history", slog.Any("error", err))
 		return nil, handleError(err)
@@ -57,7 +57,7 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID)
 		return false, gqlerror.Errorf("invalid profile ID")
 	}
 
-	err := r.WatchhistoryService.DeleteWatchHistory(ctx, id, profileID)
+	err := r.WatchHistoryService.DeleteWatchHistory(ctx, id, profileID)
 	if err != nil {
 		r.Logger.Error("failed to delete watch history", slog.Any("error", err))
 		return false, handleError(err)
@@ -74,7 +74,7 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*mod
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	wh, err := r.WatchhistoryService.GetWatchHistory(ctx, id, profileID)
+	wh, err := r.WatchHistoryService.GetWatchHistory(ctx, id, profileID)
 	if err != nil {
 		r.Logger.Error("failed to get watch history", slog.Any("error", err))
 		return nil, handleError(err)
@@ -91,7 +91,7 @@ func (r *queryResolver) ListWatchHistories(ctx context.Context) ([]*model.WatchH
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
-	watchHistories, err := r.WatchhistoryService.ListWatchHistories(ctx, profileID)
+	watchHistories, err := r.WatchHistoryService.ListWatchHistories(ctx, profileID)
 	if err != nil {
 		r.Logger.Error("failed to list watch histories", slog.Any("error", err))
 		return nil, handleError(err)

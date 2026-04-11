@@ -157,7 +157,7 @@ func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *s
 	profileService := profile.NewService(queries)
 	reviewService := review.NewService(queries)
 	seriesService := series.NewService(queries)
-	watchhistoryService := watchhistory.NewService(queries)
+	watchHistoryService := watchhistory.NewService(queries)
 	authService := auth.NewService(queries)
 
 	s := scs.New()
@@ -177,7 +177,7 @@ func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *s
 		profileService,
 		reviewService,
 		seriesService,
-		watchhistoryService,
+		watchHistoryService,
 		authService,
 	)
 

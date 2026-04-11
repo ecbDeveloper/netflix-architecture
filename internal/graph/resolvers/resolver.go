@@ -31,7 +31,7 @@ type Resolver struct {
 	ProfileService      profile.Service
 	ReviewService       review.Service
 	SeriesService       series.Service
-	WatchhistoryService watchhistory.Service
+	WatchHistoryService watchhistory.Service
 	AuthService         auth.Service
 }
 
@@ -58,7 +58,7 @@ func NewResolver(
 		ProfileService:      ps,
 		ReviewService:       rs,
 		SeriesService:       ss,
-		WatchhistoryService: whs,
+		WatchHistoryService: whs,
 		AuthService:         as,
 	}
 }
