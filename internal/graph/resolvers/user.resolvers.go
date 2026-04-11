@@ -11,6 +11,7 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -81,8 +82,15 @@ func (r *queryResolver) GetUser(ctx context.Context, id uuid.UUID) (*model.User,
 		return nil, handleError(err)
 	}
 
-	if sessionUserID != id {
-		return nil, gqlerror.Errorf("access denied")
+	sessionRoleID, err := r.getUserRoleIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get user role id to get user", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	if sessionUserID != id && sessionRoleID != shared.DBRoleAdmin {
+		r.Logger.Error("user is not authorized to get user")
+		return nil, gqlerror.Errorf("you can't access other users data")
 	}
 
 	user, err := r.UserService.GetUser(ctx, id)
