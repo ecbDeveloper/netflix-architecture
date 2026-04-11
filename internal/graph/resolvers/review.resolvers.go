@@ -10,17 +10,15 @@ import (
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
-	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateReview is the resolver for the createReview field.
 func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to create review")
-		return nil, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to create review", slog.Any("error", err))
+		return nil, handleError(err)
 	}
 
 	review, err := r.ReviewService.CreateReview(ctx, input, profileID)
@@ -34,10 +32,10 @@ func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateR
 
 // UpdateReview is the resolver for the updateReview field.
 func (r *mutationResolver) UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput) (*model.Review, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to update review")
-		return nil, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to update review", slog.Any("error", err))
+		return nil, handleError(err)
 	}
 
 	review, err := r.ReviewService.UpdateReview(ctx, id, input, profileID)
@@ -51,13 +49,13 @@ func (r *mutationResolver) UpdateReview(ctx context.Context, id uuid.UUID, input
 
 // DeleteReview is the resolver for the deleteReview field.
 func (r *mutationResolver) DeleteReview(ctx context.Context, id uuid.UUID) (bool, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to delete review")
-		return false, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to delete review", slog.Any("error", err))
+		return false, handleError(err)
 	}
 
-	err := r.ReviewService.DeleteReview(ctx, id, profileID)
+	err = r.ReviewService.DeleteReview(ctx, id, profileID)
 	if err != nil {
 		r.Logger.Error("failed to delete review", slog.Any("error", err))
 		return false, handleError(err)
@@ -79,10 +77,10 @@ func (r *queryResolver) GetReview(ctx context.Context, id uuid.UUID) (*model.Rev
 
 // ListReviews is the resolver for the listReviews field.
 func (r *queryResolver) ListReviews(ctx context.Context) ([]*model.Review, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to list reviews")
-		return nil, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list reviews", slog.Any("error", err))
+		return nil, handleError(err)
 	}
 
 	reviews, err := r.ReviewService.ListReviewsByProfile(ctx, profileID)

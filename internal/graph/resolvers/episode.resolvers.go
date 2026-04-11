@@ -11,9 +11,7 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
-	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Reviews is the resolver for the reviews field.
@@ -62,10 +60,10 @@ func (r *mutationResolver) DeleteEpisode(ctx context.Context, id uuid.UUID) (boo
 
 // GetEpisode is the resolver for the getEpisode field.
 func (r *queryResolver) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to get episode")
-		return nil, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to get episode", slog.Any("error", err))
+		return nil, handleError(err)
 	}
 
 	episode, err := r.EpisodeService.GetEpisode(ctx, id, profileID)
@@ -79,10 +77,10 @@ func (r *queryResolver) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Ep
 
 // ListEpisodes is the resolver for the listEpisodes field.
 func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([]*model.Episode, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to list episodes")
-		return nil, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
+		return nil, handleError(err)
 	}
 
 	episodes, err := r.EpisodeService.ListEpisodesBySeries(ctx, seriesID, profileID)

@@ -11,7 +11,6 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
-	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -29,8 +28,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error) {
-	sessionUserID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
-	if !ok || sessionUserID != id {
+	sessionUserID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get user id to update user", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	if sessionUserID != id {
 		return nil, gqlerror.Errorf("access denied")
 	}
 
@@ -45,12 +49,17 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id uuid.UUID, input m
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, error) {
-	sessionUserID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
-	if !ok || sessionUserID != id {
+	sessionUserID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get user id to delete user", slog.Any("error", err))
+		return false, handleError(err)
+	}
+
+	if sessionUserID != id {
 		return false, gqlerror.Errorf("access denied")
 	}
 
-	err := r.UserService.DeleteUser(ctx, id)
+	err = r.UserService.DeleteUser(ctx, id)
 	if err != nil {
 		r.Logger.Error("failed to delete user", slog.Any("error", err))
 		return false, handleError(err)
@@ -61,8 +70,13 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, 
 
 // GetUser is the resolver for the getUser field.
 func (r *queryResolver) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
-	sessionUserID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
-	if !ok || sessionUserID != id {
+	sessionUserID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get user id to get user", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	if sessionUserID != id {
 		return nil, gqlerror.Errorf("access denied")
 	}
 

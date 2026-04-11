@@ -11,9 +11,7 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
-	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateSeries is the resolver for the createSeries field.
@@ -51,10 +49,10 @@ func (r *mutationResolver) DeleteSeries(ctx context.Context, id uuid.UUID) (bool
 
 // GetSeries is the resolver for the getSeries field.
 func (r *queryResolver) GetSeries(ctx context.Context, id uuid.UUID) (*model.Series, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to get series")
-		return nil, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to get series", slog.Any("error", err))
+		return nil, handleError(err)
 	}
 
 	s, err := r.SeriesService.GetSeries(ctx, id, profileID)
@@ -68,10 +66,10 @@ func (r *queryResolver) GetSeries(ctx context.Context, id uuid.UUID) (*model.Ser
 
 // ListSeries is the resolver for the listSeries field.
 func (r *queryResolver) ListSeries(ctx context.Context) ([]*model.Series, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to list series")
-		return nil, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list series", slog.Any("error", err))
+		return nil, handleError(err)
 	}
 
 	series, err := r.SeriesService.ListSeries(ctx, profileID)
@@ -85,10 +83,10 @@ func (r *queryResolver) ListSeries(ctx context.Context) ([]*model.Series, error)
 
 // Episodes is the resolver for the episodes field.
 func (r *seriesResolver) Episodes(ctx context.Context, obj *model.Series) ([]*model.Episode, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to get series")
-		return nil, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to get series", slog.Any("error", err))
+		return nil, handleError(err)
 	}
 
 	episodes, err := r.EpisodeService.ListEpisodesBySeries(ctx, obj.ID, profileID)

@@ -11,9 +11,7 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
-	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Reviews is the resolver for the reviews field.
@@ -62,10 +60,10 @@ func (r *mutationResolver) DeleteMovie(ctx context.Context, id uuid.UUID) (bool,
 
 // GetMovie is the resolver for the getMovie field.
 func (r *queryResolver) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movie, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to get movie")
-		return nil, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to get movie", slog.Any("error", err))
+		return nil, handleError(err)
 	}
 
 	movie, err := r.MovieService.GetMovie(ctx, id, profileID)
@@ -79,10 +77,10 @@ func (r *queryResolver) GetMovie(ctx context.Context, id uuid.UUID) (*model.Movi
 
 // ListMovies is the resolver for the listMovies field.
 func (r *queryResolver) ListMovies(ctx context.Context) ([]*model.Movie, error) {
-	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to get profile id to list movies")
-		return nil, gqlerror.Errorf("invalid profile ID")
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list movies", slog.Any("error", err))
+		return nil, handleError(err)
 	}
 
 	movies, err := r.MovieService.ListMovies(ctx, profileID)
