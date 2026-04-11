@@ -189,7 +189,7 @@ type MutationResolver interface {
 	CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error)
 	UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error)
 	DeleteProfile(ctx context.Context, id uuid.UUID) (bool, error)
-	SelectProfile(ctx context.Context, id uuid.UUID) (bool, error)
+	SelectProfile(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error)
 	UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput) (*model.Review, error)
 	DeleteReview(ctx context.Context, id uuid.UUID) (bool, error)
@@ -2930,7 +2930,7 @@ func (ec *executionContext) _Mutation_selectProfile(ctx context.Context, field g
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.Directives.Auth == nil {
-					var zeroVal bool
+					var zeroVal uuid.UUID
 					return zeroVal, errors.New("directive auth is not implemented")
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
@@ -2939,7 +2939,7 @@ func (ec *executionContext) _Mutation_selectProfile(ctx context.Context, field g
 			next = directive1
 			return next
 		},
-		ec.marshalNBoolean2bool,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -2952,7 +2952,7 @@ func (ec *executionContext) fieldContext_Mutation_selectProfile(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	defer func() {
