@@ -16,7 +16,9 @@ import (
 type Service interface {
 	CreateReview(ctx context.Context, input model.CreateReviewInput, profileID uuid.UUID) (*model.Review, error)
 	GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error)
-	ListReviews(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error)
+	ListReviewsByProfile(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error)
+	ListReviewsByEpisode(ctx context.Context, episodeID uuid.UUID) ([]*model.Review, error)
+	ListReviewsByMovie(ctx context.Context, movieID uuid.UUID) ([]*model.Review, error)
 	UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput, profileID uuid.UUID) (*model.Review, error)
 	DeleteReview(ctx context.Context, id uuid.UUID, profileID uuid.UUID) error
 }
@@ -90,6 +92,36 @@ func (s *ServiceImpl) ListReviewsByProfile(ctx context.Context, profileID uuid.U
 	for i, r := range reviews {
 		result[i] = toGraphQLModel(r)
 	}
+	return result, nil
+}
+
+func (s *ServiceImpl) ListReviewsByEpisode(ctx context.Context, episodeID uuid.UUID) ([]*model.Review, error) {
+	episodeIDPG := pgtype.UUID{Bytes: episodeID, Valid: true}
+	reviews, err := s.queries.ListReviewsByEpisode(ctx, episodeIDPG)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch all reviews from database: %w", err)
+	}
+
+	result := make([]*model.Review, len(reviews))
+	for i, r := range reviews {
+		result[i] = toGraphQLModel(r)
+	}
+
+	return result, nil
+}
+
+func (s *ServiceImpl) ListReviewsByMovie(ctx context.Context, movieID uuid.UUID) ([]*model.Review, error) {
+	movieIDPG := pgtype.UUID{Bytes: movieID, Valid: true}
+	reviews, err := s.queries.ListReviewsByMovie(ctx, movieIDPG)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch all movie %v reviews from database: %w", movieID, err)
+	}
+
+	result := make([]*model.Review, len(reviews))
+	for i, r := range reviews {
+		result[i] = toGraphQLModel(r)
+	}
+
 	return result, nil
 }
 
