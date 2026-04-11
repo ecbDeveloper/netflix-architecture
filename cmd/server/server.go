@@ -61,7 +61,8 @@ func main() {
 
 	port := os.Getenv("API_PORT")
 	if port == "" {
-		port = defaultPort
+		logger.Error("API_PORT is not set")
+		os.Exit(1)
 	}
 
 	pool, err := initializeDatabaseConnection(ctx)
