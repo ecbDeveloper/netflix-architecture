@@ -7,8 +7,10 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
+	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
@@ -66,6 +68,35 @@ func (r *mutationResolver) DeleteProfile(ctx context.Context, id uuid.UUID) (boo
 	return true, nil
 }
 
+// SelectProfile is the resolver for the selectProfile field.
+func (r *mutationResolver) SelectProfile(ctx context.Context, id uuid.UUID) (bool, error) {
+	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
+	if !ok {
+		r.Logger.Error("failed to parse user id to select profile")
+		return false, gqlerror.Errorf("invalid user ID")
+	}
+
+	_, err := r.ProfileService.GetProfile(ctx, id, userID)
+	if err != nil {
+		r.Logger.Error("failed to select profile", slog.Any("error", err))
+		return false, handleError(err)
+	}
+
+	r.Sessions.Put(ctx, shared.SessionProfileIDKey, id)
+
+	return true, nil
+}
+
+// Reviews is the resolver for the reviews field.
+func (r *profileResolver) Reviews(ctx context.Context, obj *model.Profile) ([]*model.Review, error) {
+	panic(fmt.Errorf("not implemented: Reviews - reviews"))
+}
+
+// WatchHistories is the resolver for the watchHistories field.
+func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile) ([]*model.WatchHistory, error) {
+	panic(fmt.Errorf("not implemented: WatchHistories - watchHistories"))
+}
+
 // GetProfile is the resolver for the getProfile field.
 func (r *queryResolver) GetProfile(ctx context.Context) (*model.Profile, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
@@ -106,21 +137,7 @@ func (r *queryResolver) ListProfiles(ctx context.Context) ([]*model.Profile, err
 	return profiles, nil
 }
 
-// SelectProfile is the resolver for the selectProfile field.
-func (r *mutationResolver) SelectProfile(ctx context.Context, id uuid.UUID) (bool, error) {
-	userID, ok := r.Sessions.Get(ctx, shared.SessionUserIDKey).(uuid.UUID)
-	if !ok {
-		r.Logger.Error("failed to parse user id to select profile")
-		return false, gqlerror.Errorf("invalid user ID")
-	}
+// Profile returns graph.ProfileResolver implementation.
+func (r *Resolver) Profile() graph.ProfileResolver { return &profileResolver{r} }
 
-	_, err := r.ProfileService.GetProfile(ctx, id, userID)
-	if err != nil {
-		r.Logger.Error("failed to select profile", slog.Any("error", err))
-		return false, handleError(err)
-	}
-
-	r.Sessions.Put(ctx, shared.SessionProfileIDKey, id)
-
-	return true, nil
-}
+type profileResolver struct{ *Resolver }

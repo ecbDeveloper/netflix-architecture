@@ -7,8 +7,10 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
+	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
@@ -84,3 +86,13 @@ func (r *queryResolver) ListUsers(ctx context.Context) ([]*model.User, error) {
 
 	return users, nil
 }
+
+// Profiles is the resolver for the profiles field.
+func (r *userResolver) Profiles(ctx context.Context, obj *model.User) ([]*model.Profile, error) {
+	panic(fmt.Errorf("not implemented: Profiles - profiles"))
+}
+
+// User returns graph.UserResolver implementation.
+func (r *Resolver) User() graph.UserResolver { return &userResolver{r} }
+
+type userResolver struct{ *Resolver }

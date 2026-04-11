@@ -40,7 +40,7 @@ model:
 
 # Where should the resolver implementations go?
 resolver:
-  package: graph
+  package: resolvers
   layout: follow-schema # Only other option is "single-file."
 
   # Only for single-file layout:
@@ -194,3 +194,25 @@ models:
     model:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
+  User:
+    fields:
+      profiles:
+        resolver: true
+  Profile:
+    fields:
+      reviews:
+        resolver: true
+      watchHistories:
+        resolver: true
+  Series:
+    fields:
+      episodes:
+        resolver: true
+  Movie:
+    fields:
+      reviews:
+        resolver: true
+  Episode:
+    fields:
+      reviews:
+        resolver: true 

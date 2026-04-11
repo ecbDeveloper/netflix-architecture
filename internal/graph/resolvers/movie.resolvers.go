@@ -7,13 +7,20 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
+	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+// Reviews is the resolver for the reviews field.
+func (r *movieResolver) Reviews(ctx context.Context, obj *model.Movie) ([]*model.Review, error) {
+	panic(fmt.Errorf("not implemented: Reviews - reviews"))
+}
 
 // CreateMovie is the resolver for the createMovie field.
 func (r *mutationResolver) CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error) {
@@ -81,3 +88,8 @@ func (r *queryResolver) ListMovies(ctx context.Context) ([]*model.Movie, error) 
 
 	return movies, nil
 }
+
+// Movie returns graph.MovieResolver implementation.
+func (r *Resolver) Movie() graph.MovieResolver { return &movieResolver{r} }
+
+type movieResolver struct{ *Resolver }

@@ -7,13 +7,20 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
+	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+// Reviews is the resolver for the reviews field.
+func (r *episodeResolver) Reviews(ctx context.Context, obj *model.Episode) ([]*model.Review, error) {
+	panic(fmt.Errorf("not implemented: Reviews - reviews"))
+}
 
 // CreateEpisode is the resolver for the createEpisode field.
 func (r *mutationResolver) CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error) {
@@ -81,3 +88,8 @@ func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([
 
 	return episodes, nil
 }
+
+// Episode returns graph.EpisodeResolver implementation.
+func (r *Resolver) Episode() graph.EpisodeResolver { return &episodeResolver{r} }
+
+type episodeResolver struct{ *Resolver }

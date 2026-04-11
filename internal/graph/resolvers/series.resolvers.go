@@ -7,8 +7,10 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
+	"github.com/ecbDeveloper/netflix-architecture/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/internal/shared"
 	"github.com/google/uuid"
@@ -81,3 +83,13 @@ func (r *queryResolver) ListSeries(ctx context.Context) ([]*model.Series, error)
 
 	return series, nil
 }
+
+// Episodes is the resolver for the episodes field.
+func (r *seriesResolver) Episodes(ctx context.Context, obj *model.Series) ([]*model.Episode, error) {
+	panic(fmt.Errorf("not implemented: Episodes - episodes"))
+}
+
+// Series returns graph.SeriesResolver implementation.
+func (r *Resolver) Series() graph.SeriesResolver { return &seriesResolver{r} }
+
+type seriesResolver struct{ *Resolver }
