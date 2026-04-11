@@ -54,6 +54,16 @@ func handleError(err error) *gqlerror.Error {
 		}
 	}
 
+	var unauthorizedErr *apperror.UnauthorizedError
+	if errors.As(err, &unauthorizedErr) {
+		return &gqlerror.Error{
+			Message: unauthorizedErr.Message,
+			Extensions: map[string]any{
+				"code": "UNAUTHORIZED",
+			},
+		}
+	}
+
 	return &gqlerror.Error{
 		Message: "internal error, try again later",
 		Extensions: map[string]any{
