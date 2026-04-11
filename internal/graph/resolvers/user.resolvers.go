@@ -56,13 +56,18 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, 
 	}
 
 	if sessionUserID != id {
-		return false, gqlerror.Errorf("access denied")
+		return false, gqlerror.Errorf("you can't delete other users")
 	}
 
 	err = r.UserService.DeleteUser(ctx, id)
 	if err != nil {
 		r.Logger.Error("failed to delete user", slog.Any("error", err))
 		return false, handleError(err)
+	}
+
+	if err := r.Sessions.Destroy(ctx); err != nil {
+		r.Logger.Error("failed to destroy session", slog.Any("error", err))
+		return false, gqlerror.Errorf("error deleting user, try again later")
 	}
 
 	return true, nil
