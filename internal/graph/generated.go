@@ -29,8 +29,13 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
+	Episode() EpisodeResolver
+	Movie() MovieResolver
 	Mutation() MutationResolver
+	Profile() ProfileResolver
 	Query() QueryResolver
+	Series() SeriesResolver
+	User() UserResolver
 }
 
 type DirectiveRoot struct {
@@ -166,6 +171,12 @@ type ComplexityRoot struct {
 	}
 }
 
+type EpisodeResolver interface {
+	Reviews(ctx context.Context, obj *model.Episode) ([]*model.Review, error)
+}
+type MovieResolver interface {
+	Reviews(ctx context.Context, obj *model.Movie) ([]*model.Review, error)
+}
 type MutationResolver interface {
 	Login(ctx context.Context, input *model.LoginInput) (string, error)
 	Logout(ctx context.Context) (string, error)
@@ -192,6 +203,10 @@ type MutationResolver interface {
 	UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error)
 	DeleteWatchHistory(ctx context.Context, id uuid.UUID) (bool, error)
 }
+type ProfileResolver interface {
+	Reviews(ctx context.Context, obj *model.Profile) ([]*model.Review, error)
+	WatchHistories(ctx context.Context, obj *model.Profile) ([]*model.WatchHistory, error)
+}
 type QueryResolver interface {
 	GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error)
 	ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([]*model.Episode, error)
@@ -207,6 +222,12 @@ type QueryResolver interface {
 	ListUsers(ctx context.Context) ([]*model.User, error)
 	GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error)
 	ListWatchHistories(ctx context.Context) ([]*model.WatchHistory, error)
+}
+type SeriesResolver interface {
+	Episodes(ctx context.Context, obj *model.Series) ([]*model.Episode, error)
+}
+type UserResolver interface {
+	Profiles(ctx context.Context, obj *model.User) ([]*model.Profile, error)
 }
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -1786,7 +1807,7 @@ func (ec *executionContext) _Episode_reviews(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Episode_reviews,
 		func(ctx context.Context) (any, error) {
-			return obj.Reviews, nil
+			return ec.Resolvers.Episode().Reviews(ctx, obj)
 		},
 		nil,
 		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
@@ -1799,8 +1820,8 @@ func (ec *executionContext) fieldContext_Episode_reviews(_ context.Context, fiel
 	fc = &graphql.FieldContext{
 		Object:     "Episode",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -2065,7 +2086,7 @@ func (ec *executionContext) _Movie_reviews(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Movie_reviews,
 		func(ctx context.Context) (any, error) {
-			return obj.Reviews, nil
+			return ec.Resolvers.Movie().Reviews(ctx, obj)
 		},
 		nil,
 		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
@@ -2078,8 +2099,8 @@ func (ec *executionContext) fieldContext_Movie_reviews(_ context.Context, field 
 	fc = &graphql.FieldContext{
 		Object:     "Movie",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -4050,7 +4071,7 @@ func (ec *executionContext) _Profile_reviews(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Profile_reviews,
 		func(ctx context.Context) (any, error) {
-			return obj.Reviews, nil
+			return ec.Resolvers.Profile().Reviews(ctx, obj)
 		},
 		nil,
 		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
@@ -4063,8 +4084,8 @@ func (ec *executionContext) fieldContext_Profile_reviews(_ context.Context, fiel
 	fc = &graphql.FieldContext{
 		Object:     "Profile",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -4097,7 +4118,7 @@ func (ec *executionContext) _Profile_watchHistories(ctx context.Context, field g
 		field,
 		ec.fieldContext_Profile_watchHistories,
 		func(ctx context.Context) (any, error) {
-			return obj.WatchHistories, nil
+			return ec.Resolvers.Profile().WatchHistories(ctx, obj)
 		},
 		nil,
 		ec.marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ,
@@ -4110,8 +4131,8 @@ func (ec *executionContext) fieldContext_Profile_watchHistories(_ context.Contex
 	fc = &graphql.FieldContext{
 		Object:     "Profile",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -5656,7 +5677,7 @@ func (ec *executionContext) _Series_episodes(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Series_episodes,
 		func(ctx context.Context) (any, error) {
-			return obj.Episodes, nil
+			return ec.Resolvers.Series().Episodes(ctx, obj)
 		},
 		nil,
 		ec.marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ,
@@ -5669,8 +5690,8 @@ func (ec *executionContext) fieldContext_Series_episodes(_ context.Context, fiel
 	fc = &graphql.FieldContext{
 		Object:     "Series",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -5906,7 +5927,7 @@ func (ec *executionContext) _User_profiles(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_User_profiles,
 		func(ctx context.Context) (any, error) {
-			return obj.Profiles, nil
+			return ec.Resolvers.User().Profiles(ctx, obj)
 		},
 		nil,
 		ec.marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfileᚄ,
@@ -5919,8 +5940,8 @@ func (ec *executionContext) fieldContext_User_profiles(_ context.Context, field 
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -8426,43 +8447,74 @@ func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, 
 		case "id":
 			out.Values[i] = ec._Episode_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "seriesId":
 			out.Values[i] = ec._Episode_seriesId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "season":
 			out.Values[i] = ec._Episode_season(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "episodeNumber":
 			out.Values[i] = ec._Episode_episodeNumber(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "title":
 			out.Values[i] = ec._Episode_title(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "durationMinutes":
 			out.Values[i] = ec._Episode_durationMinutes(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "createdAt":
 			out.Values[i] = ec._Episode_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "reviews":
-			out.Values[i] = ec._Episode_reviews(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Episode_reviews(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8500,48 +8552,79 @@ func (ec *executionContext) _Movie(ctx context.Context, sel ast.SelectionSet, ob
 		case "id":
 			out.Values[i] = ec._Movie_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "title":
 			out.Values[i] = ec._Movie_title(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "description":
 			out.Values[i] = ec._Movie_description(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "durationMinutes":
 			out.Values[i] = ec._Movie_durationMinutes(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "releaseDate":
 			out.Values[i] = ec._Movie_releaseDate(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "maturityRating":
 			out.Values[i] = ec._Movie_maturityRating(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "contentUrl":
 			out.Values[i] = ec._Movie_contentUrl(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "genreId":
 			out.Values[i] = ec._Movie_genreId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "reviews":
-			out.Values[i] = ec._Movie_reviews(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Movie_reviews(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8789,43 +8872,105 @@ func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, 
 		case "id":
 			out.Values[i] = ec._Profile_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "userId":
 			out.Values[i] = ec._Profile_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._Profile_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "hasParentalControls":
 			out.Values[i] = ec._Profile_hasParentalControls(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "createdAt":
 			out.Values[i] = ec._Profile_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "updatedAt":
 			out.Values[i] = ec._Profile_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "reviews":
-			out.Values[i] = ec._Profile_reviews(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Profile_reviews(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "watchHistories":
-			out.Values[i] = ec._Profile_watchHistories(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Profile_watchHistories(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9265,38 +9410,69 @@ func (ec *executionContext) _Series(ctx context.Context, sel ast.SelectionSet, o
 		case "id":
 			out.Values[i] = ec._Series_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "title":
 			out.Values[i] = ec._Series_title(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "description":
 			out.Values[i] = ec._Series_description(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "releaseDate":
 			out.Values[i] = ec._Series_releaseDate(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "maturityRating":
 			out.Values[i] = ec._Series_maturityRating(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "genreId":
 			out.Values[i] = ec._Series_genreId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "episodes":
-			out.Values[i] = ec._Series_episodes(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Series_episodes(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9334,43 +9510,74 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		case "id":
 			out.Values[i] = ec._User_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "email":
 			out.Values[i] = ec._User_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._User_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "cpf":
 			out.Values[i] = ec._User_cpf(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "createdAt":
 			out.Values[i] = ec._User_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "updatedAt":
 			out.Values[i] = ec._User_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "roleId":
 			out.Values[i] = ec._User_roleId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "profiles":
-			out.Values[i] = ec._User_profiles(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_profiles(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

@@ -95,7 +95,7 @@ resolver:
 # omit_root_models: false
 
 # Optional: turn on to exclude resolver fields from the generated models file.
-# omit_resolver_fields: false
+omit_resolver_fields: true
 
 # Optional: turn on to omit panic handler in the generated server
 # omit_panic_handler: false

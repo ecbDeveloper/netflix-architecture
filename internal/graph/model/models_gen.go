@@ -76,7 +76,6 @@ type Episode struct {
 	Title           string    `json:"title"`
 	DurationMinutes int32     `json:"durationMinutes"`
 	CreatedAt       string    `json:"createdAt"`
-	Reviews         []*Review `json:"reviews"`
 }
 
 type LoginInput struct {
@@ -93,21 +92,18 @@ type Movie struct {
 	MaturityRating  MaturityRating `json:"maturityRating"`
 	ContentURL      string         `json:"contentUrl"`
 	GenreID         int32          `json:"genreId"`
-	Reviews         []*Review      `json:"reviews"`
 }
 
 type Mutation struct {
 }
 
 type Profile struct {
-	ID                  uuid.UUID       `json:"id"`
-	UserID              uuid.UUID       `json:"userId"`
-	Name                string          `json:"name"`
-	HasParentalControls bool            `json:"hasParentalControls"`
-	CreatedAt           string          `json:"createdAt"`
-	UpdatedAt           string          `json:"updatedAt"`
-	Reviews             []*Review       `json:"reviews"`
-	WatchHistories      []*WatchHistory `json:"watchHistories"`
+	ID                  uuid.UUID `json:"id"`
+	UserID              uuid.UUID `json:"userId"`
+	Name                string    `json:"name"`
+	HasParentalControls bool      `json:"hasParentalControls"`
+	CreatedAt           string    `json:"createdAt"`
+	UpdatedAt           string    `json:"updatedAt"`
 }
 
 type Query struct {
@@ -131,7 +127,6 @@ type Series struct {
 	ReleaseDate    string         `json:"releaseDate"`
 	MaturityRating MaturityRating `json:"maturityRating"`
 	GenreID        int32          `json:"genreId"`
-	Episodes       []*Episode     `json:"episodes"`
 }
 
 type UpdateEpisodeInput struct {
@@ -183,14 +178,13 @@ type UpdateWatchHistoryInput struct {
 }
 
 type User struct {
-	ID        uuid.UUID  `json:"id"`
-	Email     string     `json:"email"`
-	Name      string     `json:"name"`
-	Cpf       string     `json:"cpf"`
-	CreatedAt string     `json:"createdAt"`
-	UpdatedAt string     `json:"updatedAt"`
-	RoleID    int32      `json:"roleId"`
-	Profiles  []*Profile `json:"profiles"`
+	ID        uuid.UUID `json:"id"`
+	Email     string    `json:"email"`
+	Name      string    `json:"name"`
+	Cpf       string    `json:"cpf"`
+	CreatedAt string    `json:"createdAt"`
+	UpdatedAt string    `json:"updatedAt"`
+	RoleID    int32     `json:"roleId"`
 }
 
 type WatchHistory struct {
