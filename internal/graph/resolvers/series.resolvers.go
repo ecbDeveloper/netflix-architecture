@@ -87,7 +87,7 @@ func (r *queryResolver) GetSeries(ctx context.Context, id uuid.UUID) (*model.Ser
 func (r *queryResolver) ListSeries(ctx context.Context) ([]*model.Series, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
-		r.Logger.Error("failed to get profile id to create watch history")
+		r.Logger.Error("failed to get profile id to list series")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 

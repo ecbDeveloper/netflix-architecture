@@ -64,7 +64,7 @@ func (r *mutationResolver) DeleteEpisode(ctx context.Context, id uuid.UUID) (boo
 func (r *queryResolver) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
-		r.Logger.Error("failed to get profile id to create watch history")
+		r.Logger.Error("failed to get profile id to get episode")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
@@ -81,7 +81,7 @@ func (r *queryResolver) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Ep
 func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([]*model.Episode, error) {
 	profileID, ok := r.Sessions.Get(ctx, shared.SessionProfileIDKey).(uuid.UUID)
 	if !ok {
-		r.Logger.Error("failed to get profile id to create watch history")
+		r.Logger.Error("failed to get profile id to list episodes")
 		return nil, gqlerror.Errorf("invalid profile ID")
 	}
 
