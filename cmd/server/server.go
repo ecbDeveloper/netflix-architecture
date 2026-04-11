@@ -168,7 +168,6 @@ func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *s
 	s.Cookie.Secure = os.Getenv("ENV") != "development"
 
 	resolver := resolvers.NewResolver(
-		queries,
 		logger,
 		s,
 		userService,
@@ -245,7 +244,7 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 		}
 
 		profileIsFromUser := false
-		userProfiles, err := queries.ListProfilesByUser(ctx, userID)
+		userProfiles, err := resolver.ProfileService.ListProfilesByUser(ctx, userID)
 		if err != nil {
 			return nil, &gqlerror.Error{
 				Message: "internal error",

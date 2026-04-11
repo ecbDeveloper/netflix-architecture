@@ -5,7 +5,6 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/ecbDeveloper/netflix-architecture/internal/auth"
-	"github.com/ecbDeveloper/netflix-architecture/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/internal/episode"
 	"github.com/ecbDeveloper/netflix-architecture/internal/movie"
 	"github.com/ecbDeveloper/netflix-architecture/internal/profile"
@@ -21,7 +20,6 @@ import (
 // here.
 
 type Resolver struct {
-	Queries  *sqlc.Queries
 	Logger   *slog.Logger
 	Sessions *scs.SessionManager
 
@@ -36,7 +34,6 @@ type Resolver struct {
 }
 
 func NewResolver(
-	q *sqlc.Queries,
 	l *slog.Logger,
 	s *scs.SessionManager,
 	us user.Service,
@@ -51,7 +48,6 @@ func NewResolver(
 	return &Resolver{
 		Logger:              l,
 		Sessions:            s,
-		Queries:             q,
 		UserService:         us,
 		EpisodeService:      es,
 		MovieService:        ms,
