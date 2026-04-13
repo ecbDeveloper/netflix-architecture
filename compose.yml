@@ -1,15 +1,39 @@
 services:
-  db:
-    container_name: netflix_db
+  api_db:
+    container_name: api_db
     image: postgres:18-alpine
     ports:
-      - ${DB_PORT}:5432
+      - ${API_DB_PORT}:5432
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${API_DB_NAME}
+      POSTGRES_USER: ${API_DB_USER}
+      POSTGRES_PASSWORD: ${API_DB_PASS}
     volumes:
-      - postgres-data:/var/lib/postgresql/18/data
+      - api-postgres-data:/var/lib/postgresql/18/data
+
+  history_db:
+    container_name: history_db
+    image: postgres:18-alpine
+    ports:
+      - ${HISTORY_DB_PORT}:5432
+    environment:
+      POSTGRES_DB: ${HISTORY_DB_NAME}
+      POSTGRES_USER: ${HISTORY_DB_USER}
+      POSTGRES_PASSWORD: ${HISTORY_DB_PASS}
+    volumes:
+      - history-postgres-data:/var/lib/postgresql/18/data
+
+  recomendation_db:
+    container_name: recomendation_db
+    image: postgres:18-alpine
+    ports:
+      - ${RECOMENDATION_DB_PORT}:5432
+    environment:
+      POSTGRES_DB: ${RECOMENDATION_DB_NAME}
+      POSTGRES_USER: ${RECOMENDATION_DB_USER}
+      POSTGRES_PASSWORD: ${RECOMENDATION_DB_PASS}
+    volumes:
+      - recomendation-postgres-data:/var/lib/postgresql/18/data
 
   redis:
     container_name: netflix_redis
@@ -26,21 +50,13 @@ services:
       - "${API_PORT}:${API_PORT}"
     build:
       context: ./apps/api
-    environment:
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - DB_PORT=${DB_PORT}
-      - DB_HOST=${DB_HOST}
-      - ENV=${ENV}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASS=${REDIS_PASS}
-      - ADMIN_EMAIL=${ADMIN_EMAIL}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    env_file: ./apps/api/.env
     depends_on:
-      - db
+      - api_db
       - redis
 
 volumes:
-  postgres-data:
+  api-postgres-data:
+  history-postgres-data:
+  recomendation-postgres-data:
   redis-data:
