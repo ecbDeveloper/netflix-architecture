@@ -65,26 +65,29 @@ func main() {
 		os.Exit(1)
 	}
 
+	redisPool := initializeRedisPool(ctx)
+	defer redisPool.Close()
+
+	conn := redisPool.Get()
+	defer conn.Close()
+
+	if err := conn.Err(); err != nil {
+		logger.Error("failed to connect on redis", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	_, err = conn.Do("PING")
+	if err != nil {
+		logger.Error("failed to ping redis", slog.Any("error", err))
+		os.Exit(1)
+	}
+
 	pool, err := initializeDatabaseConnection(ctx)
 	if err != nil {
 		logger.Error("failed to initialize db pool", slog.Any("error", err))
 		os.Exit(1)
 	}
 	defer pool.Close()
-
-	redisPort := os.Getenv("REDIS_PORT")
-	redisPass := os.Getenv("REDIS_PASS")
-	redisHost := os.Getenv("REDIS_HOST")
-
-	redisPool := &redis.Pool{
-		MaxIdle:     10,
-		IdleTimeout: 240 * time.Second,
-		DialContext: func(ctx context.Context) (redis.Conn, error) {
-			return redis.Dial("tcp", redisHost+":"+redisPort,
-				redis.DialPassword(redisPass),
-			)
-		},
-	}
 
 	resolver, s, queries := initializeDependencies(pool, redisPool, logger)
 
@@ -141,6 +144,21 @@ func initializeDatabaseConnection(ctx context.Context) (*pgxpool.Pool, error) {
 	}
 
 	return pool, nil
+}
+
+func initializeRedisPool(ctx context.Context) *redis.Pool {
+	redisPort := os.Getenv("REDIS_PORT")
+	redisPass := os.Getenv("REDIS_PASS")
+	redisHost := os.Getenv("REDIS_HOST")
+	address := redisHost + ":" + redisPort
+
+	return &redis.Pool{
+		MaxIdle:     10,
+		IdleTimeout: 240 * time.Second,
+		DialContext: func(context.Context) (redis.Conn, error) {
+			return redis.Dial("tcp", address, redis.DialPassword(redisPass))
+		},
+	}
 }
 
 func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *slog.Logger) (*resolvers.Resolver, *scs.SessionManager, *sqlc.Queries) {
