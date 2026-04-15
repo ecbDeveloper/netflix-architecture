@@ -15,6 +15,16 @@ import (
 	"github.com/google/uuid"
 )
 
+var hContentTypeToGraph = map[historypb.ContentType]model.ContentType{
+	1: model.ContentTypeMovie,
+	2: model.ContentTypeSeries,
+}
+
+var recContentTypeToGraph = map[recommendationpb.ContentType]model.ContentType{
+	1: model.ContentTypeMovie,
+	2: model.ContentTypeSeries,
+}
+
 // CreateWatchHistory is the resolver for the createWatchHistory field.
 func (r *mutationResolver) CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
@@ -163,7 +173,7 @@ func (r *queryResolver) MostWatchedContents(ctx context.Context, limit *int32) (
 		contentID, _ := uuid.Parse(item.ContentId)
 		result[i] = &model.MostWatchedContent{
 			ContentID:   contentID,
-			ContentType: item.ContentType,
+			ContentType: hContentTypeToGraph[item.ContentType],
 			GenreID:     item.GenreId,
 			WatchCount:  int32(item.WatchCount),
 		}
@@ -227,7 +237,7 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 		contentID, _ := uuid.Parse(rec.ContentId)
 		result[i] = &model.RecommendedContent{
 			ContentID:   contentID,
-			ContentType: rec.ContentType,
+			ContentType: recContentTypeToGraph[rec.ContentType],
 			Score:       rec.Score,
 			Reason:      rec.Reason,
 		}
