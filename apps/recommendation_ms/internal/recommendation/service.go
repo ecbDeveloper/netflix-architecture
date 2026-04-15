@@ -73,7 +73,6 @@ func (s *Server) GetRecommendations(ctx context.Context, req *pb.GetRecommendati
 
 	scored := make([]scoredContent, 0)
 
-	// 3. Rule: recommend most watched content the user hasn't seen
 	for _, item := range mostWatchedResp.Items {
 		if watchedSet[item.ContentId] {
 			continue
