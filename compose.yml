@@ -27,11 +27,11 @@ services:
     container_name: recommendation_db
     image: postgres:18-alpine
     ports:
-      - ${recommendation_DB_PORT}:5432
+      - ${RECOMMENDATION_DB_PORT}:5432
     environment:
-      POSTGRES_DB: ${recommendation_DB_NAME}
-      POSTGRES_USER: ${recommendation_DB_USER}
-      POSTGRES_PASSWORD: ${recommendation_DB_PASS}
+      POSTGRES_DB: ${RECOMMENDATION_DB_NAME}
+      POSTGRES_USER: ${RECOMMENDATION_DB_USER}
+      POSTGRES_PASSWORD: ${RECOMMENDATION_DB_PASS}
     volumes:
       - recommendation-postgres-data:/var/lib/postgresql/18/data
 
@@ -55,7 +55,7 @@ services:
     depends_on:
       - api_db
       - redis
-      - history_msa
+      - history_ms
       - recommendation_ms
 
   history_ms:
