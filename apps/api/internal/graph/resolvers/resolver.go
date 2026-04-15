@@ -11,7 +11,8 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/review"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/series"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/user"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/watchhistory"
+	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
+	recommendationpb "github.com/ecbDeveloper/netflix-architecture/proto/recommendation"
 )
 
 // This file will not be regenerated automatically.
@@ -23,14 +24,15 @@ type Resolver struct {
 	Logger   *slog.Logger
 	Sessions *scs.SessionManager
 
-	UserService         user.Service
-	EpisodeService      episode.Service
-	MovieService        movie.Service
-	ProfileService      profile.Service
-	ReviewService       review.Service
-	SeriesService       series.Service
-	WatchHistoryService watchhistory.Service
-	AuthService         auth.Service
+	UserService          user.Service
+	EpisodeService       episode.Service
+	MovieService         movie.Service
+	ProfileService       profile.Service
+	ReviewService        review.Service
+	SeriesService        series.Service
+	AuthService          auth.Service
+	HistoryClient        historypb.HistoryServiceClient
+	RecommendationClient recommendationpb.RecommendationServiceClient
 }
 
 func NewResolver(
@@ -42,19 +44,21 @@ func NewResolver(
 	ps profile.Service,
 	rs review.Service,
 	ss series.Service,
-	whs watchhistory.Service,
 	as auth.Service,
+	hc historypb.HistoryServiceClient,
+	rc recommendationpb.RecommendationServiceClient,
 ) *Resolver {
 	return &Resolver{
-		Logger:              l,
-		Sessions:            s,
-		UserService:         us,
-		EpisodeService:      es,
-		MovieService:        ms,
-		ProfileService:      ps,
-		ReviewService:       rs,
-		SeriesService:       ss,
-		WatchHistoryService: whs,
-		AuthService:         as,
+		Logger:               l,
+		Sessions:             s,
+		UserService:          us,
+		EpisodeService:       es,
+		MovieService:         ms,
+		ProfileService:       ps,
+		ReviewService:        rs,
+		SeriesService:        ss,
+		AuthService:          as,
+		HistoryClient:        hc,
+		RecommendationClient: rc,
 	}
 }
