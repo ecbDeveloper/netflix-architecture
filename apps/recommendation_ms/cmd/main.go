@@ -41,7 +41,9 @@ func main() {
 	}
 	defer pool.Close()
 
-	historyAddr := os.Getenv("HISTORY_GRPC_ADDR")
+	historyHost := os.Getenv("HISTORY_GRPC_HOST")
+	historyPort := os.Getenv("HISTORY_GRPC_PORT")
+	historyAddr := historyHost + ":" + historyPort
 	historyConn, err := grpc.NewClient(historyAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Error("failed to connect to history ms", slog.Any("error", err))
