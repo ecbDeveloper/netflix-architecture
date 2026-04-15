@@ -6,6 +6,8 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -71,3 +73,39 @@ func handleError(err error) *gqlerror.Error {
 		},
 	}
 }
+
+func handleGRPCError(err error) *gqlerror.Error {
+	st, ok := status.FromError(err)
+	if !ok {
+		return handleError(err)
+	}
+
+	switch st.Code() {
+	case codes.InvalidArgument:
+		return &gqlerror.Error{
+			Message: st.Message(),
+			Extensions: map[string]any{"code": "BAD_REQUEST"},
+		}
+	case codes.NotFound:
+		return &gqlerror.Error{
+			Message: st.Message(),
+			Extensions: map[string]any{"code": "NOT_FOUND"},
+		}
+	case codes.Unauthenticated:
+		return &gqlerror.Error{
+			Message: st.Message(),
+			Extensions: map[string]any{"code": "UNAUTHORIZED"},
+		}
+	case codes.PermissionDenied:
+		return &gqlerror.Error{
+			Message: st.Message(),
+			Extensions: map[string]any{"code": "FORBIDDEN"},
+		}
+	default:
+		return &gqlerror.Error{
+			Message: "internal error from external service",
+			Extensions: map[string]any{"code": "INTERNAL_SERVER"},
+		}
+	}
+}
+
