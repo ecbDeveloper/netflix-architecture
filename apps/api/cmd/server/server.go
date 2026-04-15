@@ -116,6 +116,12 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(s.LoadAndSave)
 
+	uploadPath := os.Getenv("UPLOAD_PATH")
+	if uploadPath == "" {
+		uploadPath = "./storage/"
+	}
+	router.Handle("/storage/*", http.StripPrefix("/storage/", http.FileServer(http.Dir(uploadPath))))
+
 	graphConfig := initializeGraphQLConfig(resolver, s, queries)
 
 	srv := handler.New(graph.NewExecutableSchema(graphConfig))
