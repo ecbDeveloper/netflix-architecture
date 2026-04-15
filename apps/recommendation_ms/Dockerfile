@@ -2,11 +2,11 @@ FROM golang:1.25.3-alpine3.21 AS build
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
-COPY ../../proto/ /proto/
+COPY apps/recommendation_ms/go.mod apps/recommendation_ms/go.sum ./
+COPY proto/ /proto/
 RUN go mod download
 
-COPY . .
+COPY apps/recommendation_ms/ .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/main.go
 

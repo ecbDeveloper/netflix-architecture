@@ -2,11 +2,11 @@ FROM golang:1.25.3-alpine3.21 AS build
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
-COPY ../../proto/ /proto/
+COPY apps/history_ms/go.mod apps/history_ms/go.sum ./
+COPY proto/ /proto/
 RUN go mod download
 
-COPY . .
+COPY apps/history_ms/ .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/main.go
 
