@@ -10,6 +10,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -24,12 +25,14 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	queries *sqlc.Queries
+	queries        *sqlc.Queries
+	storageService storage.Service
 }
 
-func NewService(queries *sqlc.Queries) Service {
+func NewService(queries *sqlc.Queries, storageService storage.Service) Service {
 	return &ServiceImpl{
-		queries: queries,
+		queries:        queries,
+		storageService: storageService,
 	}
 }
 
@@ -46,8 +49,8 @@ func (s *ServiceImpl) CreateMovie(ctx context.Context, input model.CreateMovieIn
 	if strings.TrimSpace(string(input.MaturityRating)) == "" {
 		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating is required"}
 	}
-	if strings.TrimSpace(input.ContentURL) == "" {
-		return nil, &apperror.ValidationError{Field: "contentUrl", Message: "content URL is required"}
+	if input.MovieFile.File == nil {
+		return nil, &apperror.ValidationError{Field: "moveFile", Message: "movie file is required"}
 	}
 
 	movieID := uuid.New()
@@ -55,6 +58,11 @@ func (s *ServiceImpl) CreateMovie(ctx context.Context, input model.CreateMovieIn
 	releaseDate, err := time.Parse("2006-01-02", input.ReleaseDate)
 	if err != nil {
 		return nil, &apperror.ValidationError{Field: "releaseDate", Message: "invalid date format, use YYYY-MM-DD"}
+	}
+
+	contentURL, err := s.storageService.Upload(ctx, input.MovieFile.Filename, input.MovieFile.File)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload movie file: %w", err)
 	}
 
 	movie, err := s.queries.CreateMovie(ctx, sqlc.CreateMovieParams{
@@ -67,7 +75,7 @@ func (s *ServiceImpl) CreateMovie(ctx context.Context, input model.CreateMovieIn
 			Valid: true,
 		},
 		MaturityRating: sqlc.MaturityRating(input.MaturityRating),
-		ContentUrl:     input.ContentURL,
+		ContentUrl:     contentURL,
 		GenreID:        input.GenreID,
 	})
 	if err != nil {
@@ -146,9 +154,6 @@ func (s *ServiceImpl) UpdateMovie(ctx context.Context, id uuid.UUID, input model
 	if input.MaturityRating != nil && strings.TrimSpace(string(*input.MaturityRating)) == "" {
 		return nil, &apperror.ValidationError{Field: "maturityRating", Message: "maturity rating cannot be empty"}
 	}
-	if input.ContentURL != nil && strings.TrimSpace(*input.ContentURL) == "" {
-		return nil, &apperror.ValidationError{Field: "contentUrl", Message: "content URL cannot be empty"}
-	}
 
 	current, err := s.queries.GetMovie(ctx, id)
 	if err != nil {
@@ -187,8 +192,14 @@ func (s *ServiceImpl) UpdateMovie(ctx context.Context, id uuid.UUID, input model
 	if input.MaturityRating != nil {
 		params.MaturityRating = sqlc.MaturityRating(*input.MaturityRating)
 	}
-	if input.ContentURL != nil {
-		params.ContentUrl = *input.ContentURL
+
+	if input.MovieFile.File != nil {
+		contentURL, err := s.storageService.Upload(ctx, input.MovieFile.Filename, input.MovieFile.File)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update movie file content: %w", err)
+		}
+
+		params.ContentUrl = contentURL
 	}
 
 	movie, err := s.queries.UpdateMovie(ctx, params)

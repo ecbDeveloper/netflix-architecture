@@ -28,6 +28,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/review"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/series"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/user"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/watchhistory"
 	"github.com/go-chi/chi/v5"
@@ -162,11 +163,13 @@ func initializeRedisPool(ctx context.Context) *redis.Pool {
 }
 
 func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *slog.Logger) (*resolvers.Resolver, *scs.SessionManager, *sqlc.Queries) {
-	queries := sqlc.New(pool)
+	uploadPath := os.Getenv("UPLOAD_PATH")
 
+	queries := sqlc.New(pool)
+	storageService := storage.NewService(uploadPath)
 	userService := user.NewService(queries)
-	episodeService := episode.NewService(queries)
-	movieService := movie.NewService(queries)
+	episodeService := episode.NewService(queries, storageService)
+	movieService := movie.NewService(queries, storageService)
 	profileService := profile.NewService(queries)
 	reviewService := review.NewService(queries)
 	seriesService := series.NewService(queries)

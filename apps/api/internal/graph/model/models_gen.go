@@ -32,8 +32,8 @@ type CreateMovieInput struct {
 	DurationMinutes int32          `json:"durationMinutes"`
 	ReleaseDate     string         `json:"releaseDate"`
 	MaturityRating  MaturityRating `json:"maturityRating"`
-	MovieFile       graphql.Upload `json:"movieFile"`
 	GenreID         int32          `json:"genreId"`
+	MovieFile       graphql.Upload `json:"movieFile"`
 }
 
 type CreateProfileInput struct {
@@ -133,10 +133,11 @@ type Series struct {
 }
 
 type UpdateEpisodeInput struct {
-	Season          *int32  `json:"season,omitempty"`
-	EpisodeNumber   *int32  `json:"episodeNumber,omitempty"`
-	Title           *string `json:"title,omitempty"`
-	DurationMinutes *int32  `json:"durationMinutes,omitempty"`
+	Season          *int32         `json:"season,omitempty"`
+	EpisodeNumber   *int32         `json:"episodeNumber,omitempty"`
+	Title           *string        `json:"title,omitempty"`
+	DurationMinutes *int32         `json:"durationMinutes,omitempty"`
+	EpisodeFile     graphql.Upload `json:"episodeFile"`
 }
 
 type UpdateMovieInput struct {
@@ -146,6 +147,7 @@ type UpdateMovieInput struct {
 	ReleaseDate     *string         `json:"releaseDate,omitempty"`
 	MaturityRating  *MaturityRating `json:"maturityRating,omitempty"`
 	GenreID         *int32          `json:"genreId,omitempty"`
+	MovieFile       graphql.Upload  `json:"movieFile"`
 }
 
 type UpdateProfileInput struct {

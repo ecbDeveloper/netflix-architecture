@@ -9,6 +9,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -22,12 +23,14 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	queries *sqlc.Queries
+	queries        *sqlc.Queries
+	storageService storage.Service
 }
 
-func NewService(queries *sqlc.Queries) Service {
+func NewService(queries *sqlc.Queries, storageService storage.Service) Service {
 	return &ServiceImpl{
-		queries: queries,
+		queries:        queries,
+		storageService: storageService,
 	}
 }
 
@@ -44,8 +47,16 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 	if input.DurationMinutes <= 0 {
 		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: "duration must be greater than zero"}
 	}
+	if input.EpisodeFile.File == nil {
+		return nil, &apperror.ValidationError{Field: "episodeFile", Message: "episode file is required"}
+	}
 
 	episodeID := uuid.New()
+
+	contentURL, err := s.storageService.Upload(ctx, input.EpisodeFile.Filename, input.EpisodeFile.File)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload episode file: %w", err)
+	}
 
 	ep, err := s.queries.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
 		ID:              episodeID,
@@ -54,6 +65,7 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 		EpisodeNumber:   input.EpisodeNumber,
 		Title:           input.Title,
 		DurationMinutes: input.DurationMinutes,
+		ContentUrl:      contentURL,
 	})
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
@@ -158,6 +170,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		EpisodeNumber:   current.EpisodeNumber,
 		Title:           current.Title,
 		DurationMinutes: current.DurationMinutes,
+		ContentUrl:      current.ContentUrl,
 	}
 
 	if input.Season != nil {
@@ -171,6 +184,17 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 	}
 	if input.DurationMinutes != nil {
 		params.DurationMinutes = *input.DurationMinutes
+	}
+
+	if input.EpisodeFile.File != nil {
+		contentURL, err := s.storageService.Upload(ctx, input.EpisodeFile.Filename, input.EpisodeFile.File)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update episode file content: %w", err)
+		}
+
+		if strings.TrimSpace(contentURL) != "" {
+			params.ContentUrl = contentURL
+		}
 	}
 
 	ep, err := s.queries.UpdateEpisode(ctx, params)

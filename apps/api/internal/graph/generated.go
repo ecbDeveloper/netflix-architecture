@@ -7752,7 +7752,7 @@ func (ec *executionContext) unmarshalInputCreateMovieInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "movieFile", "genreId"}
+	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "genreId", "movieFile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7794,13 +7794,6 @@ func (ec *executionContext) unmarshalInputCreateMovieInput(ctx context.Context, 
 				return it, err
 			}
 			it.MaturityRating = data
-		case "movieFile":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("movieFile"))
-			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.MovieFile = data
 		case "genreId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
 			data, err := ec.unmarshalNInt2int32(ctx, v)
@@ -7808,6 +7801,13 @@ func (ec *executionContext) unmarshalInputCreateMovieInput(ctx context.Context, 
 				return it, err
 			}
 			it.GenreID = data
+		case "movieFile":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("movieFile"))
+			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MovieFile = data
 		}
 	}
 	return it, nil
@@ -8109,7 +8109,7 @@ func (ec *executionContext) unmarshalInputUpdateEpisodeInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"season", "episodeNumber", "title", "durationMinutes"}
+	fieldsInOrder := [...]string{"season", "episodeNumber", "title", "durationMinutes", "episodeFile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8144,6 +8144,13 @@ func (ec *executionContext) unmarshalInputUpdateEpisodeInput(ctx context.Context
 				return it, err
 			}
 			it.DurationMinutes = data
+		case "episodeFile":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("episodeFile"))
+			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EpisodeFile = data
 		}
 	}
 	return it, nil
@@ -8160,7 +8167,7 @@ func (ec *executionContext) unmarshalInputUpdateMovieInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "genreId"}
+	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "genreId", "movieFile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8209,6 +8216,13 @@ func (ec *executionContext) unmarshalInputUpdateMovieInput(ctx context.Context, 
 				return it, err
 			}
 			it.GenreID = data
+		case "movieFile":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("movieFile"))
+			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MovieFile = data
 		}
 	}
 	return it, nil
