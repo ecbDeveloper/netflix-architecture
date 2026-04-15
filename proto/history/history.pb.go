@@ -9,7 +9,6 @@ package history
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -21,6 +20,55 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+type ContentType int32
+
+const (
+	ContentType_CONTENT_TYPE_UNSPECIFIED ContentType = 0
+	ContentType_MOVIE                    ContentType = 1
+	ContentType_SERIES                   ContentType = 2
+)
+
+// Enum value maps for ContentType.
+var (
+	ContentType_name = map[int32]string{
+		0: "CONTENT_TYPE_UNSPECIFIED",
+		1: "MOVIE",
+		2: "SERIES",
+	}
+	ContentType_value = map[string]int32{
+		"CONTENT_TYPE_UNSPECIFIED": 0,
+		"MOVIE":                    1,
+		"SERIES":                   2,
+	}
+)
+
+func (x ContentType) Enum() *ContentType {
+	p := new(ContentType)
+	*p = x
+	return p
+}
+
+func (x ContentType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ContentType) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_history_history_proto_enumTypes[0].Descriptor()
+}
+
+func (ContentType) Type() protoreflect.EnumType {
+	return &file_proto_history_history_proto_enumTypes[0]
+}
+
+func (x ContentType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ContentType.Descriptor instead.
+func (ContentType) EnumDescriptor() ([]byte, []int) {
+	return file_proto_history_history_proto_rawDescGZIP(), []int{0}
+}
 
 type RecordWatchRequest struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
@@ -533,7 +581,7 @@ func (x *GetMostWatchedRequest) GetLimit() int32 {
 type MostWatchedItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ContentId     string                 `protobuf:"bytes,1,opt,name=content_id,json=contentId,proto3" json:"content_id,omitempty"`
-	ContentType   string                 `protobuf:"bytes,2,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"` // "movie" or "episode"
+	ContentType   ContentType            `protobuf:"varint,2,opt,name=content_type,json=contentType,proto3,enum=history.ContentType" json:"content_type,omitempty"`
 	GenreId       int32                  `protobuf:"varint,3,opt,name=genre_id,json=genreId,proto3" json:"genre_id,omitempty"`
 	WatchCount    int64                  `protobuf:"varint,4,opt,name=watch_count,json=watchCount,proto3" json:"watch_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -577,11 +625,11 @@ func (x *MostWatchedItem) GetContentId() string {
 	return ""
 }
 
-func (x *MostWatchedItem) GetContentType() string {
+func (x *MostWatchedItem) GetContentType() ContentType {
 	if x != nil {
 		return x.ContentType
 	}
-	return ""
+	return ContentType_CONTENT_TYPE_UNSPECIFIED
 }
 
 func (x *MostWatchedItem) GetGenreId() int32 {
@@ -698,7 +746,7 @@ var File_proto_history_history_proto protoreflect.FileDescriptor
 
 const file_proto_history_history_proto_rawDesc = "" +
 	"\n" +
-	"\x1bproto/history/history.proto\x12\ahistory\x1a\x1fgoogle/protobuf/timestamp.proto\"\xcc\x02\n" +
+	"\x1bproto/history/history.proto\x12\ahistory\"\xcc\x02\n" +
 	"\x12RecordWatchRequest\x12\x1d\n" +
 	"\n" +
 	"profile_id\x18\x01 \x01(\tR\tprofileId\x12\x1e\n" +
@@ -745,11 +793,11 @@ const file_proto_history_history_proto_rawDesc = "" +
 	"\x18ListWatchHistoryResponse\x12;\n" +
 	"\thistories\x18\x01 \x03(\v2\x1d.history.WatchHistoryResponseR\thistories\"-\n" +
 	"\x15GetMostWatchedRequest\x12\x14\n" +
-	"\x05limit\x18\x01 \x01(\x05R\x05limit\"\x8f\x01\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\"\xa5\x01\n" +
 	"\x0fMostWatchedItem\x12\x1d\n" +
 	"\n" +
-	"content_id\x18\x01 \x01(\tR\tcontentId\x12!\n" +
-	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x19\n" +
+	"content_id\x18\x01 \x01(\tR\tcontentId\x127\n" +
+	"\fcontent_type\x18\x02 \x01(\x0e2\x14.history.contentTypeR\vcontentType\x12\x19\n" +
 	"\bgenre_id\x18\x03 \x01(\x05R\agenreId\x12\x1f\n" +
 	"\vwatch_count\x18\x04 \x01(\x03R\n" +
 	"watchCount\"E\n" +
@@ -758,7 +806,12 @@ const file_proto_history_history_proto_rawDesc = "" +
 	"\x19GetRecentlyWatchedRequest\x12\x1d\n" +
 	"\n" +
 	"profile_id\x18\x01 \x01(\tR\tprofileId\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit2\xee\x04\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit*B\n" +
+	"\vcontentType\x12\x1c\n" +
+	"\x18CONTENT_TYPE_UNSPECIFIED\x10\x00\x12\t\n" +
+	"\x05MOVIE\x10\x01\x12\n" +
+	"\n" +
+	"\x06SERIES\x10\x022\xee\x04\n" +
 	"\x0eHistoryService\x12I\n" +
 	"\vRecordWatch\x12\x1b.history.RecordWatchRequest\x1a\x1d.history.WatchHistoryResponse\x12Q\n" +
 	"\x0fGetWatchHistory\x12\x1f.history.GetWatchHistoryRequest\x1a\x1d.history.WatchHistoryResponse\x12W\n" +
@@ -780,43 +833,46 @@ func file_proto_history_history_proto_rawDescGZIP() []byte {
 	return file_proto_history_history_proto_rawDescData
 }
 
+var file_proto_history_history_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_proto_history_history_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_proto_history_history_proto_goTypes = []any{
-	(*RecordWatchRequest)(nil),         // 0: history.RecordWatchRequest
-	(*GetWatchHistoryRequest)(nil),     // 1: history.GetWatchHistoryRequest
-	(*ListWatchHistoryRequest)(nil),    // 2: history.ListWatchHistoryRequest
-	(*UpdateWatchProgressRequest)(nil), // 3: history.UpdateWatchProgressRequest
-	(*DeleteWatchHistoryRequest)(nil),  // 4: history.DeleteWatchHistoryRequest
-	(*DeleteWatchHistoryResponse)(nil), // 5: history.DeleteWatchHistoryResponse
-	(*WatchHistoryResponse)(nil),       // 6: history.WatchHistoryResponse
-	(*ListWatchHistoryResponse)(nil),   // 7: history.ListWatchHistoryResponse
-	(*GetMostWatchedRequest)(nil),      // 8: history.GetMostWatchedRequest
-	(*MostWatchedItem)(nil),            // 9: history.MostWatchedItem
-	(*MostWatchedResponse)(nil),        // 10: history.MostWatchedResponse
-	(*GetRecentlyWatchedRequest)(nil),  // 11: history.GetRecentlyWatchedRequest
+	(ContentType)(0),                   // 0: history.contentType
+	(*RecordWatchRequest)(nil),         // 1: history.RecordWatchRequest
+	(*GetWatchHistoryRequest)(nil),     // 2: history.GetWatchHistoryRequest
+	(*ListWatchHistoryRequest)(nil),    // 3: history.ListWatchHistoryRequest
+	(*UpdateWatchProgressRequest)(nil), // 4: history.UpdateWatchProgressRequest
+	(*DeleteWatchHistoryRequest)(nil),  // 5: history.DeleteWatchHistoryRequest
+	(*DeleteWatchHistoryResponse)(nil), // 6: history.DeleteWatchHistoryResponse
+	(*WatchHistoryResponse)(nil),       // 7: history.WatchHistoryResponse
+	(*ListWatchHistoryResponse)(nil),   // 8: history.ListWatchHistoryResponse
+	(*GetMostWatchedRequest)(nil),      // 9: history.GetMostWatchedRequest
+	(*MostWatchedItem)(nil),            // 10: history.MostWatchedItem
+	(*MostWatchedResponse)(nil),        // 11: history.MostWatchedResponse
+	(*GetRecentlyWatchedRequest)(nil),  // 12: history.GetRecentlyWatchedRequest
 }
 var file_proto_history_history_proto_depIdxs = []int32{
-	6,  // 0: history.ListWatchHistoryResponse.histories:type_name -> history.WatchHistoryResponse
-	9,  // 1: history.MostWatchedResponse.items:type_name -> history.MostWatchedItem
-	0,  // 2: history.HistoryService.RecordWatch:input_type -> history.RecordWatchRequest
-	1,  // 3: history.HistoryService.GetWatchHistory:input_type -> history.GetWatchHistoryRequest
-	2,  // 4: history.HistoryService.ListWatchHistory:input_type -> history.ListWatchHistoryRequest
-	3,  // 5: history.HistoryService.UpdateWatchProgress:input_type -> history.UpdateWatchProgressRequest
-	4,  // 6: history.HistoryService.DeleteWatchHistory:input_type -> history.DeleteWatchHistoryRequest
-	8,  // 7: history.HistoryService.GetMostWatched:input_type -> history.GetMostWatchedRequest
-	11, // 8: history.HistoryService.GetRecentlyWatched:input_type -> history.GetRecentlyWatchedRequest
-	6,  // 9: history.HistoryService.RecordWatch:output_type -> history.WatchHistoryResponse
-	6,  // 10: history.HistoryService.GetWatchHistory:output_type -> history.WatchHistoryResponse
-	7,  // 11: history.HistoryService.ListWatchHistory:output_type -> history.ListWatchHistoryResponse
-	6,  // 12: history.HistoryService.UpdateWatchProgress:output_type -> history.WatchHistoryResponse
-	5,  // 13: history.HistoryService.DeleteWatchHistory:output_type -> history.DeleteWatchHistoryResponse
-	10, // 14: history.HistoryService.GetMostWatched:output_type -> history.MostWatchedResponse
-	7,  // 15: history.HistoryService.GetRecentlyWatched:output_type -> history.ListWatchHistoryResponse
-	9,  // [9:16] is the sub-list for method output_type
-	2,  // [2:9] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	7,  // 0: history.ListWatchHistoryResponse.histories:type_name -> history.WatchHistoryResponse
+	0,  // 1: history.MostWatchedItem.content_type:type_name -> history.contentType
+	10, // 2: history.MostWatchedResponse.items:type_name -> history.MostWatchedItem
+	1,  // 3: history.HistoryService.RecordWatch:input_type -> history.RecordWatchRequest
+	2,  // 4: history.HistoryService.GetWatchHistory:input_type -> history.GetWatchHistoryRequest
+	3,  // 5: history.HistoryService.ListWatchHistory:input_type -> history.ListWatchHistoryRequest
+	4,  // 6: history.HistoryService.UpdateWatchProgress:input_type -> history.UpdateWatchProgressRequest
+	5,  // 7: history.HistoryService.DeleteWatchHistory:input_type -> history.DeleteWatchHistoryRequest
+	9,  // 8: history.HistoryService.GetMostWatched:input_type -> history.GetMostWatchedRequest
+	12, // 9: history.HistoryService.GetRecentlyWatched:input_type -> history.GetRecentlyWatchedRequest
+	7,  // 10: history.HistoryService.RecordWatch:output_type -> history.WatchHistoryResponse
+	7,  // 11: history.HistoryService.GetWatchHistory:output_type -> history.WatchHistoryResponse
+	8,  // 12: history.HistoryService.ListWatchHistory:output_type -> history.ListWatchHistoryResponse
+	7,  // 13: history.HistoryService.UpdateWatchProgress:output_type -> history.WatchHistoryResponse
+	6,  // 14: history.HistoryService.DeleteWatchHistory:output_type -> history.DeleteWatchHistoryResponse
+	11, // 15: history.HistoryService.GetMostWatched:output_type -> history.MostWatchedResponse
+	8,  // 16: history.HistoryService.GetRecentlyWatched:output_type -> history.ListWatchHistoryResponse
+	10, // [10:17] is the sub-list for method output_type
+	3,  // [3:10] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_proto_history_history_proto_init() }
@@ -832,13 +888,14 @@ func file_proto_history_history_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_history_history_proto_rawDesc), len(file_proto_history_history_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_proto_history_history_proto_goTypes,
 		DependencyIndexes: file_proto_history_history_proto_depIdxs,
+		EnumInfos:         file_proto_history_history_proto_enumTypes,
 		MessageInfos:      file_proto_history_history_proto_msgTypes,
 	}.Build()
 	File_proto_history_history_proto = out.File

@@ -66,8 +66,7 @@ message GetMostWatchedRequest {
 
 message MostWatchedItem {
   string content_id = 1;
-  string content_type = 2;
-  int32 genre_id = 3;
+  contentType content_type = 2; int32 genre_id = 3;
   int64 watch_count = 4;
 }
 
@@ -78,4 +77,10 @@ message MostWatchedResponse {
 message GetRecentlyWatchedRequest {
   string profile_id = 1;
   int32 limit = 2;
+}
+
+enum contentType {
+  CONTENT_TYPE_UNSPECIFIED = 0;
+  MOVIE = 1;
+  SERIES = 2;
 }

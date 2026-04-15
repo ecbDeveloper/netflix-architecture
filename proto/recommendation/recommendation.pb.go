@@ -21,6 +21,55 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type ContentType int32
+
+const (
+	ContentType_CONTENT_TYPE_UNSPECIFIED ContentType = 0
+	ContentType_MOVIE                    ContentType = 1
+	ContentType_SERIES                   ContentType = 2
+)
+
+// Enum value maps for ContentType.
+var (
+	ContentType_name = map[int32]string{
+		0: "CONTENT_TYPE_UNSPECIFIED",
+		1: "MOVIE",
+		2: "SERIES",
+	}
+	ContentType_value = map[string]int32{
+		"CONTENT_TYPE_UNSPECIFIED": 0,
+		"MOVIE":                    1,
+		"SERIES":                   2,
+	}
+)
+
+func (x ContentType) Enum() *ContentType {
+	p := new(ContentType)
+	*p = x
+	return p
+}
+
+func (x ContentType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ContentType) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_recommendation_recommendation_proto_enumTypes[0].Descriptor()
+}
+
+func (ContentType) Type() protoreflect.EnumType {
+	return &file_proto_recommendation_recommendation_proto_enumTypes[0]
+}
+
+func (x ContentType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ContentType.Descriptor instead.
+func (ContentType) EnumDescriptor() ([]byte, []int) {
+	return file_proto_recommendation_recommendation_proto_rawDescGZIP(), []int{0}
+}
+
 type GetRecommendationsRequest struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	ProfileId        string                 `protobuf:"bytes,1,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"`
@@ -84,7 +133,7 @@ func (x *GetRecommendationsRequest) GetTopRatedContents() []*TopRatedContent {
 type TopRatedContent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ContentId     string                 `protobuf:"bytes,1,opt,name=content_id,json=contentId,proto3" json:"content_id,omitempty"`
-	ContentType   string                 `protobuf:"bytes,2,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"` // "movie" or "episode"
+	ContentType   ContentType            `protobuf:"varint,2,opt,name=content_type,json=contentType,proto3,enum=recommendation.ContentType" json:"content_type,omitempty"`
 	GenreId       int32                  `protobuf:"varint,3,opt,name=genre_id,json=genreId,proto3" json:"genre_id,omitempty"`
 	AvgRating     float64                `protobuf:"fixed64,4,opt,name=avg_rating,json=avgRating,proto3" json:"avg_rating,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -128,11 +177,11 @@ func (x *TopRatedContent) GetContentId() string {
 	return ""
 }
 
-func (x *TopRatedContent) GetContentType() string {
+func (x *TopRatedContent) GetContentType() ContentType {
 	if x != nil {
 		return x.ContentType
 	}
-	return ""
+	return ContentType_CONTENT_TYPE_UNSPECIFIED
 }
 
 func (x *TopRatedContent) GetGenreId() int32 {
@@ -152,9 +201,9 @@ func (x *TopRatedContent) GetAvgRating() float64 {
 type RecommendedContent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ContentId     string                 `protobuf:"bytes,1,opt,name=content_id,json=contentId,proto3" json:"content_id,omitempty"`
-	ContentType   string                 `protobuf:"bytes,2,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"` // "movie" or "episode"
+	ContentType   ContentType            `protobuf:"varint,2,opt,name=content_type,json=contentType,proto3,enum=recommendation.ContentType" json:"content_type,omitempty"`
 	Score         float64                `protobuf:"fixed64,3,opt,name=score,proto3" json:"score,omitempty"`
-	Reason        string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"` // "same_genre", "most_watched", "top_rated"
+	Reason        string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -196,11 +245,11 @@ func (x *RecommendedContent) GetContentId() string {
 	return ""
 }
 
-func (x *RecommendedContent) GetContentType() string {
+func (x *RecommendedContent) GetContentType() ContentType {
 	if x != nil {
 		return x.ContentType
 	}
-	return ""
+	return ContentType_CONTENT_TYPE_UNSPECIFIED
 }
 
 func (x *RecommendedContent) GetScore() float64 {
@@ -270,22 +319,27 @@ const file_proto_recommendation_recommendation_proto_rawDesc = "" +
 	"\n" +
 	"profile_id\x18\x01 \x01(\tR\tprofileId\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12M\n" +
-	"\x12top_rated_contents\x18\x03 \x03(\v2\x1f.recommendation.TopRatedContentR\x10topRatedContents\"\x8d\x01\n" +
+	"\x12top_rated_contents\x18\x03 \x03(\v2\x1f.recommendation.TopRatedContentR\x10topRatedContents\"\xaa\x01\n" +
 	"\x0fTopRatedContent\x12\x1d\n" +
 	"\n" +
-	"content_id\x18\x01 \x01(\tR\tcontentId\x12!\n" +
-	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x19\n" +
+	"content_id\x18\x01 \x01(\tR\tcontentId\x12>\n" +
+	"\fcontent_type\x18\x02 \x01(\x0e2\x1b.recommendation.contentTypeR\vcontentType\x12\x19\n" +
 	"\bgenre_id\x18\x03 \x01(\x05R\agenreId\x12\x1d\n" +
 	"\n" +
-	"avg_rating\x18\x04 \x01(\x01R\tavgRating\"\x84\x01\n" +
+	"avg_rating\x18\x04 \x01(\x01R\tavgRating\"\xa1\x01\n" +
 	"\x12RecommendedContent\x12\x1d\n" +
 	"\n" +
-	"content_id\x18\x01 \x01(\tR\tcontentId\x12!\n" +
-	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x14\n" +
+	"content_id\x18\x01 \x01(\tR\tcontentId\x12>\n" +
+	"\fcontent_type\x18\x02 \x01(\x0e2\x1b.recommendation.contentTypeR\vcontentType\x12\x14\n" +
 	"\x05score\x18\x03 \x01(\x01R\x05score\x12\x16\n" +
 	"\x06reason\x18\x04 \x01(\tR\x06reason\"j\n" +
 	"\x1aGetRecommendationsResponse\x12L\n" +
-	"\x0frecommendations\x18\x01 \x03(\v2\".recommendation.RecommendedContentR\x0frecommendations2\x84\x01\n" +
+	"\x0frecommendations\x18\x01 \x03(\v2\".recommendation.RecommendedContentR\x0frecommendations*B\n" +
+	"\vcontentType\x12\x1c\n" +
+	"\x18CONTENT_TYPE_UNSPECIFIED\x10\x00\x12\t\n" +
+	"\x05MOVIE\x10\x01\x12\n" +
+	"\n" +
+	"\x06SERIES\x10\x022\x84\x01\n" +
 	"\x15RecommendationService\x12k\n" +
 	"\x12GetRecommendations\x12).recommendation.GetRecommendationsRequest\x1a*.recommendation.GetRecommendationsResponseBCZAgithub.com/ecbDeveloper/netflix-architecture/proto/recommendationb\x06proto3"
 
@@ -301,23 +355,27 @@ func file_proto_recommendation_recommendation_proto_rawDescGZIP() []byte {
 	return file_proto_recommendation_recommendation_proto_rawDescData
 }
 
+var file_proto_recommendation_recommendation_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_proto_recommendation_recommendation_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_proto_recommendation_recommendation_proto_goTypes = []any{
-	(*GetRecommendationsRequest)(nil),  // 0: recommendation.GetRecommendationsRequest
-	(*TopRatedContent)(nil),            // 1: recommendation.TopRatedContent
-	(*RecommendedContent)(nil),         // 2: recommendation.RecommendedContent
-	(*GetRecommendationsResponse)(nil), // 3: recommendation.GetRecommendationsResponse
+	(ContentType)(0),                   // 0: recommendation.contentType
+	(*GetRecommendationsRequest)(nil),  // 1: recommendation.GetRecommendationsRequest
+	(*TopRatedContent)(nil),            // 2: recommendation.TopRatedContent
+	(*RecommendedContent)(nil),         // 3: recommendation.RecommendedContent
+	(*GetRecommendationsResponse)(nil), // 4: recommendation.GetRecommendationsResponse
 }
 var file_proto_recommendation_recommendation_proto_depIdxs = []int32{
-	1, // 0: recommendation.GetRecommendationsRequest.top_rated_contents:type_name -> recommendation.TopRatedContent
-	2, // 1: recommendation.GetRecommendationsResponse.recommendations:type_name -> recommendation.RecommendedContent
-	0, // 2: recommendation.RecommendationService.GetRecommendations:input_type -> recommendation.GetRecommendationsRequest
-	3, // 3: recommendation.RecommendationService.GetRecommendations:output_type -> recommendation.GetRecommendationsResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	2, // 0: recommendation.GetRecommendationsRequest.top_rated_contents:type_name -> recommendation.TopRatedContent
+	0, // 1: recommendation.TopRatedContent.content_type:type_name -> recommendation.contentType
+	0, // 2: recommendation.RecommendedContent.content_type:type_name -> recommendation.contentType
+	3, // 3: recommendation.GetRecommendationsResponse.recommendations:type_name -> recommendation.RecommendedContent
+	1, // 4: recommendation.RecommendationService.GetRecommendations:input_type -> recommendation.GetRecommendationsRequest
+	4, // 5: recommendation.RecommendationService.GetRecommendations:output_type -> recommendation.GetRecommendationsResponse
+	5, // [5:6] is the sub-list for method output_type
+	4, // [4:5] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_proto_recommendation_recommendation_proto_init() }
@@ -330,13 +388,14 @@ func file_proto_recommendation_recommendation_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_recommendation_recommendation_proto_rawDesc), len(file_proto_recommendation_recommendation_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_proto_recommendation_recommendation_proto_goTypes,
 		DependencyIndexes: file_proto_recommendation_recommendation_proto_depIdxs,
+		EnumInfos:         file_proto_recommendation_recommendation_proto_enumTypes,
 		MessageInfos:      file_proto_recommendation_recommendation_proto_msgTypes,
 	}.Build()
 	File_proto_recommendation_recommendation_proto = out.File
