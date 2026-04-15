@@ -175,6 +175,7 @@ func toGraphQLModel(u sqlc.User) *model.User {
 		Email:     u.Email,
 		Name:      u.Name,
 		Cpf:       u.Cpf,
+		RoleID:    u.RoleID,
 		CreatedAt: u.CreatedAt.String(),
 		UpdatedAt: u.UpdatedAt.String(),
 	}
