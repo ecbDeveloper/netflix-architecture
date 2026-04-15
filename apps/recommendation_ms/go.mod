@@ -1,4 +1,4 @@
-module github.com/ecbDeveloper/netflix-architecture/apps/recomendation_ms
+module github.com/ecbDeveloper/netflix-architecture/apps/recommendation_ms
 
 go 1.25.3
 

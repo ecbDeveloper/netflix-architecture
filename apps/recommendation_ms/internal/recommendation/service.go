@@ -4,7 +4,7 @@ import (
 	"context"
 	"sort"
 
-	"github.com/ecbDeveloper/netflix-architecture/apps/recomendation_ms/internal/database/sqlc"
+	"github.com/ecbDeveloper/netflix-architecture/apps/recommendation_ms/internal/database/sqlc"
 	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
 	pb "github.com/ecbDeveloper/netflix-architecture/proto/recommendation"
 	"github.com/google/uuid"

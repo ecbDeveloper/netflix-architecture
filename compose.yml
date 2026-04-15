@@ -23,17 +23,17 @@ services:
     volumes:
       - history-postgres-data:/var/lib/postgresql/18/data
 
-  recomendation_db:
-    container_name: recomendation_db
+  recommendation_db:
+    container_name: recommendation_db
     image: postgres:18-alpine
     ports:
-      - ${RECOMENDATION_DB_PORT}:5432
+      - ${recommendation_DB_PORT}:5432
     environment:
-      POSTGRES_DB: ${RECOMENDATION_DB_NAME}
-      POSTGRES_USER: ${RECOMENDATION_DB_USER}
-      POSTGRES_PASSWORD: ${RECOMENDATION_DB_PASS}
+      POSTGRES_DB: ${recommendation_DB_NAME}
+      POSTGRES_USER: ${recommendation_DB_USER}
+      POSTGRES_PASSWORD: ${recommendation_DB_PASS}
     volumes:
-      - recomendation-postgres-data:/var/lib/postgresql/18/data
+      - recommendation-postgres-data:/var/lib/postgresql/18/data
 
   redis:
     container_name: redis
@@ -49,14 +49,40 @@ services:
     ports:
       - "${API_PORT}:${API_PORT}"
     build:
-      context: ./apps/api
+      context: .
+      dockerfile: apps/api/Dockerfile
     env_file: ./apps/api/.env
     depends_on:
       - api_db
       - redis
+      - history_msa
+      - recommendation_ms
+
+  history_ms:
+    container_name: history_ms
+    ports:
+      - "50051:50051"
+    build:
+      context: .
+      dockerfile: apps/history_ms/Dockerfile
+    env_file: ./apps/history_ms/.env
+    depends_on:
+      - history_db
+
+  recommendation_ms:
+    container_name: recommendation_ms
+    ports:
+      - "50052:50052"
+    build:
+      context: .
+      dockerfile: apps/recommendation_ms/Dockerfile
+    env_file: ./apps/recommendation_ms/.env
+    depends_on:
+      - recommendation_db
+      - history_ms
 
 volumes:
   api-postgres-data:
   history-postgres-data:
-  recomendation-postgres-data:
+  recommendation-postgres-data:
   redis-data:
