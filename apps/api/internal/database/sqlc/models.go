@@ -71,7 +71,9 @@ type Episode struct {
 	EpisodeNumber   int32     `json:"episode_number"`
 	Title           string    `json:"title"`
 	DurationMinutes int32     `json:"duration_minutes"`
+	ContentUrl      string    `json:"content_url"`
 	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type Movie struct {
@@ -81,6 +83,8 @@ type Movie struct {
 	DurationMinutes int32          `json:"duration_minutes"`
 	ReleaseDate     pgtype.Date    `json:"release_date"`
 	ContentUrl      string         `json:"content_url"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
 	MaturityRating  MaturityRating `json:"maturity_rating"`
 	GenreID         int32          `json:"genre_id"`
 }
@@ -110,6 +114,8 @@ type Series struct {
 	Title          string         `json:"title"`
 	Description    string         `json:"description"`
 	ReleaseDate    pgtype.Date    `json:"release_date"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
 	MaturityRating MaturityRating `json:"maturity_rating"`
 	GenreID        int32          `json:"genre_id"`
 }

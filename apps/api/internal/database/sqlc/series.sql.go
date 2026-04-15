@@ -15,7 +15,7 @@ import (
 const createSerie = `-- name: CreateSerie :one
 INSERT INTO series (id, title, description, release_date, maturity_rating, genre_id)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, title, description, release_date, maturity_rating, genre_id
+RETURNING id, title, description, release_date, created_at, updated_at, maturity_rating, genre_id
 `
 
 type CreateSerieParams struct {
@@ -42,6 +42,8 @@ func (q *Queries) CreateSerie(ctx context.Context, arg CreateSerieParams) (Serie
 		&i.Title,
 		&i.Description,
 		&i.ReleaseDate,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.MaturityRating,
 		&i.GenreID,
 	)
@@ -58,7 +60,7 @@ func (q *Queries) DeleteSerie(ctx context.Context, id uuid.UUID) error {
 }
 
 const getSerie = `-- name: GetSerie :one
-SELECT id, title, description, release_date, maturity_rating, genre_id FROM series WHERE id = $1
+SELECT id, title, description, release_date, created_at, updated_at, maturity_rating, genre_id FROM series WHERE id = $1
 `
 
 func (q *Queries) GetSerie(ctx context.Context, id uuid.UUID) (Series, error) {
@@ -69,6 +71,8 @@ func (q *Queries) GetSerie(ctx context.Context, id uuid.UUID) (Series, error) {
 		&i.Title,
 		&i.Description,
 		&i.ReleaseDate,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.MaturityRating,
 		&i.GenreID,
 	)
@@ -76,7 +80,7 @@ func (q *Queries) GetSerie(ctx context.Context, id uuid.UUID) (Series, error) {
 }
 
 const listKidsSeries = `-- name: ListKidsSeries :many
-SELECT id, title, description, release_date, maturity_rating, genre_id FROM series WHERE maturity_rating = 'L' ORDER BY release_date DESC
+SELECT id, title, description, release_date, created_at, updated_at, maturity_rating, genre_id FROM series WHERE maturity_rating = 'L' ORDER BY release_date DESC
 `
 
 func (q *Queries) ListKidsSeries(ctx context.Context) ([]Series, error) {
@@ -93,6 +97,8 @@ func (q *Queries) ListKidsSeries(ctx context.Context) ([]Series, error) {
 			&i.Title,
 			&i.Description,
 			&i.ReleaseDate,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.MaturityRating,
 			&i.GenreID,
 		); err != nil {
@@ -107,7 +113,7 @@ func (q *Queries) ListKidsSeries(ctx context.Context) ([]Series, error) {
 }
 
 const listSeries = `-- name: ListSeries :many
-SELECT id, title, description, release_date, maturity_rating, genre_id FROM series ORDER BY title
+SELECT id, title, description, release_date, created_at, updated_at, maturity_rating, genre_id FROM series ORDER BY title
 `
 
 func (q *Queries) ListSeries(ctx context.Context) ([]Series, error) {
@@ -124,6 +130,8 @@ func (q *Queries) ListSeries(ctx context.Context) ([]Series, error) {
 			&i.Title,
 			&i.Description,
 			&i.ReleaseDate,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.MaturityRating,
 			&i.GenreID,
 		); err != nil {
@@ -141,7 +149,7 @@ const updateSerie = `-- name: UpdateSerie :one
 UPDATE series
 SET title = $2, description = $3, release_date = $4, maturity_rating = $5, genre_id = $6
 WHERE id = $1
-RETURNING id, title, description, release_date, maturity_rating, genre_id
+RETURNING id, title, description, release_date, created_at, updated_at, maturity_rating, genre_id
 `
 
 type UpdateSerieParams struct {
@@ -168,6 +176,8 @@ func (q *Queries) UpdateSerie(ctx context.Context, arg UpdateSerieParams) (Serie
 		&i.Title,
 		&i.Description,
 		&i.ReleaseDate,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.MaturityRating,
 		&i.GenreID,
 	)
