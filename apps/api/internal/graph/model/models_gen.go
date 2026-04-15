@@ -8,6 +8,7 @@ import (
 	"io"
 	"strconv"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/google/uuid"
 )
 
@@ -17,11 +18,12 @@ type ContentGenre struct {
 }
 
 type CreateEpisodeInput struct {
-	SeriesID        uuid.UUID `json:"seriesId"`
-	Season          int32     `json:"season"`
-	EpisodeNumber   int32     `json:"episodeNumber"`
-	Title           string    `json:"title"`
-	DurationMinutes int32     `json:"durationMinutes"`
+	SeriesID        uuid.UUID      `json:"seriesId"`
+	Season          int32          `json:"season"`
+	EpisodeNumber   int32          `json:"episodeNumber"`
+	Title           string         `json:"title"`
+	DurationMinutes int32          `json:"durationMinutes"`
+	EpisodeFile     graphql.Upload `json:"episodeFile"`
 }
 
 type CreateMovieInput struct {
@@ -30,7 +32,7 @@ type CreateMovieInput struct {
 	DurationMinutes int32          `json:"durationMinutes"`
 	ReleaseDate     string         `json:"releaseDate"`
 	MaturityRating  MaturityRating `json:"maturityRating"`
-	ContentURL      string         `json:"contentUrl"`
+	MovieFile       graphql.Upload `json:"movieFile"`
 	GenreID         int32          `json:"genreId"`
 }
 
@@ -75,6 +77,7 @@ type Episode struct {
 	EpisodeNumber   int32     `json:"episodeNumber"`
 	Title           string    `json:"title"`
 	DurationMinutes int32     `json:"durationMinutes"`
+	ContentURL      string    `json:"contentURL"`
 	CreatedAt       string    `json:"createdAt"`
 }
 
@@ -142,7 +145,6 @@ type UpdateMovieInput struct {
 	DurationMinutes *int32          `json:"durationMinutes,omitempty"`
 	ReleaseDate     *string         `json:"releaseDate,omitempty"`
 	MaturityRating  *MaturityRating `json:"maturityRating,omitempty"`
-	ContentURL      *string         `json:"contentUrl,omitempty"`
 	GenreID         *int32          `json:"genreId,omitempty"`
 }
 

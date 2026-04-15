@@ -51,6 +51,7 @@ type ComplexityRoot struct {
 	}
 
 	Episode struct {
+		ContentURL      func(childComplexity int) int
 		CreatedAt       func(childComplexity int) int
 		DurationMinutes func(childComplexity int) int
 		EpisodeNumber   func(childComplexity int) int
@@ -257,6 +258,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.ContentGenre.ID(childComplexity), true
 
+	case "Episode.contentURL":
+		if e.ComplexityRoot.Episode.ContentURL == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Episode.ContentURL(childComplexity), true
 	case "Episode.createdAt":
 		if e.ComplexityRoot.Episode.CreatedAt == nil {
 			break
@@ -1103,7 +1110,7 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "role", ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "role", ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole)
 	if err != nil {
 		return nil, err
 	}
@@ -1114,7 +1121,7 @@ func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[st
 func (ec *executionContext) field_Mutation_createEpisode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateEpisodeInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateEpisodeInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateEpisodeInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateEpisodeInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1125,7 +1132,7 @@ func (ec *executionContext) field_Mutation_createEpisode_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_createMovie_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateMovieInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateMovieInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateMovieInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateMovieInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1136,7 +1143,7 @@ func (ec *executionContext) field_Mutation_createMovie_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_createProfile_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateProfileInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateProfileInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateProfileInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateProfileInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1147,7 +1154,7 @@ func (ec *executionContext) field_Mutation_createProfile_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_createReview_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateReviewInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateReviewInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateReviewInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateReviewInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1158,7 +1165,7 @@ func (ec *executionContext) field_Mutation_createReview_args(ctx context.Context
 func (ec *executionContext) field_Mutation_createSeries_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateSeriesInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateSeriesInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateSeriesInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateSeriesInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1169,7 +1176,7 @@ func (ec *executionContext) field_Mutation_createSeries_args(ctx context.Context
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateUserInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateUserInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateUserInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateUserInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1180,7 +1187,7 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_createWatchHistory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateWatchHistoryInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateWatchHistoryInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateWatchHistoryInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateWatchHistoryInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1268,7 +1275,7 @@ func (ec *executionContext) field_Mutation_deleteWatchHistory_args(ctx context.C
 func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOLoginInput2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐLoginInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOLoginInput2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐLoginInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1295,7 +1302,7 @@ func (ec *executionContext) field_Mutation_updateEpisode_args(ctx context.Contex
 		return nil, err
 	}
 	args["id"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateEpisodeInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateEpisodeInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateEpisodeInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateEpisodeInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1311,7 +1318,7 @@ func (ec *executionContext) field_Mutation_updateMovie_args(ctx context.Context,
 		return nil, err
 	}
 	args["id"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateMovieInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateMovieInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateMovieInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateMovieInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1327,7 +1334,7 @@ func (ec *executionContext) field_Mutation_updateProfile_args(ctx context.Contex
 		return nil, err
 	}
 	args["id"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateProfileInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateProfileInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateProfileInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateProfileInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1343,7 +1350,7 @@ func (ec *executionContext) field_Mutation_updateReview_args(ctx context.Context
 		return nil, err
 	}
 	args["id"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateReviewInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateReviewInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateReviewInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateReviewInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1359,7 +1366,7 @@ func (ec *executionContext) field_Mutation_updateSeries_args(ctx context.Context
 		return nil, err
 	}
 	args["id"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateSeriesInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateSeriesInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateSeriesInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateSeriesInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1375,7 +1382,7 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 		return nil, err
 	}
 	args["id"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateUserInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateUserInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateUserInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateUserInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1391,7 +1398,7 @@ func (ec *executionContext) field_Mutation_updateWatchHistory_args(ctx context.C
 		return nil, err
 	}
 	args["id"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateWatchHistoryInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateWatchHistoryInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateWatchHistoryInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateWatchHistoryInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1771,6 +1778,35 @@ func (ec *executionContext) fieldContext_Episode_durationMinutes(_ context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Episode_contentURL(ctx context.Context, field graphql.CollectedField, obj *model.Episode) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Episode_contentURL,
+		func(ctx context.Context) (any, error) {
+			return obj.ContentURL, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Episode_contentURL(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Episode",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Episode_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Episode) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1810,7 +1846,7 @@ func (ec *executionContext) _Episode_reviews(ctx context.Context, field graphql.
 			return ec.Resolvers.Episode().Reviews(ctx, obj)
 		},
 		nil,
-		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
+		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
 		true,
 		true,
 	)
@@ -2002,7 +2038,7 @@ func (ec *executionContext) _Movie_maturityRating(ctx context.Context, field gra
 			return obj.MaturityRating, nil
 		},
 		nil,
-		ec.marshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating,
+		ec.marshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating,
 		true,
 		true,
 	)
@@ -2089,7 +2125,7 @@ func (ec *executionContext) _Movie_reviews(ctx context.Context, field graphql.Co
 			return ec.Resolvers.Movie().Reviews(ctx, obj)
 		},
 		nil,
-		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
+		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
 		true,
 		true,
 	)
@@ -2230,7 +2266,7 @@ func (ec *executionContext) _Mutation_createEpisode(ctx context.Context, field g
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Episode
 					return zeroVal, err
@@ -2245,7 +2281,7 @@ func (ec *executionContext) _Mutation_createEpisode(ctx context.Context, field g
 			next = directive2
 			return next
 		},
-		ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode,
+		ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisode,
 		true,
 		true,
 	)
@@ -2271,6 +2307,8 @@ func (ec *executionContext) fieldContext_Mutation_createEpisode(ctx context.Cont
 				return ec.fieldContext_Episode_title(ctx, field)
 			case "durationMinutes":
 				return ec.fieldContext_Episode_durationMinutes(ctx, field)
+			case "contentURL":
+				return ec.fieldContext_Episode_contentURL(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Episode_createdAt(ctx, field)
 			case "reviews":
@@ -2314,7 +2352,7 @@ func (ec *executionContext) _Mutation_updateEpisode(ctx context.Context, field g
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Episode
 					return zeroVal, err
@@ -2329,7 +2367,7 @@ func (ec *executionContext) _Mutation_updateEpisode(ctx context.Context, field g
 			next = directive2
 			return next
 		},
-		ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode,
+		ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisode,
 		true,
 		true,
 	)
@@ -2355,6 +2393,8 @@ func (ec *executionContext) fieldContext_Mutation_updateEpisode(ctx context.Cont
 				return ec.fieldContext_Episode_title(ctx, field)
 			case "durationMinutes":
 				return ec.fieldContext_Episode_durationMinutes(ctx, field)
+			case "contentURL":
+				return ec.fieldContext_Episode_contentURL(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Episode_createdAt(ctx, field)
 			case "reviews":
@@ -2398,7 +2438,7 @@ func (ec *executionContext) _Mutation_deleteEpisode(ctx context.Context, field g
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -2464,7 +2504,7 @@ func (ec *executionContext) _Mutation_createMovie(ctx context.Context, field gra
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Movie
 					return zeroVal, err
@@ -2479,7 +2519,7 @@ func (ec *executionContext) _Mutation_createMovie(ctx context.Context, field gra
 			next = directive2
 			return next
 		},
-		ec.marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie,
+		ec.marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMovie,
 		true,
 		true,
 	)
@@ -2550,7 +2590,7 @@ func (ec *executionContext) _Mutation_updateMovie(ctx context.Context, field gra
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Movie
 					return zeroVal, err
@@ -2565,7 +2605,7 @@ func (ec *executionContext) _Mutation_updateMovie(ctx context.Context, field gra
 			next = directive2
 			return next
 		},
-		ec.marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie,
+		ec.marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMovie,
 		true,
 		true,
 	)
@@ -2636,7 +2676,7 @@ func (ec *executionContext) _Mutation_deleteMovie(ctx context.Context, field gra
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -2702,7 +2742,7 @@ func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field g
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Profile
 					return zeroVal, err
@@ -2717,7 +2757,7 @@ func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field g
 			next = directive2
 			return next
 		},
-		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile,
+		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile,
 		true,
 		true,
 	)
@@ -2786,7 +2826,7 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Profile
 					return zeroVal, err
@@ -2801,7 +2841,7 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 			next = directive2
 			return next
 		},
-		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile,
+		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile,
 		true,
 		true,
 	)
@@ -2870,7 +2910,7 @@ func (ec *executionContext) _Mutation_deleteProfile(ctx context.Context, field g
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -2997,7 +3037,7 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
 			}
 			directive3 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Review
 					return zeroVal, err
@@ -3012,7 +3052,7 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 			next = directive3
 			return next
 		},
-		ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
+		ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReview,
 		true,
 		true,
 	)
@@ -3088,7 +3128,7 @@ func (ec *executionContext) _Mutation_updateReview(ctx context.Context, field gr
 				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
 			}
 			directive3 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Review
 					return zeroVal, err
@@ -3103,7 +3143,7 @@ func (ec *executionContext) _Mutation_updateReview(ctx context.Context, field gr
 			next = directive3
 			return next
 		},
-		ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
+		ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReview,
 		true,
 		true,
 	)
@@ -3179,7 +3219,7 @@ func (ec *executionContext) _Mutation_deleteReview(ctx context.Context, field gr
 				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
 			}
 			directive3 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -3245,7 +3285,7 @@ func (ec *executionContext) _Mutation_createSeries(ctx context.Context, field gr
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Series
 					return zeroVal, err
@@ -3260,7 +3300,7 @@ func (ec *executionContext) _Mutation_createSeries(ctx context.Context, field gr
 			next = directive2
 			return next
 		},
-		ec.marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries,
+		ec.marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐSeries,
 		true,
 		true,
 	)
@@ -3327,7 +3367,7 @@ func (ec *executionContext) _Mutation_updateSeries(ctx context.Context, field gr
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Series
 					return zeroVal, err
@@ -3342,7 +3382,7 @@ func (ec *executionContext) _Mutation_updateSeries(ctx context.Context, field gr
 			next = directive2
 			return next
 		},
-		ec.marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries,
+		ec.marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐSeries,
 		true,
 		true,
 	)
@@ -3409,7 +3449,7 @@ func (ec *executionContext) _Mutation_deleteSeries(ctx context.Context, field gr
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -3465,7 +3505,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 			return ec.Resolvers.Mutation().CreateUser(ctx, fc.Args["input"].(model.CreateUserInput))
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUser,
 		true,
 		true,
 	)
@@ -3537,7 +3577,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 			next = directive1
 			return next
 		},
-		ec.marshalNUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUser,
 		true,
 		true,
 	)
@@ -3667,7 +3707,7 @@ func (ec *executionContext) _Mutation_createWatchHistory(ctx context.Context, fi
 				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
 			}
 			directive3 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.WatchHistory
 					return zeroVal, err
@@ -3682,7 +3722,7 @@ func (ec *executionContext) _Mutation_createWatchHistory(ctx context.Context, fi
 			next = directive3
 			return next
 		},
-		ec.marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory,
+		ec.marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistory,
 		true,
 		true,
 	)
@@ -3756,7 +3796,7 @@ func (ec *executionContext) _Mutation_updateWatchHistory(ctx context.Context, fi
 				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
 			}
 			directive3 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.WatchHistory
 					return zeroVal, err
@@ -3771,7 +3811,7 @@ func (ec *executionContext) _Mutation_updateWatchHistory(ctx context.Context, fi
 			next = directive3
 			return next
 		},
-		ec.marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory,
+		ec.marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistory,
 		true,
 		true,
 	)
@@ -3845,7 +3885,7 @@ func (ec *executionContext) _Mutation_deleteWatchHistory(ctx context.Context, fi
 				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
 			}
 			directive3 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -4074,7 +4114,7 @@ func (ec *executionContext) _Profile_reviews(ctx context.Context, field graphql.
 			return ec.Resolvers.Profile().Reviews(ctx, obj)
 		},
 		nil,
-		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
+		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
 		true,
 		true,
 	)
@@ -4121,7 +4161,7 @@ func (ec *executionContext) _Profile_watchHistories(ctx context.Context, field g
 			return ec.Resolvers.Profile().WatchHistories(ctx, obj)
 		},
 		nil,
-		ec.marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ,
+		ec.marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ,
 		true,
 		true,
 	)
@@ -4187,7 +4227,7 @@ func (ec *executionContext) _Query_getEpisode(ctx context.Context, field graphql
 			next = directive2
 			return next
 		},
-		ec.marshalOEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode,
+		ec.marshalOEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisode,
 		true,
 		false,
 	)
@@ -4213,6 +4253,8 @@ func (ec *executionContext) fieldContext_Query_getEpisode(ctx context.Context, f
 				return ec.fieldContext_Episode_title(ctx, field)
 			case "durationMinutes":
 				return ec.fieldContext_Episode_durationMinutes(ctx, field)
+			case "contentURL":
+				return ec.fieldContext_Episode_contentURL(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Episode_createdAt(ctx, field)
 			case "reviews":
@@ -4266,7 +4308,7 @@ func (ec *executionContext) _Query_listEpisodes(ctx context.Context, field graph
 			next = directive2
 			return next
 		},
-		ec.marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ,
+		ec.marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ,
 		true,
 		true,
 	)
@@ -4292,6 +4334,8 @@ func (ec *executionContext) fieldContext_Query_listEpisodes(ctx context.Context,
 				return ec.fieldContext_Episode_title(ctx, field)
 			case "durationMinutes":
 				return ec.fieldContext_Episode_durationMinutes(ctx, field)
+			case "contentURL":
+				return ec.fieldContext_Episode_contentURL(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Episode_createdAt(ctx, field)
 			case "reviews":
@@ -4345,7 +4389,7 @@ func (ec *executionContext) _Query_getMovie(ctx context.Context, field graphql.C
 			next = directive2
 			return next
 		},
-		ec.marshalOMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie,
+		ec.marshalOMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMovie,
 		true,
 		false,
 	)
@@ -4425,7 +4469,7 @@ func (ec *executionContext) _Query_listMovies(ctx context.Context, field graphql
 			next = directive2
 			return next
 		},
-		ec.marshalNMovie2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovieᚄ,
+		ec.marshalNMovie2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMovieᚄ,
 		true,
 		true,
 	)
@@ -4484,7 +4528,7 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Profile
 					return zeroVal, err
@@ -4499,7 +4543,7 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 			next = directive2
 			return next
 		},
-		ec.marshalOProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile,
+		ec.marshalOProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile,
 		true,
 		false,
 	)
@@ -4559,7 +4603,7 @@ func (ec *executionContext) _Query_listProfiles(ctx context.Context, field graph
 			next = directive1
 			return next
 		},
-		ec.marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfileᚄ,
+		ec.marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfileᚄ,
 		true,
 		true,
 	)
@@ -4627,7 +4671,7 @@ func (ec *executionContext) _Query_getReview(ctx context.Context, field graphql.
 			next = directive2
 			return next
 		},
-		ec.marshalOReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview,
+		ec.marshalOReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReview,
 		true,
 		false,
 	)
@@ -4705,7 +4749,7 @@ func (ec *executionContext) _Query_listReviews(ctx context.Context, field graphq
 			next = directive2
 			return next
 		},
-		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
+		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
 		true,
 		true,
 	)
@@ -4773,7 +4817,7 @@ func (ec *executionContext) _Query_getSeries(ctx context.Context, field graphql.
 			next = directive2
 			return next
 		},
-		ec.marshalOSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries,
+		ec.marshalOSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐSeries,
 		true,
 		false,
 	)
@@ -4849,7 +4893,7 @@ func (ec *executionContext) _Query_listSeries(ctx context.Context, field graphql
 			next = directive2
 			return next
 		},
-		ec.marshalNSeries2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeriesᚄ,
+		ec.marshalNSeries2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐSeriesᚄ,
 		true,
 		true,
 	)
@@ -4908,7 +4952,7 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 			next = directive1
 			return next
 		},
-		ec.marshalOUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUser,
+		ec.marshalOUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUser,
 		true,
 		false,
 	)
@@ -4976,7 +5020,7 @@ func (ec *executionContext) _Query_listUsers(ctx context.Context, field graphql.
 				return ec.Directives.Auth(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
+				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal []*model.User
 					return zeroVal, err
@@ -4991,7 +5035,7 @@ func (ec *executionContext) _Query_listUsers(ctx context.Context, field graphql.
 			next = directive2
 			return next
 		},
-		ec.marshalNUser2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserᚄ,
+		ec.marshalNUser2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserᚄ,
 		true,
 		true,
 	)
@@ -5059,7 +5103,7 @@ func (ec *executionContext) _Query_getWatchHistory(ctx context.Context, field gr
 			next = directive2
 			return next
 		},
-		ec.marshalOWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory,
+		ec.marshalOWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistory,
 		true,
 		false,
 	)
@@ -5135,7 +5179,7 @@ func (ec *executionContext) _Query_listWatchHistories(ctx context.Context, field
 			next = directive2
 			return next
 		},
-		ec.marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ,
+		ec.marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ,
 		true,
 		true,
 	)
@@ -5636,7 +5680,7 @@ func (ec *executionContext) _Series_maturityRating(ctx context.Context, field gr
 			return obj.MaturityRating, nil
 		},
 		nil,
-		ec.marshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating,
+		ec.marshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating,
 		true,
 		true,
 	)
@@ -5694,7 +5738,7 @@ func (ec *executionContext) _Series_episodes(ctx context.Context, field graphql.
 			return ec.Resolvers.Series().Episodes(ctx, obj)
 		},
 		nil,
-		ec.marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ,
+		ec.marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ,
 		true,
 		true,
 	)
@@ -5720,6 +5764,8 @@ func (ec *executionContext) fieldContext_Series_episodes(_ context.Context, fiel
 				return ec.fieldContext_Episode_title(ctx, field)
 			case "durationMinutes":
 				return ec.fieldContext_Episode_durationMinutes(ctx, field)
+			case "contentURL":
+				return ec.fieldContext_Episode_contentURL(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Episode_createdAt(ctx, field)
 			case "reviews":
@@ -5944,7 +5990,7 @@ func (ec *executionContext) _User_profiles(ctx context.Context, field graphql.Co
 			return ec.Resolvers.User().Profiles(ctx, obj)
 		},
 		nil,
-		ec.marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfileᚄ,
+		ec.marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfileᚄ,
 		true,
 		true,
 	)
@@ -7641,7 +7687,7 @@ func (ec *executionContext) unmarshalInputCreateEpisodeInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"seriesId", "season", "episodeNumber", "title", "durationMinutes"}
+	fieldsInOrder := [...]string{"seriesId", "season", "episodeNumber", "title", "durationMinutes", "episodeFile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7683,6 +7729,13 @@ func (ec *executionContext) unmarshalInputCreateEpisodeInput(ctx context.Context
 				return it, err
 			}
 			it.DurationMinutes = data
+		case "episodeFile":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("episodeFile"))
+			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EpisodeFile = data
 		}
 	}
 	return it, nil
@@ -7699,7 +7752,7 @@ func (ec *executionContext) unmarshalInputCreateMovieInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "contentUrl", "genreId"}
+	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "movieFile", "genreId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7736,18 +7789,18 @@ func (ec *executionContext) unmarshalInputCreateMovieInput(ctx context.Context, 
 			it.ReleaseDate = data
 		case "maturityRating":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maturityRating"))
-			data, err := ec.unmarshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
+			data, err := ec.unmarshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.MaturityRating = data
-		case "contentUrl":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentUrl"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+		case "movieFile":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("movieFile"))
+			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.ContentURL = data
+			it.MovieFile = data
 		case "genreId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
 			data, err := ec.unmarshalNInt2int32(ctx, v)
@@ -7889,7 +7942,7 @@ func (ec *executionContext) unmarshalInputCreateSeriesInput(ctx context.Context,
 			it.ReleaseDate = data
 		case "maturityRating":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maturityRating"))
-			data, err := ec.unmarshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
+			data, err := ec.unmarshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8107,7 +8160,7 @@ func (ec *executionContext) unmarshalInputUpdateMovieInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "contentUrl", "genreId"}
+	fieldsInOrder := [...]string{"title", "description", "durationMinutes", "releaseDate", "maturityRating", "genreId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8144,18 +8197,11 @@ func (ec *executionContext) unmarshalInputUpdateMovieInput(ctx context.Context, 
 			it.ReleaseDate = data
 		case "maturityRating":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maturityRating"))
-			data, err := ec.unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
+			data, err := ec.unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.MaturityRating = data
-		case "contentUrl":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentUrl"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ContentURL = data
 		case "genreId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
 			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
@@ -8290,7 +8336,7 @@ func (ec *executionContext) unmarshalInputUpdateSeriesInput(ctx context.Context,
 			it.ReleaseDate = data
 		case "maturityRating":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maturityRating"))
-			data, err := ec.unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
+			data, err := ec.unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8485,6 +8531,11 @@ func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "durationMinutes":
 			out.Values[i] = ec._Episode_durationMinutes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "contentURL":
+			out.Values[i] = ec._Episode_contentURL(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -10023,50 +10074,50 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNCreateEpisodeInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateEpisodeInput(ctx context.Context, v any) (model.CreateEpisodeInput, error) {
+func (ec *executionContext) unmarshalNCreateEpisodeInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateEpisodeInput(ctx context.Context, v any) (model.CreateEpisodeInput, error) {
 	res, err := ec.unmarshalInputCreateEpisodeInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateMovieInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateMovieInput(ctx context.Context, v any) (model.CreateMovieInput, error) {
+func (ec *executionContext) unmarshalNCreateMovieInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateMovieInput(ctx context.Context, v any) (model.CreateMovieInput, error) {
 	res, err := ec.unmarshalInputCreateMovieInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateProfileInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateProfileInput(ctx context.Context, v any) (model.CreateProfileInput, error) {
+func (ec *executionContext) unmarshalNCreateProfileInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateProfileInput(ctx context.Context, v any) (model.CreateProfileInput, error) {
 	res, err := ec.unmarshalInputCreateProfileInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateReviewInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateReviewInput(ctx context.Context, v any) (model.CreateReviewInput, error) {
+func (ec *executionContext) unmarshalNCreateReviewInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateReviewInput(ctx context.Context, v any) (model.CreateReviewInput, error) {
 	res, err := ec.unmarshalInputCreateReviewInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateSeriesInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateSeriesInput(ctx context.Context, v any) (model.CreateSeriesInput, error) {
+func (ec *executionContext) unmarshalNCreateSeriesInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateSeriesInput(ctx context.Context, v any) (model.CreateSeriesInput, error) {
 	res, err := ec.unmarshalInputCreateSeriesInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v any) (model.CreateUserInput, error) {
+func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v any) (model.CreateUserInput, error) {
 	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateWatchHistoryInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐCreateWatchHistoryInput(ctx context.Context, v any) (model.CreateWatchHistoryInput, error) {
+func (ec *executionContext) unmarshalNCreateWatchHistoryInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateWatchHistoryInput(ctx context.Context, v any) (model.CreateWatchHistoryInput, error) {
 	res, err := ec.unmarshalInputCreateWatchHistoryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNEpisode2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode(ctx context.Context, sel ast.SelectionSet, v model.Episode) graphql.Marshaler {
+func (ec *executionContext) marshalNEpisode2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisode(ctx context.Context, sel ast.SelectionSet, v model.Episode) graphql.Marshaler {
 	return ec._Episode(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Episode) graphql.Marshaler {
+func (ec *executionContext) marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Episode) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode(ctx, sel, v[i])
+		return ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisode(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -10078,7 +10129,7 @@ func (ec *executionContext) marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode(ctx context.Context, sel ast.SelectionSet, v *model.Episode) graphql.Marshaler {
+func (ec *executionContext) marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisode(ctx context.Context, sel ast.SelectionSet, v *model.Episode) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -10120,25 +10171,25 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, v any) (model.MaturityRating, error) {
+func (ec *executionContext) unmarshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, v any) (model.MaturityRating, error) {
 	var res model.MaturityRating
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, sel ast.SelectionSet, v model.MaturityRating) graphql.Marshaler {
+func (ec *executionContext) marshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, sel ast.SelectionSet, v model.MaturityRating) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNMovie2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie(ctx context.Context, sel ast.SelectionSet, v model.Movie) graphql.Marshaler {
+func (ec *executionContext) marshalNMovie2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMovie(ctx context.Context, sel ast.SelectionSet, v model.Movie) graphql.Marshaler {
 	return ec._Movie(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNMovie2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovieᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Movie) graphql.Marshaler {
+func (ec *executionContext) marshalNMovie2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMovieᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Movie) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie(ctx, sel, v[i])
+		return ec.marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMovie(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -10150,7 +10201,7 @@ func (ec *executionContext) marshalNMovie2ᚕᚖgithubᚗcomᚋecbDeveloperᚋne
 	return ret
 }
 
-func (ec *executionContext) marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie(ctx context.Context, sel ast.SelectionSet, v *model.Movie) graphql.Marshaler {
+func (ec *executionContext) marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMovie(ctx context.Context, sel ast.SelectionSet, v *model.Movie) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -10160,15 +10211,15 @@ func (ec *executionContext) marshalNMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetfl
 	return ec._Movie(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNProfile2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v model.Profile) graphql.Marshaler {
+func (ec *executionContext) marshalNProfile2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v model.Profile) graphql.Marshaler {
 	return ec._Profile(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Profile) graphql.Marshaler {
+func (ec *executionContext) marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Profile) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile(ctx, sel, v[i])
+		return ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -10180,7 +10231,7 @@ func (ec *executionContext) marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v *model.Profile) graphql.Marshaler {
+func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v *model.Profile) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -10190,15 +10241,15 @@ func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnet
 	return ec._Profile(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNReview2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview(ctx context.Context, sel ast.SelectionSet, v model.Review) graphql.Marshaler {
+func (ec *executionContext) marshalNReview2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReview(ctx context.Context, sel ast.SelectionSet, v model.Review) graphql.Marshaler {
 	return ec._Review(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReviewᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Review) graphql.Marshaler {
+func (ec *executionContext) marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReviewᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Review) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview(ctx, sel, v[i])
+		return ec.marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReview(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -10210,7 +10261,7 @@ func (ec *executionContext) marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋn
 	return ret
 }
 
-func (ec *executionContext) marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview(ctx context.Context, sel ast.SelectionSet, v *model.Review) graphql.Marshaler {
+func (ec *executionContext) marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReview(ctx context.Context, sel ast.SelectionSet, v *model.Review) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -10220,15 +10271,15 @@ func (ec *executionContext) marshalNReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetf
 	return ec._Review(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSeries2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries(ctx context.Context, sel ast.SelectionSet, v model.Series) graphql.Marshaler {
+func (ec *executionContext) marshalNSeries2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐSeries(ctx context.Context, sel ast.SelectionSet, v model.Series) graphql.Marshaler {
 	return ec._Series(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSeries2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeriesᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Series) graphql.Marshaler {
+func (ec *executionContext) marshalNSeries2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐSeriesᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Series) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries(ctx, sel, v[i])
+		return ec.marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐSeries(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -10240,7 +10291,7 @@ func (ec *executionContext) marshalNSeries2ᚕᚖgithubᚗcomᚋecbDeveloperᚋn
 	return ret
 }
 
-func (ec *executionContext) marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries(ctx context.Context, sel ast.SelectionSet, v *model.Series) graphql.Marshaler {
+func (ec *executionContext) marshalNSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐSeries(ctx context.Context, sel ast.SelectionSet, v *model.Series) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -10266,50 +10317,66 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateEpisodeInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateEpisodeInput(ctx context.Context, v any) (model.UpdateEpisodeInput, error) {
+func (ec *executionContext) unmarshalNUpdateEpisodeInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateEpisodeInput(ctx context.Context, v any) (model.UpdateEpisodeInput, error) {
 	res, err := ec.unmarshalInputUpdateEpisodeInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateMovieInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateMovieInput(ctx context.Context, v any) (model.UpdateMovieInput, error) {
+func (ec *executionContext) unmarshalNUpdateMovieInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateMovieInput(ctx context.Context, v any) (model.UpdateMovieInput, error) {
 	res, err := ec.unmarshalInputUpdateMovieInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateProfileInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateProfileInput(ctx context.Context, v any) (model.UpdateProfileInput, error) {
+func (ec *executionContext) unmarshalNUpdateProfileInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateProfileInput(ctx context.Context, v any) (model.UpdateProfileInput, error) {
 	res, err := ec.unmarshalInputUpdateProfileInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateReviewInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateReviewInput(ctx context.Context, v any) (model.UpdateReviewInput, error) {
+func (ec *executionContext) unmarshalNUpdateReviewInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateReviewInput(ctx context.Context, v any) (model.UpdateReviewInput, error) {
 	res, err := ec.unmarshalInputUpdateReviewInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateSeriesInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateSeriesInput(ctx context.Context, v any) (model.UpdateSeriesInput, error) {
+func (ec *executionContext) unmarshalNUpdateSeriesInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateSeriesInput(ctx context.Context, v any) (model.UpdateSeriesInput, error) {
 	res, err := ec.unmarshalInputUpdateSeriesInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateUserInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v any) (model.UpdateUserInput, error) {
+func (ec *executionContext) unmarshalNUpdateUserInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v any) (model.UpdateUserInput, error) {
 	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateWatchHistoryInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUpdateWatchHistoryInput(ctx context.Context, v any) (model.UpdateWatchHistoryInput, error) {
+func (ec *executionContext) unmarshalNUpdateWatchHistoryInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUpdateWatchHistoryInput(ctx context.Context, v any) (model.UpdateWatchHistoryInput, error) {
 	res, err := ec.unmarshalInputUpdateWatchHistoryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+func (ec *executionContext) unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v any) (graphql.Upload, error) {
+	res, err := graphql.UnmarshalUpload(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v graphql.Upload) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalUpload(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNUser2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
+		return ec.marshalNUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -10321,7 +10388,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnet
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -10331,25 +10398,25 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetfli
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx context.Context, v any) (model.UserRole, error) {
+func (ec *executionContext) unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx context.Context, v any) (model.UserRole, error) {
 	var res model.UserRole
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUserRole(ctx context.Context, sel ast.SelectionSet, v model.UserRole) graphql.Marshaler {
+func (ec *executionContext) marshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx context.Context, sel ast.SelectionSet, v model.UserRole) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNWatchHistory2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory(ctx context.Context, sel ast.SelectionSet, v model.WatchHistory) graphql.Marshaler {
+func (ec *executionContext) marshalNWatchHistory2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistory(ctx context.Context, sel ast.SelectionSet, v model.WatchHistory) graphql.Marshaler {
 	return ec._WatchHistory(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.WatchHistory) graphql.Marshaler {
+func (ec *executionContext) marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.WatchHistory) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory(ctx, sel, v[i])
+		return ec.marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistory(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -10361,7 +10428,7 @@ func (ec *executionContext) marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDevelop
 	return ret
 }
 
-func (ec *executionContext) marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory(ctx context.Context, sel ast.SelectionSet, v *model.WatchHistory) graphql.Marshaler {
+func (ec *executionContext) marshalNWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistory(ctx context.Context, sel ast.SelectionSet, v *model.WatchHistory) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -10542,7 +10609,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐEpisode(ctx context.Context, sel ast.SelectionSet, v *model.Episode) graphql.Marshaler {
+func (ec *executionContext) marshalOEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisode(ctx context.Context, sel ast.SelectionSet, v *model.Episode) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -10585,7 +10652,7 @@ func (ec *executionContext) marshalOInt2ᚖint32(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalOLoginInput2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐLoginInput(ctx context.Context, v any) (*model.LoginInput, error) {
+func (ec *executionContext) unmarshalOLoginInput2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐLoginInput(ctx context.Context, v any) (*model.LoginInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -10593,7 +10660,7 @@ func (ec *executionContext) unmarshalOLoginInput2ᚖgithubᚗcomᚋecbDeveloper�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, v any) (*model.MaturityRating, error) {
+func (ec *executionContext) unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, v any) (*model.MaturityRating, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -10602,35 +10669,35 @@ func (ec *executionContext) unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDevelo
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, sel ast.SelectionSet, v *model.MaturityRating) graphql.Marshaler {
+func (ec *executionContext) marshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, sel ast.SelectionSet, v *model.MaturityRating) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) marshalOMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐMovie(ctx context.Context, sel ast.SelectionSet, v *model.Movie) graphql.Marshaler {
+func (ec *executionContext) marshalOMovie2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMovie(ctx context.Context, sel ast.SelectionSet, v *model.Movie) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Movie(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v *model.Profile) graphql.Marshaler {
+func (ec *executionContext) marshalOProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v *model.Profile) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Profile(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐReview(ctx context.Context, sel ast.SelectionSet, v *model.Review) graphql.Marshaler {
+func (ec *executionContext) marshalOReview2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReview(ctx context.Context, sel ast.SelectionSet, v *model.Review) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Review(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐSeries(ctx context.Context, sel ast.SelectionSet, v *model.Series) graphql.Marshaler {
+func (ec *executionContext) marshalOSeries2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐSeries(ctx context.Context, sel ast.SelectionSet, v *model.Series) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -10655,14 +10722,14 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋinternalᚋgraphᚋmodelᚐWatchHistory(ctx context.Context, sel ast.SelectionSet, v *model.WatchHistory) graphql.Marshaler {
+func (ec *executionContext) marshalOWatchHistory2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistory(ctx context.Context, sel ast.SelectionSet, v *model.WatchHistory) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

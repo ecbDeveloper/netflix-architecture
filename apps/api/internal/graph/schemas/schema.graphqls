@@ -1,6 +1,8 @@
 type Mutation
 type Query
 
+scalar Upload
+
 enum MaturityRating {
   L
   RATING_10

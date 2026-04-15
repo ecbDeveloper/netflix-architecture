@@ -16,8 +16,8 @@ input CreateMovieInput {
   durationMinutes: Int!
   releaseDate: String!
   maturityRating: MaturityRating!
-  contentUrl: String!
   genreId: Int!
+  movieFile: Upload!
 }
 
 input UpdateMovieInput {
@@ -26,8 +26,8 @@ input UpdateMovieInput {
   durationMinutes: Int
   releaseDate: String
   maturityRating: MaturityRating
-  contentUrl: String
   genreId: Int
+  movieFile: Upload!
 }
 
 extend type Query {
