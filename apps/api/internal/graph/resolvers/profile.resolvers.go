@@ -12,7 +12,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
-
+	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
 	"github.com/google/uuid"
 )
 
@@ -99,13 +99,20 @@ func (r *profileResolver) Reviews(ctx context.Context, obj *model.Profile) ([]*m
 
 // WatchHistories is the resolver for the watchHistories field.
 func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile) ([]*model.WatchHistory, error) {
-	watchHistories, err := r.WatchHistoryService.ListWatchHistories(ctx, obj.ID)
+	resp, err := r.HistoryClient.ListWatchHistory(ctx, &historypb.ListWatchHistoryRequest{
+		ProfileId: obj.ID.String(),
+	})
 	if err != nil {
-		r.Logger.Error("failed to list watch histories", slog.Any("error", err))
-		return nil, handleError(err)
+		r.Logger.Error("failed to list watch histories via grpc", slog.Any("error", err))
+		return nil, handleGRPCError(err)
 	}
 
-	return watchHistories, nil
+	result := make([]*model.WatchHistory, len(resp.Histories))
+	for i, h := range resp.Histories {
+		result[i] = protoToWatchHistory(h)
+	}
+
+	return result, nil
 }
 
 // GetProfile is the resolver for the getProfile field.
