@@ -8,11 +8,26 @@ type WatchHistory {
   isCompleted: Boolean
 }
 
+type MostWatchedContent {
+  contentId: ID!
+  contentType: ContentType!
+  genreId: Int!
+  watchCount: Int!
+}
+
+type RecommendedContent {
+  contentId: ID!
+  contentType: ContentType!
+  score: Float!
+  reason: String!
+}
+
 input CreateWatchHistoryInput {
   movieId: ID
   episodeId: ID
   lastPositionSeconds: Int
   isCompleted: Boolean
+  genreId: Int
 }
 
 input UpdateWatchHistoryInput {
@@ -24,6 +39,9 @@ input UpdateWatchHistoryInput {
 extend type Query {
   getWatchHistory(id: ID!): WatchHistory @auth @profileSelectionIsRequired
   listWatchHistories: [WatchHistory!]! @auth @profileSelectionIsRequired
+  mostWatchedContents(limit: Int): [MostWatchedContent!]! @auth
+  recentlyWatchedContents(limit: Int): [WatchHistory!]! @auth @profileSelectionIsRequired
+  getRecommendations(limit: Int): [RecommendedContent!]! @auth @profileSelectionIsRequired
 }
 
 extend type Mutation {

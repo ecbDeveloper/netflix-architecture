@@ -12,6 +12,11 @@ enum MaturityRating {
   RATING_18
 }
 
+enum ContentType {
+	MOVIE
+	SERIES
+}
+
 type ContentGenre {
   id: Int!
   description: String!

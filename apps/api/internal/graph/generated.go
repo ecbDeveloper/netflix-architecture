@@ -62,6 +62,13 @@ type ComplexityRoot struct {
 		Title           func(childComplexity int) int
 	}
 
+	MostWatchedContent struct {
+		ContentID   func(childComplexity int) int
+		ContentType func(childComplexity int) int
+		GenreID     func(childComplexity int) int
+		WatchCount  func(childComplexity int) int
+	}
+
 	Movie struct {
 		ContentURL      func(childComplexity int) int
 		Description     func(childComplexity int) int
@@ -113,20 +120,30 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetEpisode         func(childComplexity int, id uuid.UUID) int
-		GetMovie           func(childComplexity int, id uuid.UUID) int
-		GetProfile         func(childComplexity int) int
-		GetReview          func(childComplexity int, id uuid.UUID) int
-		GetSeries          func(childComplexity int, id uuid.UUID) int
-		GetUser            func(childComplexity int, id uuid.UUID) int
-		GetWatchHistory    func(childComplexity int, id uuid.UUID) int
-		ListEpisodes       func(childComplexity int, seriesID uuid.UUID) int
-		ListMovies         func(childComplexity int) int
-		ListProfiles       func(childComplexity int) int
-		ListReviews        func(childComplexity int) int
-		ListSeries         func(childComplexity int) int
-		ListUsers          func(childComplexity int) int
-		ListWatchHistories func(childComplexity int) int
+		GetEpisode              func(childComplexity int, id uuid.UUID) int
+		GetMovie                func(childComplexity int, id uuid.UUID) int
+		GetProfile              func(childComplexity int) int
+		GetRecommendations      func(childComplexity int, limit *int32) int
+		GetReview               func(childComplexity int, id uuid.UUID) int
+		GetSeries               func(childComplexity int, id uuid.UUID) int
+		GetUser                 func(childComplexity int, id uuid.UUID) int
+		GetWatchHistory         func(childComplexity int, id uuid.UUID) int
+		ListEpisodes            func(childComplexity int, seriesID uuid.UUID) int
+		ListMovies              func(childComplexity int) int
+		ListProfiles            func(childComplexity int) int
+		ListReviews             func(childComplexity int) int
+		ListSeries              func(childComplexity int) int
+		ListUsers               func(childComplexity int) int
+		ListWatchHistories      func(childComplexity int) int
+		MostWatchedContents     func(childComplexity int, limit *int32) int
+		RecentlyWatchedContents func(childComplexity int, limit *int32) int
+	}
+
+	RecommendedContent struct {
+		ContentID   func(childComplexity int) int
+		ContentType func(childComplexity int) int
+		Reason      func(childComplexity int) int
+		Score       func(childComplexity int) int
 	}
 
 	Review struct {
@@ -223,6 +240,9 @@ type QueryResolver interface {
 	ListUsers(ctx context.Context) ([]*model.User, error)
 	GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error)
 	ListWatchHistories(ctx context.Context) ([]*model.WatchHistory, error)
+	MostWatchedContents(ctx context.Context, limit *int32) ([]*model.MostWatchedContent, error)
+	RecentlyWatchedContents(ctx context.Context, limit *int32) ([]*model.WatchHistory, error)
+	GetRecommendations(ctx context.Context, limit *int32) ([]*model.RecommendedContent, error)
 }
 type SeriesResolver interface {
 	Episodes(ctx context.Context, obj *model.Series) ([]*model.Episode, error)
@@ -312,6 +332,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Episode.Title(childComplexity), true
+
+	case "MostWatchedContent.contentId":
+		if e.ComplexityRoot.MostWatchedContent.ContentID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MostWatchedContent.ContentID(childComplexity), true
+	case "MostWatchedContent.contentType":
+		if e.ComplexityRoot.MostWatchedContent.ContentType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MostWatchedContent.ContentType(childComplexity), true
+	case "MostWatchedContent.genreId":
+		if e.ComplexityRoot.MostWatchedContent.GenreID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MostWatchedContent.GenreID(childComplexity), true
+	case "MostWatchedContent.watchCount":
+		if e.ComplexityRoot.MostWatchedContent.WatchCount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MostWatchedContent.WatchCount(childComplexity), true
 
 	case "Movie.contentUrl":
 		if e.ComplexityRoot.Movie.ContentURL == nil {
@@ -705,6 +750,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.GetProfile(childComplexity), true
+	case "Query.getRecommendations":
+		if e.ComplexityRoot.Query.GetRecommendations == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getRecommendations_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.GetRecommendations(childComplexity, args["limit"].(*int32)), true
 	case "Query.getReview":
 		if e.ComplexityRoot.Query.GetReview == nil {
 			break
@@ -797,6 +853,53 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.ListWatchHistories(childComplexity), true
+	case "Query.mostWatchedContents":
+		if e.ComplexityRoot.Query.MostWatchedContents == nil {
+			break
+		}
+
+		args, err := ec.field_Query_mostWatchedContents_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.MostWatchedContents(childComplexity, args["limit"].(*int32)), true
+	case "Query.recentlyWatchedContents":
+		if e.ComplexityRoot.Query.RecentlyWatchedContents == nil {
+			break
+		}
+
+		args, err := ec.field_Query_recentlyWatchedContents_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.RecentlyWatchedContents(childComplexity, args["limit"].(*int32)), true
+
+	case "RecommendedContent.contentId":
+		if e.ComplexityRoot.RecommendedContent.ContentID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RecommendedContent.ContentID(childComplexity), true
+	case "RecommendedContent.contentType":
+		if e.ComplexityRoot.RecommendedContent.ContentType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RecommendedContent.ContentType(childComplexity), true
+	case "RecommendedContent.reason":
+		if e.ComplexityRoot.RecommendedContent.Reason == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RecommendedContent.Reason(childComplexity), true
+	case "RecommendedContent.score":
+		if e.ComplexityRoot.RecommendedContent.Score == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RecommendedContent.Score(childComplexity), true
 
 	case "Review.comment":
 		if e.ComplexityRoot.Review.Comment == nil {
@@ -1439,6 +1542,17 @@ func (ec *executionContext) field_Query_getMovie_args(ctx context.Context, rawAr
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_getRecommendations_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint32)
+	if err != nil {
+		return nil, err
+	}
+	args["limit"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_getReview_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1491,6 +1605,28 @@ func (ec *executionContext) field_Query_listEpisodes_args(ctx context.Context, r
 		return nil, err
 	}
 	args["seriesId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_mostWatchedContents_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint32)
+	if err != nil {
+		return nil, err
+	}
+	args["limit"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_recentlyWatchedContents_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint32)
+	if err != nil {
+		return nil, err
+	}
+	args["limit"] = arg0
 	return args, nil
 }
 
@@ -1878,6 +2014,122 @@ func (ec *executionContext) fieldContext_Episode_reviews(_ context.Context, fiel
 				return ec.fieldContext_Review_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MostWatchedContent_contentId(ctx context.Context, field graphql.CollectedField, obj *model.MostWatchedContent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MostWatchedContent_contentId,
+		func(ctx context.Context) (any, error) {
+			return obj.ContentID, nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MostWatchedContent_contentId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MostWatchedContent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MostWatchedContent_contentType(ctx context.Context, field graphql.CollectedField, obj *model.MostWatchedContent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MostWatchedContent_contentType,
+		func(ctx context.Context) (any, error) {
+			return obj.ContentType, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MostWatchedContent_contentType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MostWatchedContent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MostWatchedContent_genreId(ctx context.Context, field graphql.CollectedField, obj *model.MostWatchedContent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MostWatchedContent_genreId,
+		func(ctx context.Context) (any, error) {
+			return obj.GenreID, nil
+		},
+		nil,
+		ec.marshalNInt2int32,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MostWatchedContent_genreId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MostWatchedContent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MostWatchedContent_watchCount(ctx context.Context, field graphql.CollectedField, obj *model.MostWatchedContent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MostWatchedContent_watchCount,
+		func(ctx context.Context) (any, error) {
+			return obj.WatchCount, nil
+		},
+		nil,
+		ec.marshalNInt2int32,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MostWatchedContent_watchCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MostWatchedContent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5214,6 +5466,218 @@ func (ec *executionContext) fieldContext_Query_listWatchHistories(_ context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_mostWatchedContents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_mostWatchedContents,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().MostWatchedContents(ctx, fc.Args["limit"].(*int32))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.MostWatchedContent
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNMostWatchedContent2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMostWatchedContentᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_mostWatchedContents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "contentId":
+				return ec.fieldContext_MostWatchedContent_contentId(ctx, field)
+			case "contentType":
+				return ec.fieldContext_MostWatchedContent_contentType(ctx, field)
+			case "genreId":
+				return ec.fieldContext_MostWatchedContent_genreId(ctx, field)
+			case "watchCount":
+				return ec.fieldContext_MostWatchedContent_watchCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MostWatchedContent", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_mostWatchedContents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_recentlyWatchedContents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_recentlyWatchedContents,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().RecentlyWatchedContents(ctx, fc.Args["limit"].(*int32))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.WatchHistory
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal []*model.WatchHistory
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
+
+			next = directive2
+			return next
+		},
+		ec.marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_recentlyWatchedContents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_WatchHistory_id(ctx, field)
+			case "profileId":
+				return ec.fieldContext_WatchHistory_profileId(ctx, field)
+			case "movieId":
+				return ec.fieldContext_WatchHistory_movieId(ctx, field)
+			case "episodeId":
+				return ec.fieldContext_WatchHistory_episodeId(ctx, field)
+			case "watchedAt":
+				return ec.fieldContext_WatchHistory_watchedAt(ctx, field)
+			case "lastPositionSeconds":
+				return ec.fieldContext_WatchHistory_lastPositionSeconds(ctx, field)
+			case "isCompleted":
+				return ec.fieldContext_WatchHistory_isCompleted(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type WatchHistory", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_recentlyWatchedContents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getRecommendations(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getRecommendations,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().GetRecommendations(ctx, fc.Args["limit"].(*int32))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.RecommendedContent
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.ProfileSelectionIsRequired == nil {
+					var zeroVal []*model.RecommendedContent
+					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
+				}
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+			}
+
+			next = directive2
+			return next
+		},
+		ec.marshalNRecommendedContent2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐRecommendedContentᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getRecommendations(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "contentId":
+				return ec.fieldContext_RecommendedContent_contentId(ctx, field)
+			case "contentType":
+				return ec.fieldContext_RecommendedContent_contentType(ctx, field)
+			case "score":
+				return ec.fieldContext_RecommendedContent_score(ctx, field)
+			case "reason":
+				return ec.fieldContext_RecommendedContent_reason(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RecommendedContent", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getRecommendations_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -5317,6 +5781,122 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecommendedContent_contentId(ctx context.Context, field graphql.CollectedField, obj *model.RecommendedContent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RecommendedContent_contentId,
+		func(ctx context.Context) (any, error) {
+			return obj.ContentID, nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RecommendedContent_contentId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecommendedContent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecommendedContent_contentType(ctx context.Context, field graphql.CollectedField, obj *model.RecommendedContent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RecommendedContent_contentType,
+		func(ctx context.Context) (any, error) {
+			return obj.ContentType, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RecommendedContent_contentType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecommendedContent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecommendedContent_score(ctx context.Context, field graphql.CollectedField, obj *model.RecommendedContent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RecommendedContent_score,
+		func(ctx context.Context) (any, error) {
+			return obj.Score, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RecommendedContent_score(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecommendedContent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecommendedContent_reason(ctx context.Context, field graphql.CollectedField, obj *model.RecommendedContent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RecommendedContent_reason,
+		func(ctx context.Context) (any, error) {
+			return obj.Reason, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RecommendedContent_reason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecommendedContent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8021,7 +8601,7 @@ func (ec *executionContext) unmarshalInputCreateWatchHistoryInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"movieId", "episodeId", "lastPositionSeconds", "isCompleted"}
+	fieldsInOrder := [...]string{"movieId", "episodeId", "lastPositionSeconds", "isCompleted", "genreId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8056,6 +8636,13 @@ func (ec *executionContext) unmarshalInputCreateWatchHistoryInput(ctx context.Co
 				return it, err
 			}
 			it.IsCompleted = data
+		case "genreId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GenreID = data
 		}
 	}
 	return it, nil
@@ -8594,6 +9181,60 @@ func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, 
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var mostWatchedContentImplementors = []string{"MostWatchedContent"}
+
+func (ec *executionContext) _MostWatchedContent(ctx context.Context, sel ast.SelectionSet, obj *model.MostWatchedContent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mostWatchedContentImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MostWatchedContent")
+		case "contentId":
+			out.Values[i] = ec._MostWatchedContent_contentId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "contentType":
+			out.Values[i] = ec._MostWatchedContent_contentType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "genreId":
+			out.Values[i] = ec._MostWatchedContent_genreId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "watchCount":
+			out.Values[i] = ec._MostWatchedContent_watchCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9379,6 +10020,72 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "mostWatchedContents":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_mostWatchedContents(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "recentlyWatchedContents":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_recentlyWatchedContents(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getRecommendations":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getRecommendations(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -9387,6 +10094,60 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var recommendedContentImplementors = []string{"RecommendedContent"}
+
+func (ec *executionContext) _RecommendedContent(ctx context.Context, sel ast.SelectionSet, obj *model.RecommendedContent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, recommendedContentImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RecommendedContent")
+		case "contentId":
+			out.Values[i] = ec._RecommendedContent_contentId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "contentType":
+			out.Values[i] = ec._RecommendedContent_contentType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "score":
+			out.Values[i] = ec._RecommendedContent_score(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "reason":
+			out.Values[i] = ec._RecommendedContent_reason(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10153,6 +10914,22 @@ func (ec *executionContext) marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnet
 	return ec._Episode(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v any) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalFloatContext(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, v any) (uuid.UUID, error) {
 	res, err := graphql.UnmarshalUUID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -10193,6 +10970,32 @@ func (ec *executionContext) unmarshalNMaturityRating2githubᚗcomᚋecbDeveloper
 
 func (ec *executionContext) marshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, sel ast.SelectionSet, v model.MaturityRating) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNMostWatchedContent2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMostWatchedContentᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.MostWatchedContent) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNMostWatchedContent2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMostWatchedContent(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNMostWatchedContent2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMostWatchedContent(ctx context.Context, sel ast.SelectionSet, v *model.MostWatchedContent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._MostWatchedContent(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNMovie2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMovie(ctx context.Context, sel ast.SelectionSet, v model.Movie) graphql.Marshaler {
@@ -10253,6 +11056,32 @@ func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnet
 		return graphql.Null
 	}
 	return ec._Profile(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNRecommendedContent2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐRecommendedContentᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.RecommendedContent) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNRecommendedContent2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐRecommendedContent(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNRecommendedContent2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐRecommendedContent(ctx context.Context, sel ast.SelectionSet, v *model.RecommendedContent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._RecommendedContent(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNReview2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReview(ctx context.Context, sel ast.SelectionSet, v model.Review) graphql.Marshaler {

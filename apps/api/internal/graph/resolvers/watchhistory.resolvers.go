@@ -10,6 +10,8 @@ import (
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
+	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
+	recommendationpb "github.com/ecbDeveloper/netflix-architecture/proto/recommendation"
 	"github.com/google/uuid"
 )
 
@@ -21,44 +23,79 @@ func (r *mutationResolver) CreateWatchHistory(ctx context.Context, input model.C
 		return nil, handleError(err)
 	}
 
-	wh, err := r.WatchHistoryService.CreateWatchHistory(ctx, input, profileID)
-	if err != nil {
-		r.Logger.Error("failed to create watch history", slog.Any("error", err))
-		return nil, handleError(err)
+	req := &historypb.RecordWatchRequest{
+		ProfileId: profileID.String(),
 	}
 
-	return wh, nil
+	if input.MovieID != nil {
+		movieStr := input.MovieID.String()
+		req.MovieId = &movieStr
+	}
+	if input.EpisodeID != nil {
+		episodeStr := input.EpisodeID.String()
+		req.EpisodeId = &episodeStr
+	}
+	if input.LastPositionSeconds != nil {
+		req.LastPositionSeconds = input.LastPositionSeconds
+	}
+	if input.IsCompleted != nil {
+		req.IsCompleted = input.IsCompleted
+	}
+	if input.GenreID != nil {
+		req.GenreId = input.GenreID
+	}
+
+	resp, err := r.HistoryClient.RecordWatch(ctx, req)
+	if err != nil {
+		r.Logger.Error("failed to create watch history via grpc", slog.Any("error", err))
+		return nil, handleGRPCError(err)
+	}
+
+	return protoToWatchHistory(resp), nil
 }
 
 // UpdateWatchHistory is the resolver for the updateWatchHistory field.
 func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
-	profileID, err := r.getProfileIDFromSession(ctx)
+	_, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
 		r.Logger.Error("failed to get profile id to update watch history", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
-	wh, err := r.WatchHistoryService.UpdateWatchHistory(ctx, id, input, profileID)
-	if err != nil {
-		r.Logger.Error("failed to update watch history", slog.Any("error", err))
-		return nil, handleError(err)
+	req := &historypb.UpdateWatchProgressRequest{
+		Id: id.String(),
 	}
 
-	return wh, nil
+	if input.LastPositionSeconds != nil {
+		req.LastPositionSeconds = input.LastPositionSeconds
+	}
+	if input.IsCompleted != nil {
+		req.IsCompleted = input.IsCompleted
+	}
+
+	resp, err := r.HistoryClient.UpdateWatchProgress(ctx, req)
+	if err != nil {
+		r.Logger.Error("failed to update watch history via grpc", slog.Any("error", err))
+		return nil, handleGRPCError(err)
+	}
+
+	return protoToWatchHistory(resp), nil
 }
 
 // DeleteWatchHistory is the resolver for the deleteWatchHistory field.
 func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID) (bool, error) {
-	profileID, err := r.getProfileIDFromSession(ctx)
+	_, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
 		r.Logger.Error("failed to get profile id to delete watch history", slog.Any("error", err))
 		return false, handleError(err)
 	}
 
-	err = r.WatchHistoryService.DeleteWatchHistory(ctx, id, profileID)
+	_, err = r.HistoryClient.DeleteWatchHistory(ctx, &historypb.DeleteWatchHistoryRequest{
+		Id: id.String(),
+	})
 	if err != nil {
-		r.Logger.Error("failed to delete watch history", slog.Any("error", err))
-		return false, handleError(err)
+		r.Logger.Error("failed to delete watch history via grpc", slog.Any("error", err))
+		return false, handleGRPCError(err)
 	}
 
 	return true, nil
@@ -66,19 +103,21 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID)
 
 // GetWatchHistory is the resolver for the getWatchHistory field.
 func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error) {
-	profileID, err := r.getProfileIDFromSession(ctx)
+	_, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
 		r.Logger.Error("failed to get profile id to get one watch history", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
-	wh, err := r.WatchHistoryService.GetWatchHistory(ctx, id, profileID)
+	resp, err := r.HistoryClient.GetWatchHistory(ctx, &historypb.GetWatchHistoryRequest{
+		Id: id.String(),
+	})
 	if err != nil {
-		r.Logger.Error("failed to get watch history", slog.Any("error", err))
-		return nil, handleError(err)
+		r.Logger.Error("failed to get watch history via grpc", slog.Any("error", err))
+		return nil, handleGRPCError(err)
 	}
 
-	return wh, nil
+	return protoToWatchHistory(resp), nil
 }
 
 // ListWatchHistories is the resolver for the listWatchHistories field.
@@ -89,11 +128,139 @@ func (r *queryResolver) ListWatchHistories(ctx context.Context) ([]*model.WatchH
 		return nil, handleError(err)
 	}
 
-	watchHistories, err := r.WatchHistoryService.ListWatchHistories(ctx, profileID)
+	resp, err := r.HistoryClient.ListWatchHistory(ctx, &historypb.ListWatchHistoryRequest{
+		ProfileId: profileID.String(),
+	})
 	if err != nil {
-		r.Logger.Error("failed to list watch histories", slog.Any("error", err))
+		r.Logger.Error("failed to list watch histories via grpc", slog.Any("error", err))
+		return nil, handleGRPCError(err)
+	}
+
+	result := make([]*model.WatchHistory, len(resp.Histories))
+	for i, h := range resp.Histories {
+		result[i] = protoToWatchHistory(h)
+	}
+	return result, nil
+}
+
+// MostWatchedContents is the resolver for the mostWatchedContents field.
+func (r *queryResolver) MostWatchedContents(ctx context.Context, limit *int32) ([]*model.MostWatchedContent, error) {
+	var l int32 = 10
+	if limit != nil {
+		l = *limit
+	}
+
+	resp, err := r.HistoryClient.GetMostWatched(ctx, &historypb.GetMostWatchedRequest{
+		Limit: l,
+	})
+	if err != nil {
+		r.Logger.Error("failed to get most watched via grpc", slog.Any("error", err))
+		return nil, handleGRPCError(err)
+	}
+
+	result := make([]*model.MostWatchedContent, len(resp.Items))
+	for i, item := range resp.Items {
+		contentID, _ := uuid.Parse(item.ContentId)
+		result[i] = &model.MostWatchedContent{
+			ContentID:   contentID,
+			ContentType: item.ContentType,
+			GenreID:     item.GenreId,
+			WatchCount:  int32(item.WatchCount),
+		}
+	}
+	return result, nil
+}
+
+// RecentlyWatchedContents is the resolver for the recentlyWatchedContents field.
+func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, limit *int32) ([]*model.WatchHistory, error) {
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id for recently watched", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
-	return watchHistories, nil
+	var l int32 = 10
+	if limit != nil {
+		l = *limit
+	}
+
+	resp, err := r.HistoryClient.GetRecentlyWatched(ctx, &historypb.GetRecentlyWatchedRequest{
+		ProfileId: profileID.String(),
+		Limit:     l,
+	})
+	if err != nil {
+		r.Logger.Error("failed to get recently watched via grpc", slog.Any("error", err))
+		return nil, handleGRPCError(err)
+	}
+
+	result := make([]*model.WatchHistory, len(resp.Histories))
+	for i, h := range resp.Histories {
+		result[i] = protoToWatchHistory(h)
+	}
+	return result, nil
+}
+
+// GetRecommendations is the resolver for the getRecommendations field.
+func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([]*model.RecommendedContent, error) {
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id for recommendations", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	var l int32 = 20
+	if limit != nil {
+		l = *limit
+	}
+
+	resp, err := r.RecommendationClient.GetRecommendations(ctx, &recommendationpb.GetRecommendationsRequest{
+		ProfileId: profileID.String(),
+		Limit:     l,
+	})
+	if err != nil {
+		r.Logger.Error("failed to get recommendations via grpc", slog.Any("error", err))
+		return nil, handleGRPCError(err)
+	}
+
+	result := make([]*model.RecommendedContent, len(resp.Recommendations))
+	for i, rec := range resp.Recommendations {
+		contentID, _ := uuid.Parse(rec.ContentId)
+		result[i] = &model.RecommendedContent{
+			ContentID:   contentID,
+			ContentType: rec.ContentType,
+			Score:       rec.Score,
+			Reason:      rec.Reason,
+		}
+	}
+	return result, nil
+}
+
+// protoToWatchHistory converts a protobuf WatchHistoryResponse to the GraphQL model.
+func protoToWatchHistory(resp *historypb.WatchHistoryResponse) *model.WatchHistory {
+	wh := &model.WatchHistory{
+		WatchedAt: resp.WatchedAt,
+	}
+
+	whID, _ := uuid.Parse(resp.Id)
+	wh.ID = whID
+
+	profileID, _ := uuid.Parse(resp.ProfileId)
+	wh.ProfileID = profileID
+
+	if resp.MovieId != nil {
+		movieID, _ := uuid.Parse(*resp.MovieId)
+		wh.MovieID = &movieID
+	}
+	if resp.EpisodeId != nil {
+		episodeID, _ := uuid.Parse(*resp.EpisodeId)
+		wh.EpisodeID = &episodeID
+	}
+
+	lps := resp.LastPositionSeconds
+	wh.LastPositionSeconds = &lps
+
+	ic := resp.IsCompleted
+	wh.IsCompleted = &ic
+
+	return wh
 }

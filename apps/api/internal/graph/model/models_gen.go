@@ -68,6 +68,7 @@ type CreateWatchHistoryInput struct {
 	EpisodeID           *uuid.UUID `json:"episodeId,omitempty"`
 	LastPositionSeconds *int32     `json:"lastPositionSeconds,omitempty"`
 	IsCompleted         *bool      `json:"isCompleted,omitempty"`
+	GenreID             *int32     `json:"genreId,omitempty"`
 }
 
 type Episode struct {
@@ -84,6 +85,13 @@ type Episode struct {
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type MostWatchedContent struct {
+	ContentID   uuid.UUID `json:"contentId"`
+	ContentType string    `json:"contentType"`
+	GenreID     int32     `json:"genreId"`
+	WatchCount  int32     `json:"watchCount"`
 }
 
 type Movie struct {
@@ -110,6 +118,13 @@ type Profile struct {
 }
 
 type Query struct {
+}
+
+type RecommendedContent struct {
+	ContentID   uuid.UUID `json:"contentId"`
+	ContentType string    `json:"contentType"`
+	Score       float64   `json:"score"`
+	Reason      string    `json:"reason"`
 }
 
 type Review struct {
