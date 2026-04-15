@@ -2058,7 +2058,7 @@ func (ec *executionContext) _MostWatchedContent_contentType(ctx context.Context,
 			return obj.ContentType, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNContentType2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentType,
 		true,
 		true,
 	)
@@ -2071,7 +2071,7 @@ func (ec *executionContext) fieldContext_MostWatchedContent_contentType(_ contex
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type ContentType does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5825,7 +5825,7 @@ func (ec *executionContext) _RecommendedContent_contentType(ctx context.Context,
 			return obj.ContentType, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNContentType2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentType,
 		true,
 		true,
 	)
@@ -5838,7 +5838,7 @@ func (ec *executionContext) fieldContext_RecommendedContent_contentType(_ contex
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type ContentType does not have child fields")
 		},
 	}
 	return fc, nil
@@ -10847,6 +10847,16 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNContentType2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentType(ctx context.Context, v any) (model.ContentType, error) {
+	var res model.ContentType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNContentType2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentType(ctx context.Context, sel ast.SelectionSet, v model.ContentType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNCreateEpisodeInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateEpisodeInput(ctx context.Context, v any) (model.CreateEpisodeInput, error) {

@@ -88,10 +88,10 @@ type LoginInput struct {
 }
 
 type MostWatchedContent struct {
-	ContentID   uuid.UUID `json:"contentId"`
-	ContentType string    `json:"contentType"`
-	GenreID     int32     `json:"genreId"`
-	WatchCount  int32     `json:"watchCount"`
+	ContentID   uuid.UUID   `json:"contentId"`
+	ContentType ContentType `json:"contentType"`
+	GenreID     int32       `json:"genreId"`
+	WatchCount  int32       `json:"watchCount"`
 }
 
 type Movie struct {
@@ -121,10 +121,10 @@ type Query struct {
 }
 
 type RecommendedContent struct {
-	ContentID   uuid.UUID `json:"contentId"`
-	ContentType string    `json:"contentType"`
-	Score       float64   `json:"score"`
-	Reason      string    `json:"reason"`
+	ContentID   uuid.UUID   `json:"contentId"`
+	ContentType ContentType `json:"contentType"`
+	Score       float64     `json:"score"`
+	Reason      string      `json:"reason"`
 }
 
 type Review struct {
@@ -214,6 +214,61 @@ type WatchHistory struct {
 	WatchedAt           string     `json:"watchedAt"`
 	LastPositionSeconds *int32     `json:"lastPositionSeconds,omitempty"`
 	IsCompleted         *bool      `json:"isCompleted,omitempty"`
+}
+
+type ContentType string
+
+const (
+	ContentTypeMovie  ContentType = "MOVIE"
+	ContentTypeSeries ContentType = "SERIES"
+)
+
+var AllContentType = []ContentType{
+	ContentTypeMovie,
+	ContentTypeSeries,
+}
+
+func (e ContentType) IsValid() bool {
+	switch e {
+	case ContentTypeMovie, ContentTypeSeries:
+		return true
+	}
+	return false
+}
+
+func (e ContentType) String() string {
+	return string(e)
+}
+
+func (e *ContentType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ContentType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ContentType", str)
+	}
+	return nil
+}
+
+func (e ContentType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ContentType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ContentType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type MaturityRating string
