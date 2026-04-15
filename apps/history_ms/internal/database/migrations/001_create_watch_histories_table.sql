@@ -9,9 +9,6 @@ CREATE TABLE watch_histories (
   last_position_seconds INT DEFAULT 0,
   is_completed BOOLEAN DEFAULT FALSE
 );
-
-CREATE INDEX idx_watch_histories_profile_id ON watch_histories(profile_id);
-CREATE INDEX idx_watch_histories_genre_id ON watch_histories(genre_id);
 ---- create above / drop below ----
 DROP TABLE IF EXISTS watch_histories;
 -- Write your migrate down statements here. If this migration is irreversible
