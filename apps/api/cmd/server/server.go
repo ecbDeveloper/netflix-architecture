@@ -30,7 +30,8 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/user"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/watchhistory"
+	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
+	recommendationpb "github.com/ecbDeveloper/netflix-architecture/proto/recommendation"
 	"github.com/go-chi/chi/v5"
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
@@ -38,6 +39,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func init() {
@@ -90,7 +93,25 @@ func main() {
 	}
 	defer pool.Close()
 
-	resolver, s, queries := initializeDependencies(pool, redisPool, logger)
+	historyAddr := os.Getenv("HISTORY_GRPC_ADDR")
+	historyConn, err := grpc.NewClient(historyAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		logger.Error("failed to connect to history ms", slog.Any("error", err))
+		os.Exit(1)
+	}
+	defer historyConn.Close()
+	historyClient := historypb.NewHistoryServiceClient(historyConn)
+
+	recAddr := os.Getenv("RECOMMENDATION_GRPC_ADDR")
+	recConn, err := grpc.NewClient(recAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		logger.Error("failed to connect to recommendation ms", slog.Any("error", err))
+		os.Exit(1)
+	}
+	defer recConn.Close()
+	recClient := recommendationpb.NewRecommendationServiceClient(recConn)
+
+	resolver, s, queries := initializeDependencies(pool, redisPool, logger, historyClient, recClient)
 
 	router := chi.NewRouter()
 	router.Use(s.LoadAndSave)
@@ -162,7 +183,7 @@ func initializeRedisPool(ctx context.Context) *redis.Pool {
 	}
 }
 
-func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *slog.Logger) (*resolvers.Resolver, *scs.SessionManager, *sqlc.Queries) {
+func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *slog.Logger, historyClient historypb.HistoryServiceClient, recClient recommendationpb.RecommendationServiceClient) (*resolvers.Resolver, *scs.SessionManager, *sqlc.Queries) {
 	uploadPath := os.Getenv("UPLOAD_PATH")
 
 	queries := sqlc.New(pool)
@@ -173,7 +194,6 @@ func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *s
 	profileService := profile.NewService(queries)
 	reviewService := review.NewService(queries)
 	seriesService := series.NewService(queries)
-	watchHistoryService := watchhistory.NewService(queries)
 	authService := auth.NewService(queries)
 
 	s := scs.New()
@@ -192,8 +212,9 @@ func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *s
 		profileService,
 		reviewService,
 		seriesService,
-		watchHistoryService,
 		authService,
+		historyClient,
+		recClient,
 	)
 
 	return resolver, s, queries
