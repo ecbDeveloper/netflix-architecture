@@ -199,7 +199,9 @@ func (s *ServiceImpl) UpdateMovie(ctx context.Context, id uuid.UUID, input model
 			return nil, fmt.Errorf("failed to update movie file content: %w", err)
 		}
 
-		params.ContentUrl = contentURL
+		if strings.TrimSpace(contentURL) != "" {
+			params.ContentUrl = contentURL
+		}
 	}
 
 	movie, err := s.queries.UpdateMovie(ctx, params)
