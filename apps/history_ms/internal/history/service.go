@@ -196,7 +196,7 @@ func (s *Server) GetMostWatched(ctx context.Context, req *pb.GetMostWatchedReque
 			movieUUID, _ := uuid.FromBytes(m.MovieID.Bytes[:])
 			items = append(items, &pb.MostWatchedItem{
 				ContentId:   movieUUID.String(),
-				ContentType: "movie",
+				ContentType: pb.ContentType_MOVIE,
 				GenreId:     m.GenreID.Int32,
 				WatchCount:  m.WatchCount,
 			})
@@ -208,7 +208,7 @@ func (s *Server) GetMostWatched(ctx context.Context, req *pb.GetMostWatchedReque
 			episodeUUID, _ := uuid.FromBytes(e.EpisodeID.Bytes[:])
 			items = append(items, &pb.MostWatchedItem{
 				ContentId:   episodeUUID.String(),
-				ContentType: "episode",
+				ContentType: pb.ContentType_SERIES,
 				GenreId:     e.GenreID.Int32,
 				WatchCount:  e.WatchCount,
 			})
