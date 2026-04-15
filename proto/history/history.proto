@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package history;
+
+option go_package = "github.com/ecbDeveloper/netflix-architecture/proto/history";
+
+service HistoryService {
+  rpc RecordWatch(RecordWatchRequest) returns (WatchHistoryResponse);
+  rpc GetWatchHistory(GetWatchHistoryRequest) returns (WatchHistoryResponse);
+  rpc ListWatchHistory(ListWatchHistoryRequest) returns (ListWatchHistoryResponse);
+  rpc UpdateWatchProgress(UpdateWatchProgressRequest) returns (WatchHistoryResponse);
+  rpc DeleteWatchHistory(DeleteWatchHistoryRequest) returns (DeleteWatchHistoryResponse);
+  rpc GetMostWatched(GetMostWatchedRequest) returns (MostWatchedResponse);
+  rpc GetRecentlyWatched(GetRecentlyWatchedRequest) returns (ListWatchHistoryResponse);
+}
+
+message RecordWatchRequest {
+  string profile_id = 1;
+  optional string movie_id = 2;
+  optional string episode_id = 3;
+  optional int32 last_position_seconds = 4;
+  optional bool is_completed = 5;
+  optional int32 genre_id = 6;
+}
+
+message GetWatchHistoryRequest {
+  string id = 1;
+}
+
+message ListWatchHistoryRequest {
+  string profile_id = 1;
+}
+
+message UpdateWatchProgressRequest {
+  string id = 1;
+  optional int32 last_position_seconds = 2;
+  optional bool is_completed = 3;
+}
+
+message DeleteWatchHistoryRequest {
+  string id = 1;
+}
+
+message DeleteWatchHistoryResponse {
+  bool success = 1;
+}
+
+message WatchHistoryResponse {
+  string id = 1;
+  string profile_id = 2;
+  optional string movie_id = 3;
+  optional string episode_id = 4;
+  string watched_at = 5;
+  int32 last_position_seconds = 6;
+  bool is_completed = 7;
+  int32 genre_id = 8;
+}
+
+message ListWatchHistoryResponse {
+  repeated WatchHistoryResponse histories = 1;
+}
+
+message GetMostWatchedRequest {
+  int32 limit = 1;
+}
+
+message MostWatchedItem {
+  string content_id = 1;
+  string content_type = 2;
+  int32 genre_id = 3;
+  int64 watch_count = 4;
+}
+
+message MostWatchedResponse {
+  repeated MostWatchedItem items = 1;
+}
+
+message GetRecentlyWatchedRequest {
+  string profile_id = 1;
+  int32 limit = 2;
+}
