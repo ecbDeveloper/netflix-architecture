@@ -2,8 +2,7 @@
 CREATE TABLE reviews (
   id UUID PRIMARY KEY,
   profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  movie_id UUID REFERENCES movies(id) ON DELETE CASCADE,
-  episode_id UUID REFERENCES episodes(id) ON DELETE CASCADE,
+  content_id UUID NOT NULL REFERENCES content(id) ON DELETE CASCADE,
   rating INT NOT NULL,
   comment TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,

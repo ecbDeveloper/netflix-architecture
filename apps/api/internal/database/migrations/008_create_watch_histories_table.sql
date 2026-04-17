@@ -2,10 +2,9 @@
 CREATE TABLE watch_histories (
   id UUID PRIMARY KEY,
   profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  movie_id UUID REFERENCES movies(id) ON DELETE CASCADE,
-  episode_id UUID REFERENCES episodes(id) ON DELETE CASCADE,
-  watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  content_id UUID REFERENCES content(id) ON DELETE CASCADE,
   last_position_seconds INT DEFAULT 0,
+  watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   is_completed BOOLEAN DEFAULT FALSE
 );
 ---- create above / drop below ----
