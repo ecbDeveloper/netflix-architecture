@@ -5,11 +5,10 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/auth"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/content"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/episode"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/movie"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/review"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/series"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/user"
 	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
 	recommendationpb "github.com/ecbDeveloper/netflix-architecture/proto/recommendation"
@@ -26,11 +25,10 @@ type Resolver struct {
 
 	UserService          user.Service
 	EpisodeService       episode.Service
-	MovieService         movie.Service
 	ProfileService       profile.Service
 	ReviewService        review.Service
-	SeriesService        series.Service
 	AuthService          auth.Service
+	ContentService       content.Service
 	HistoryClient        historypb.HistoryServiceClient
 	RecommendationClient recommendationpb.RecommendationServiceClient
 }
@@ -40,11 +38,10 @@ func NewResolver(
 	s *scs.SessionManager,
 	us user.Service,
 	es episode.Service,
-	ms movie.Service,
 	ps profile.Service,
 	rs review.Service,
-	ss series.Service,
 	as auth.Service,
+	cs content.Service,
 	hc historypb.HistoryServiceClient,
 	rc recommendationpb.RecommendationServiceClient,
 ) *Resolver {
@@ -53,11 +50,10 @@ func NewResolver(
 		Sessions:             s,
 		UserService:          us,
 		EpisodeService:       es,
-		MovieService:         ms,
 		ProfileService:       ps,
 		ReviewService:        rs,
-		SeriesService:        ss,
 		AuthService:          as,
+		ContentService:       cs,
 		HistoryClient:        hc,
 		RecommendationClient: rc,
 	}

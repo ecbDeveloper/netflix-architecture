@@ -18,15 +18,14 @@ import (
 	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/auth"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/content"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/episode"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/resolvers"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/movie"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/review"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/series"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/user"
@@ -196,11 +195,10 @@ func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *s
 	storageService := storage.NewService(uploadPath)
 	userService := user.NewService(queries)
 	episodeService := episode.NewService(queries, storageService)
-	movieService := movie.NewService(queries, storageService)
 	profileService := profile.NewService(queries)
 	reviewService := review.NewService(queries)
-	seriesService := series.NewService(queries)
 	authService := auth.NewService(queries)
+	contentService := content.NewService(queries)
 
 	s := scs.New()
 	s.Store = redisstore.New(redisPool)
@@ -214,11 +212,10 @@ func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *s
 		s,
 		userService,
 		episodeService,
-		movieService,
 		profileService,
 		reviewService,
-		seriesService,
 		authService,
+		contentService,
 		historyClient,
 		recClient,
 	)
