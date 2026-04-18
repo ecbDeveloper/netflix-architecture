@@ -204,15 +204,14 @@ models:
         resolver: true
       watchHistories:
         resolver: true
-  Series:
-    fields:
-      episodes:
-        resolver: true
-  Movie:
-    fields:
-      reviews:
-        resolver: true
   Episode:
     fields:
       reviews:
-        resolver: true 
+        resolver: true
+  Content:
+    fields:
+      episodes:
+        resolver: true
+      movieReviews:
+        resolver: true
+

@@ -12,9 +12,32 @@ import (
 	"github.com/google/uuid"
 )
 
+type Content struct {
+	ID              uuid.UUID      `json:"id"`
+	Title           string         `json:"title"`
+	Description     string         `json:"description"`
+	ReleaseDate     string         `json:"releaseDate"`
+	MaturityRating  MaturityRating `json:"maturityRating"`
+	GenreID         int32          `json:"genreId"`
+	ContentType     ContentType    `json:"contentType"`
+	ContentURL      *string        `json:"contentUrl,omitempty"`
+	DurationMinutes *int32         `json:"durationMinutes,omitempty"`
+}
+
 type ContentGenre struct {
 	ID          int32  `json:"id"`
 	Description string `json:"description"`
+}
+
+type CreateContentInput struct {
+	Title           string          `json:"title"`
+	Description     string          `json:"description"`
+	ReleaseDate     string          `json:"releaseDate"`
+	MaturityRating  MaturityRating  `json:"maturityRating"`
+	GenreID         int32           `json:"genreId"`
+	ContentType     ContentType     `json:"contentType"`
+	File            *graphql.Upload `json:"file,omitempty"`
+	DurationMinutes *int32          `json:"durationMinutes,omitempty"`
 }
 
 type CreateEpisodeInput struct {
@@ -24,16 +47,6 @@ type CreateEpisodeInput struct {
 	Title           string         `json:"title"`
 	DurationMinutes int32          `json:"durationMinutes"`
 	EpisodeFile     graphql.Upload `json:"episodeFile"`
-}
-
-type CreateMovieInput struct {
-	Title           string         `json:"title"`
-	Description     string         `json:"description"`
-	DurationMinutes int32          `json:"durationMinutes"`
-	ReleaseDate     string         `json:"releaseDate"`
-	MaturityRating  MaturityRating `json:"maturityRating"`
-	GenreID         int32          `json:"genreId"`
-	MovieFile       graphql.Upload `json:"movieFile"`
 }
 
 type CreateProfileInput struct {
@@ -46,14 +59,6 @@ type CreateReviewInput struct {
 	EpisodeID *uuid.UUID `json:"episodeId,omitempty"`
 	Rating    int32      `json:"rating"`
 	Comment   *string    `json:"comment,omitempty"`
-}
-
-type CreateSeriesInput struct {
-	Title          string         `json:"title"`
-	Description    string         `json:"description"`
-	ReleaseDate    string         `json:"releaseDate"`
-	MaturityRating MaturityRating `json:"maturityRating"`
-	GenreID        int32          `json:"genreId"`
 }
 
 type CreateUserInput struct {
@@ -94,17 +99,6 @@ type MostWatchedContent struct {
 	WatchCount  int32       `json:"watchCount"`
 }
 
-type Movie struct {
-	ID              uuid.UUID      `json:"id"`
-	Title           string         `json:"title"`
-	Description     string         `json:"description"`
-	DurationMinutes int32          `json:"durationMinutes"`
-	ReleaseDate     string         `json:"releaseDate"`
-	MaturityRating  MaturityRating `json:"maturityRating"`
-	ContentURL      string         `json:"contentUrl"`
-	GenreID         int32          `json:"genreId"`
-}
-
 type Mutation struct {
 }
 
@@ -138,13 +132,14 @@ type Review struct {
 	UpdatedAt string     `json:"updatedAt"`
 }
 
-type Series struct {
-	ID             uuid.UUID      `json:"id"`
-	Title          string         `json:"title"`
-	Description    string         `json:"description"`
-	ReleaseDate    string         `json:"releaseDate"`
-	MaturityRating MaturityRating `json:"maturityRating"`
-	GenreID        int32          `json:"genreId"`
+type UpdateContentInput struct {
+	Title           string          `json:"title"`
+	Description     string          `json:"description"`
+	ReleaseDate     string          `json:"releaseDate"`
+	MaturityRating  MaturityRating  `json:"maturityRating"`
+	GenreID         int32           `json:"genreId"`
+	File            *graphql.Upload `json:"file,omitempty"`
+	DurationMinutes *int32          `json:"durationMinutes,omitempty"`
 }
 
 type UpdateEpisodeInput struct {
@@ -153,16 +148,6 @@ type UpdateEpisodeInput struct {
 	Title           *string        `json:"title,omitempty"`
 	DurationMinutes *int32         `json:"durationMinutes,omitempty"`
 	EpisodeFile     graphql.Upload `json:"episodeFile"`
-}
-
-type UpdateMovieInput struct {
-	Title           *string         `json:"title,omitempty"`
-	Description     *string         `json:"description,omitempty"`
-	DurationMinutes *int32          `json:"durationMinutes,omitempty"`
-	ReleaseDate     *string         `json:"releaseDate,omitempty"`
-	MaturityRating  *MaturityRating `json:"maturityRating,omitempty"`
-	GenreID         *int32          `json:"genreId,omitempty"`
-	MovieFile       graphql.Upload  `json:"movieFile"`
 }
 
 type UpdateProfileInput struct {
@@ -174,14 +159,6 @@ type UpdateReviewInput struct {
 	ID      uuid.UUID `json:"id"`
 	Rating  *int32    `json:"rating,omitempty"`
 	Comment *string   `json:"comment,omitempty"`
-}
-
-type UpdateSeriesInput struct {
-	Title          *string         `json:"title,omitempty"`
-	Description    *string         `json:"description,omitempty"`
-	ReleaseDate    *string         `json:"releaseDate,omitempty"`
-	MaturityRating *MaturityRating `json:"maturityRating,omitempty"`
-	GenreID        *int32          `json:"genreId,omitempty"`
 }
 
 type UpdateUserInput struct {

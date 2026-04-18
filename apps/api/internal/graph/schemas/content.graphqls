@@ -1,0 +1,51 @@
+type Content {
+  id: ID!
+  title: String!
+  description: String!
+  releaseDate: String!
+  maturityRating: MaturityRating!
+  genreId: Int!
+  contentType: ContentType!
+
+  contentUrl: String
+  durationMinutes: Int
+  movieReviews: [Review!]
+
+  episodes: [Episode!]
+}
+
+input CreateContentInput {
+  title: String!
+  description: String!
+  releaseDate: String!
+  maturityRating: MaturityRating!
+  genreId: Int!
+  contentType: ContentType!
+
+  file: Upload
+  durationMinutes: Int
+}
+
+input UpdateContentInput {
+  title: String!
+  description: String!
+  releaseDate: String!
+  maturityRating: MaturityRating!
+  genreId: Int!
+
+  file: Upload
+  durationMinutes: Int
+}
+
+extend type Query {
+  listContents: [Content!]! @auth @profileSelectionIsRequired
+  listKidsContents: [Content!]! @auth @profileSelectionIsRequired
+  listContentsByType(contentType: ContentType!): [Content!]! @auth @profileSelectionIsRequired
+  listContentsByGenre(genreId: Int!): [Content!]! @auth @profileSelectionIsRequired
+}
+
+extend type Mutation {
+  createContent(input: CreateContentInput!): Content! @auth @hasRole(role: ADMIN)
+  updateContent(id: ID!, input: UpdateContentInput!): Content! @auth @hasRole(role: ADMIN)
+  deleteContent(id: ID!): Boolean! @auth @hasRole(role: ADMIN)
+}
