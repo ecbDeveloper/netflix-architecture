@@ -13,6 +13,48 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type ContentType string
+
+const (
+	ContentTypeMOVIE  ContentType = "MOVIE"
+	ContentTypeSERIES ContentType = "SERIES"
+)
+
+func (e *ContentType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ContentType(s)
+	case string:
+		*e = ContentType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ContentType: %T", src)
+	}
+	return nil
+}
+
+type NullContentType struct {
+	ContentType ContentType `json:"content_type"`
+	Valid       bool        `json:"valid"` // Valid is true if ContentType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullContentType) Scan(value interface{}) error {
+	if value == nil {
+		ns.ContentType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ContentType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullContentType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ContentType), nil
+}
+
 type MaturityRating string
 
 const (
@@ -59,6 +101,18 @@ func (ns NullMaturityRating) Value() (driver.Value, error) {
 	return string(ns.MaturityRating), nil
 }
 
+type Content struct {
+	ID             uuid.UUID      `json:"id"`
+	Title          string         `json:"title"`
+	ContentType    ContentType    `json:"content_type"`
+	Description    string         `json:"description"`
+	ReleaseDate    pgtype.Date    `json:"release_date"`
+	MaturityRating MaturityRating `json:"maturity_rating"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	GenreID        int32          `json:"genre_id"`
+}
+
 type ContentGenre struct {
 	ID          int32  `json:"id"`
 	Description string `json:"description"`
@@ -77,16 +131,9 @@ type Episode struct {
 }
 
 type Movie struct {
-	ID              uuid.UUID      `json:"id"`
-	Title           string         `json:"title"`
-	Description     string         `json:"description"`
-	DurationMinutes int32          `json:"duration_minutes"`
-	ReleaseDate     pgtype.Date    `json:"release_date"`
-	ContentUrl      string         `json:"content_url"`
-	CreatedAt       time.Time      `json:"created_at"`
-	UpdatedAt       time.Time      `json:"updated_at"`
-	MaturityRating  MaturityRating `json:"maturity_rating"`
-	GenreID         int32          `json:"genre_id"`
+	ContentID       uuid.UUID `json:"content_id"`
+	DurationMinutes int32     `json:"duration_minutes"`
+	ContentUrl      string    `json:"content_url"`
 }
 
 type Profile struct {
@@ -110,14 +157,7 @@ type Review struct {
 }
 
 type Series struct {
-	ID             uuid.UUID      `json:"id"`
-	Title          string         `json:"title"`
-	Description    string         `json:"description"`
-	ReleaseDate    pgtype.Date    `json:"release_date"`
-	CreatedAt      time.Time      `json:"created_at"`
-	UpdatedAt      time.Time      `json:"updated_at"`
-	MaturityRating MaturityRating `json:"maturity_rating"`
-	GenreID        int32          `json:"genre_id"`
+	ContentID uuid.UUID `json:"content_id"`
 }
 
 type User struct {
@@ -134,14 +174,4 @@ type User struct {
 type UsersRole struct {
 	ID   int32  `json:"id"`
 	Role string `json:"role"`
-}
-
-type WatchHistory struct {
-	ID                  uuid.UUID        `json:"id"`
-	ProfileID           uuid.UUID        `json:"profile_id"`
-	MovieID             pgtype.UUID      `json:"movie_id"`
-	EpisodeID           pgtype.UUID      `json:"episode_id"`
-	WatchedAt           pgtype.Timestamp `json:"watched_at"`
-	LastPositionSeconds pgtype.Int4      `json:"last_position_seconds"`
-	IsCompleted         pgtype.Bool      `json:"is_completed"`
 }

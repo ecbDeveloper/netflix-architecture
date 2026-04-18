@@ -1,22 +1,21 @@
 -- name: CreateMovie :one
-INSERT INTO movies (id, title, description, duration_minutes, release_date, maturity_rating, content_url, genre_id)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO movies (
+  content_id, 
+  duration_minutes, 
+  content_url
+) VALUES ($1, $2, $3)
 RETURNING *;
 
 -- name: GetMovie :one
-SELECT * FROM movies WHERE id = $1;
-
--- name: ListMovies :many
-SELECT * FROM movies ORDER BY release_date DESC;
+SELECT
+  c.id, c.title, c.description, m.duration_minutes, c.release_date,
+  m.content_url, c.created_at, c.updated_at, c.maturity_rating, c.genre_id
+FROM contents c
+JOIN movies m ON m.content_id = c.id
+WHERE c.id = $1;
 
 -- name: UpdateMovie :one
 UPDATE movies
-SET title = $2, description = $3, duration_minutes = $4, release_date = $5, maturity_rating = $6, content_url = $7, genre_id = $8
-WHERE id = $1
+SET duration_minutes = $2, content_url = $3
+WHERE content_id = $1
 RETURNING *;
-
--- name: DeleteMovie :exec
-DELETE FROM movies WHERE id = $1;
-
--- name: ListKidsMovies :many
-SELECT * FROM movies WHERE maturity_rating = 'L' ORDER BY release_date DESC;

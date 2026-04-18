@@ -7,71 +7,59 @@ package sqlc
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createMovie = `-- name: CreateMovie :one
-INSERT INTO movies (id, title, description, duration_minutes, release_date, maturity_rating, content_url, genre_id)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, title, description, duration_minutes, release_date, content_url, created_at, updated_at, maturity_rating, genre_id
+INSERT INTO movies (
+  content_id, 
+  duration_minutes, 
+  content_url
+) VALUES ($1, $2, $3)
+RETURNING content_id, duration_minutes, content_url
 `
 
 type CreateMovieParams struct {
+	ContentID       uuid.UUID `json:"content_id"`
+	DurationMinutes int32     `json:"duration_minutes"`
+	ContentUrl      string    `json:"content_url"`
+}
+
+func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Movie, error) {
+	row := q.db.QueryRow(ctx, createMovie, arg.ContentID, arg.DurationMinutes, arg.ContentUrl)
+	var i Movie
+	err := row.Scan(&i.ContentID, &i.DurationMinutes, &i.ContentUrl)
+	return i, err
+}
+
+const getMovie = `-- name: GetMovie :one
+SELECT
+  c.id, c.title, c.description, m.duration_minutes, c.release_date,
+  m.content_url, c.created_at, c.updated_at, c.maturity_rating, c.genre_id
+FROM contents c
+JOIN movies m ON m.content_id = c.id
+WHERE c.id = $1
+`
+
+type GetMovieRow struct {
 	ID              uuid.UUID      `json:"id"`
 	Title           string         `json:"title"`
 	Description     string         `json:"description"`
 	DurationMinutes int32          `json:"duration_minutes"`
 	ReleaseDate     pgtype.Date    `json:"release_date"`
-	MaturityRating  MaturityRating `json:"maturity_rating"`
 	ContentUrl      string         `json:"content_url"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	MaturityRating  MaturityRating `json:"maturity_rating"`
 	GenreID         int32          `json:"genre_id"`
 }
 
-func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Movie, error) {
-	row := q.db.QueryRow(ctx, createMovie,
-		arg.ID,
-		arg.Title,
-		arg.Description,
-		arg.DurationMinutes,
-		arg.ReleaseDate,
-		arg.MaturityRating,
-		arg.ContentUrl,
-		arg.GenreID,
-	)
-	var i Movie
-	err := row.Scan(
-		&i.ID,
-		&i.Title,
-		&i.Description,
-		&i.DurationMinutes,
-		&i.ReleaseDate,
-		&i.ContentUrl,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.MaturityRating,
-		&i.GenreID,
-	)
-	return i, err
-}
-
-const deleteMovie = `-- name: DeleteMovie :exec
-DELETE FROM movies WHERE id = $1
-`
-
-func (q *Queries) DeleteMovie(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteMovie, id)
-	return err
-}
-
-const getMovie = `-- name: GetMovie :one
-SELECT id, title, description, duration_minutes, release_date, content_url, created_at, updated_at, maturity_rating, genre_id FROM movies WHERE id = $1
-`
-
-func (q *Queries) GetMovie(ctx context.Context, id uuid.UUID) (Movie, error) {
+func (q *Queries) GetMovie(ctx context.Context, id uuid.UUID) (GetMovieRow, error) {
 	row := q.db.QueryRow(ctx, getMovie, id)
-	var i Movie
+	var i GetMovieRow
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
@@ -85,119 +73,24 @@ func (q *Queries) GetMovie(ctx context.Context, id uuid.UUID) (Movie, error) {
 		&i.GenreID,
 	)
 	return i, err
-}
-
-const listKidsMovies = `-- name: ListKidsMovies :many
-SELECT id, title, description, duration_minutes, release_date, content_url, created_at, updated_at, maturity_rating, genre_id FROM movies WHERE maturity_rating = 'L' ORDER BY release_date DESC
-`
-
-func (q *Queries) ListKidsMovies(ctx context.Context) ([]Movie, error) {
-	rows, err := q.db.Query(ctx, listKidsMovies)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Movie
-	for rows.Next() {
-		var i Movie
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Description,
-			&i.DurationMinutes,
-			&i.ReleaseDate,
-			&i.ContentUrl,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.MaturityRating,
-			&i.GenreID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listMovies = `-- name: ListMovies :many
-SELECT id, title, description, duration_minutes, release_date, content_url, created_at, updated_at, maturity_rating, genre_id FROM movies ORDER BY release_date DESC
-`
-
-func (q *Queries) ListMovies(ctx context.Context) ([]Movie, error) {
-	rows, err := q.db.Query(ctx, listMovies)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Movie
-	for rows.Next() {
-		var i Movie
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Description,
-			&i.DurationMinutes,
-			&i.ReleaseDate,
-			&i.ContentUrl,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.MaturityRating,
-			&i.GenreID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const updateMovie = `-- name: UpdateMovie :one
 UPDATE movies
-SET title = $2, description = $3, duration_minutes = $4, release_date = $5, maturity_rating = $6, content_url = $7, genre_id = $8
-WHERE id = $1
-RETURNING id, title, description, duration_minutes, release_date, content_url, created_at, updated_at, maturity_rating, genre_id
+SET duration_minutes = $2, content_url = $3
+WHERE content_id = $1
+RETURNING content_id, duration_minutes, content_url
 `
 
 type UpdateMovieParams struct {
-	ID              uuid.UUID      `json:"id"`
-	Title           string         `json:"title"`
-	Description     string         `json:"description"`
-	DurationMinutes int32          `json:"duration_minutes"`
-	ReleaseDate     pgtype.Date    `json:"release_date"`
-	MaturityRating  MaturityRating `json:"maturity_rating"`
-	ContentUrl      string         `json:"content_url"`
-	GenreID         int32          `json:"genre_id"`
+	ContentID       uuid.UUID `json:"content_id"`
+	DurationMinutes int32     `json:"duration_minutes"`
+	ContentUrl      string    `json:"content_url"`
 }
 
 func (q *Queries) UpdateMovie(ctx context.Context, arg UpdateMovieParams) (Movie, error) {
-	row := q.db.QueryRow(ctx, updateMovie,
-		arg.ID,
-		arg.Title,
-		arg.Description,
-		arg.DurationMinutes,
-		arg.ReleaseDate,
-		arg.MaturityRating,
-		arg.ContentUrl,
-		arg.GenreID,
-	)
+	row := q.db.QueryRow(ctx, updateMovie, arg.ContentID, arg.DurationMinutes, arg.ContentUrl)
 	var i Movie
-	err := row.Scan(
-		&i.ID,
-		&i.Title,
-		&i.Description,
-		&i.DurationMinutes,
-		&i.ReleaseDate,
-		&i.ContentUrl,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.MaturityRating,
-		&i.GenreID,
-	)
+	err := row.Scan(&i.ContentID, &i.DurationMinutes, &i.ContentUrl)
 	return i, err
 }

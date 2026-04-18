@@ -7,170 +7,47 @@ package sqlc
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createSerie = `-- name: CreateSerie :one
-INSERT INTO series (id, title, description, release_date, maturity_rating, genre_id)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, title, description, release_date, created_at, updated_at, maturity_rating, genre_id
+INSERT INTO series (content_id)
+VALUES ($1)
+RETURNING content_id
 `
 
-type CreateSerieParams struct {
-	ID             uuid.UUID      `json:"id"`
-	Title          string         `json:"title"`
-	Description    string         `json:"description"`
-	ReleaseDate    pgtype.Date    `json:"release_date"`
-	MaturityRating MaturityRating `json:"maturity_rating"`
-	GenreID        int32          `json:"genre_id"`
-}
-
-func (q *Queries) CreateSerie(ctx context.Context, arg CreateSerieParams) (Series, error) {
-	row := q.db.QueryRow(ctx, createSerie,
-		arg.ID,
-		arg.Title,
-		arg.Description,
-		arg.ReleaseDate,
-		arg.MaturityRating,
-		arg.GenreID,
-	)
-	var i Series
-	err := row.Scan(
-		&i.ID,
-		&i.Title,
-		&i.Description,
-		&i.ReleaseDate,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.MaturityRating,
-		&i.GenreID,
-	)
-	return i, err
-}
-
-const deleteSerie = `-- name: DeleteSerie :exec
-DELETE FROM series WHERE id = $1
-`
-
-func (q *Queries) DeleteSerie(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteSerie, id)
-	return err
+func (q *Queries) CreateSerie(ctx context.Context, contentID uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, createSerie, contentID)
+	var content_id uuid.UUID
+	err := row.Scan(&content_id)
+	return content_id, err
 }
 
 const getSerie = `-- name: GetSerie :one
-SELECT id, title, description, release_date, created_at, updated_at, maturity_rating, genre_id FROM series WHERE id = $1
+SELECT
+  c.id, c.title, c.description, c.release_date, c.created_at, c.updated_at, c.maturity_rating, c.genre_id
+FROM contents c
+JOIN series s ON s.content_id = c.id
+WHERE c.id = $1
 `
 
-func (q *Queries) GetSerie(ctx context.Context, id uuid.UUID) (Series, error) {
-	row := q.db.QueryRow(ctx, getSerie, id)
-	var i Series
-	err := row.Scan(
-		&i.ID,
-		&i.Title,
-		&i.Description,
-		&i.ReleaseDate,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.MaturityRating,
-		&i.GenreID,
-	)
-	return i, err
-}
-
-const listKidsSeries = `-- name: ListKidsSeries :many
-SELECT id, title, description, release_date, created_at, updated_at, maturity_rating, genre_id FROM series WHERE maturity_rating = 'L' ORDER BY release_date DESC
-`
-
-func (q *Queries) ListKidsSeries(ctx context.Context) ([]Series, error) {
-	rows, err := q.db.Query(ctx, listKidsSeries)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Series
-	for rows.Next() {
-		var i Series
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Description,
-			&i.ReleaseDate,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.MaturityRating,
-			&i.GenreID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listSeries = `-- name: ListSeries :many
-SELECT id, title, description, release_date, created_at, updated_at, maturity_rating, genre_id FROM series ORDER BY title
-`
-
-func (q *Queries) ListSeries(ctx context.Context) ([]Series, error) {
-	rows, err := q.db.Query(ctx, listSeries)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Series
-	for rows.Next() {
-		var i Series
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Description,
-			&i.ReleaseDate,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.MaturityRating,
-			&i.GenreID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const updateSerie = `-- name: UpdateSerie :one
-UPDATE series
-SET title = $2, description = $3, release_date = $4, maturity_rating = $5, genre_id = $6
-WHERE id = $1
-RETURNING id, title, description, release_date, created_at, updated_at, maturity_rating, genre_id
-`
-
-type UpdateSerieParams struct {
+type GetSerieRow struct {
 	ID             uuid.UUID      `json:"id"`
 	Title          string         `json:"title"`
 	Description    string         `json:"description"`
 	ReleaseDate    pgtype.Date    `json:"release_date"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
 	MaturityRating MaturityRating `json:"maturity_rating"`
 	GenreID        int32          `json:"genre_id"`
 }
 
-func (q *Queries) UpdateSerie(ctx context.Context, arg UpdateSerieParams) (Series, error) {
-	row := q.db.QueryRow(ctx, updateSerie,
-		arg.ID,
-		arg.Title,
-		arg.Description,
-		arg.ReleaseDate,
-		arg.MaturityRating,
-		arg.GenreID,
-	)
-	var i Series
+func (q *Queries) GetSerie(ctx context.Context, id uuid.UUID) (GetSerieRow, error) {
+	row := q.db.QueryRow(ctx, getSerie, id)
+	var i GetSerieRow
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
