@@ -1,6 +1,6 @@
 -- Write your migrate up statements here
 CREATE TABLE series (
-  content_id UUID PRIMARY KEY REFERENCES content(id) ON DELETE CASCADE
+  content_id UUID PRIMARY KEY REFERENCES contents(id) ON DELETE CASCADE
 );
 ---- create above / drop below ----
 DROP TABLE IF EXISTS series;

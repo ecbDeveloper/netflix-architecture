@@ -1,5 +1,5 @@
 -- Write your migrate up statements here
-ALTER TABLE content 
+ALTER TABLE contents 
   ADD COLUMN genre_id INT NOT NULL DEFAULT 1,
   ADD CONSTRAINT content_genre_fk 
   FOREIGN KEY (genre_id) 
