@@ -106,7 +106,7 @@ type Content struct {
 	Title          string         `json:"title"`
 	ContentType    ContentType    `json:"content_type"`
 	Description    string         `json:"description"`
-	ReleaseDate    pgtype.Date    `json:"release_date"`
+	ReleaseDate    time.Time      `json:"release_date"`
 	MaturityRating MaturityRating `json:"maturity_rating"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`

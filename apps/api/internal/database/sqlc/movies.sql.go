@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createMovie = `-- name: CreateMovie :one
@@ -49,7 +48,7 @@ type GetMovieRow struct {
 	Title           string         `json:"title"`
 	Description     string         `json:"description"`
 	DurationMinutes int32          `json:"duration_minutes"`
-	ReleaseDate     pgtype.Date    `json:"release_date"`
+	ReleaseDate     time.Time      `json:"release_date"`
 	ContentUrl      string         `json:"content_url"`
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`

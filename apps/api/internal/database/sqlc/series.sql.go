@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createSerie = `-- name: CreateSerie :one
@@ -38,7 +37,7 @@ type GetSerieRow struct {
 	ID             uuid.UUID      `json:"id"`
 	Title          string         `json:"title"`
 	Description    string         `json:"description"`
-	ReleaseDate    pgtype.Date    `json:"release_date"`
+	ReleaseDate    time.Time      `json:"release_date"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	MaturityRating MaturityRating `json:"maturity_rating"`

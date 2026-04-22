@@ -18,3 +18,5 @@ sql:
             go_type: "time.Time"
           - db_type: "integer"
             go_type: "int"
+          - db_type: "date"
+            go_type: "time.Time"
