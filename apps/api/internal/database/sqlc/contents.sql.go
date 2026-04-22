@@ -7,9 +7,9 @@ package sqlc
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createContent = `-- name: CreateContent :exec
@@ -21,6 +21,7 @@ INSERT INTO contents (
   release_date, 
   maturity_rating
 ) VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id
 `
 
 type CreateContentParams struct {
@@ -28,7 +29,7 @@ type CreateContentParams struct {
 	Title          string         `json:"title"`
 	ContentType    ContentType    `json:"content_type"`
 	Description    string         `json:"description"`
-	ReleaseDate    pgtype.Date    `json:"release_date"`
+	ReleaseDate    time.Time      `json:"release_date"`
 	MaturityRating MaturityRating `json:"maturity_rating"`
 }
 
@@ -52,6 +53,29 @@ WHERE id = $1
 func (q *Queries) DeleteContent(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteContent, id)
 	return err
+}
+
+const getContent = `-- name: GetContent :one
+SELECT id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id
+FROM contents
+WHERE id = $1
+`
+
+func (q *Queries) GetContent(ctx context.Context, id uuid.UUID) (Content, error) {
+	row := q.db.QueryRow(ctx, getContent, id)
+	var i Content
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.ContentType,
+		&i.Description,
+		&i.ReleaseDate,
+		&i.MaturityRating,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.GenreID,
+	)
+	return i, err
 }
 
 const listContents = `-- name: ListContents :many
@@ -193,33 +217,46 @@ func (q *Queries) ListKidsContents(ctx context.Context) ([]Content, error) {
 	return items, nil
 }
 
-const updateContent = `-- name: UpdateContent :exec
+const updateContent = `-- name: UpdateContent :one
 UPDATE contents SET
   title = $2, 
-  content_type = $3, 
+	genre_id = $3,
   description = $4, 
   release_date = $5, 
   maturity_rating = $6
 WHERE id = $1
+RETURNING id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id
 `
 
 type UpdateContentParams struct {
 	ID             uuid.UUID      `json:"id"`
 	Title          string         `json:"title"`
-	ContentType    ContentType    `json:"content_type"`
+	GenreID        int32          `json:"genre_id"`
 	Description    string         `json:"description"`
-	ReleaseDate    pgtype.Date    `json:"release_date"`
+	ReleaseDate    time.Time      `json:"release_date"`
 	MaturityRating MaturityRating `json:"maturity_rating"`
 }
 
-func (q *Queries) UpdateContent(ctx context.Context, arg UpdateContentParams) error {
-	_, err := q.db.Exec(ctx, updateContent,
+func (q *Queries) UpdateContent(ctx context.Context, arg UpdateContentParams) (Content, error) {
+	row := q.db.QueryRow(ctx, updateContent,
 		arg.ID,
 		arg.Title,
-		arg.ContentType,
+		arg.GenreID,
 		arg.Description,
 		arg.ReleaseDate,
 		arg.MaturityRating,
 	)
-	return err
+	var i Content
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.ContentType,
+		&i.Description,
+		&i.ReleaseDate,
+		&i.MaturityRating,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.GenreID,
+	)
+	return i, err
 }

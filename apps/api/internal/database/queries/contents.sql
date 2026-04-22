@@ -6,7 +6,8 @@ INSERT INTO contents (
   description, 
   release_date, 
   maturity_rating
-) VALUES ($1, $2, $3, $4, $5, $6);
+) VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING *;
 
 -- name: ListContents :many
 SELECT * FROM contents;
@@ -27,11 +28,17 @@ WHERE genre_id = $1;
 DELETE FROM contents
 WHERE id = $1;
 
--- name: UpdateContent :exec
+-- name: UpdateContent :one
 UPDATE contents SET
   title = $2, 
-  content_type = $3, 
+	genre_id = $3,
   description = $4, 
   release_date = $5, 
   maturity_rating = $6
+WHERE id = $1
+RETURNING *;
+
+-- name: GetContent :one
+SELECT *
+FROM contents
 WHERE id = $1;
