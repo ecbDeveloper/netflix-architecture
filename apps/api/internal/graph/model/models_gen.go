@@ -36,7 +36,7 @@ type CreateContentInput struct {
 	MaturityRating  MaturityRating  `json:"maturityRating"`
 	GenreID         int32           `json:"genreId"`
 	ContentType     ContentType     `json:"contentType"`
-	File            *graphql.Upload `json:"file,omitempty"`
+	ContentFile     *graphql.Upload `json:"contentFile,omitempty"`
 	DurationMinutes *int32          `json:"durationMinutes,omitempty"`
 }
 
@@ -133,12 +133,12 @@ type Review struct {
 }
 
 type UpdateContentInput struct {
-	Title           string          `json:"title"`
-	Description     string          `json:"description"`
-	ReleaseDate     string          `json:"releaseDate"`
-	MaturityRating  MaturityRating  `json:"maturityRating"`
-	GenreID         int32           `json:"genreId"`
-	File            *graphql.Upload `json:"file,omitempty"`
+	Title           *string         `json:"title,omitempty"`
+	Description     *string         `json:"description,omitempty"`
+	ReleaseDate     *string         `json:"releaseDate,omitempty"`
+	MaturityRating  *MaturityRating `json:"maturityRating,omitempty"`
+	GenreID         *int32          `json:"genreId,omitempty"`
+	ContentFile     *graphql.Upload `json:"contentFile,omitempty"`
 	DurationMinutes *int32          `json:"durationMinutes,omitempty"`
 }
 

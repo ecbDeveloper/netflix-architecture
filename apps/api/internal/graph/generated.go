@@ -128,7 +128,6 @@ type ComplexityRoot struct {
 		ListContentsByGenre     func(childComplexity int, genreID int32) int
 		ListContentsByType      func(childComplexity int, contentType model.ContentType) int
 		ListEpisodes            func(childComplexity int, seriesID uuid.UUID) int
-		ListKidsContents        func(childComplexity int) int
 		ListProfiles            func(childComplexity int) int
 		ListReviews             func(childComplexity int) int
 		ListUsers               func(childComplexity int) int
@@ -187,7 +186,7 @@ type EpisodeResolver interface {
 type MutationResolver interface {
 	Login(ctx context.Context, input *model.LoginInput) (string, error)
 	Logout(ctx context.Context) (string, error)
-	CreateContent(ctx context.Context, input model.CreateContentInput) (*model.Content, error)
+	CreateContent(ctx context.Context, input model.CreateContentInput) (uuid.UUID, error)
 	UpdateContent(ctx context.Context, id uuid.UUID, input model.UpdateContentInput) (*model.Content, error)
 	DeleteContent(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error)
@@ -213,7 +212,6 @@ type ProfileResolver interface {
 }
 type QueryResolver interface {
 	ListContents(ctx context.Context) ([]*model.Content, error)
-	ListKidsContents(ctx context.Context) ([]*model.Content, error)
 	ListContentsByType(ctx context.Context, contentType model.ContentType) ([]*model.Content, error)
 	ListContentsByGenre(ctx context.Context, genreID int32) ([]*model.Content, error)
 	GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error)
@@ -785,12 +783,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.ListEpisodes(childComplexity, args["seriesId"].(uuid.UUID)), true
-	case "Query.listKidsContents":
-		if e.ComplexityRoot.Query.ListKidsContents == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Query.ListKidsContents(childComplexity), true
 	case "Query.listProfiles":
 		if e.ComplexityRoot.Query.ListProfiles == nil {
 			break
@@ -2468,7 +2460,7 @@ func (ec *executionContext) _Mutation_createContent(ctx context.Context, field g
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.Directives.Auth == nil {
-					var zeroVal *model.Content
+					var zeroVal uuid.UUID
 					return zeroVal, errors.New("directive auth is not implemented")
 				}
 				return ec.Directives.Auth(ctx, nil, directive0)
@@ -2476,11 +2468,11 @@ func (ec *executionContext) _Mutation_createContent(ctx context.Context, field g
 			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
-					var zeroVal *model.Content
+					var zeroVal uuid.UUID
 					return zeroVal, err
 				}
 				if ec.Directives.HasRole == nil {
-					var zeroVal *model.Content
+					var zeroVal uuid.UUID
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
 				return ec.Directives.HasRole(ctx, nil, directive1, role)
@@ -2489,7 +2481,7 @@ func (ec *executionContext) _Mutation_createContent(ctx context.Context, field g
 			next = directive2
 			return next
 		},
-		ec.marshalNContent2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContent,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -2502,31 +2494,7 @@ func (ec *executionContext) fieldContext_Mutation_createContent(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Content_id(ctx, field)
-			case "title":
-				return ec.fieldContext_Content_title(ctx, field)
-			case "description":
-				return ec.fieldContext_Content_description(ctx, field)
-			case "releaseDate":
-				return ec.fieldContext_Content_releaseDate(ctx, field)
-			case "maturityRating":
-				return ec.fieldContext_Content_maturityRating(ctx, field)
-			case "genreId":
-				return ec.fieldContext_Content_genreId(ctx, field)
-			case "contentType":
-				return ec.fieldContext_Content_contentType(ctx, field)
-			case "contentUrl":
-				return ec.fieldContext_Content_contentUrl(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Content_durationMinutes(ctx, field)
-			case "movieReviews":
-				return ec.fieldContext_Content_movieReviews(ctx, field)
-			case "episodes":
-				return ec.fieldContext_Content_episodes(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Content", field.Name)
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	defer func() {
@@ -4219,79 +4187,6 @@ func (ec *executionContext) _Query_listContents(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext_Query_listContents(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Content_id(ctx, field)
-			case "title":
-				return ec.fieldContext_Content_title(ctx, field)
-			case "description":
-				return ec.fieldContext_Content_description(ctx, field)
-			case "releaseDate":
-				return ec.fieldContext_Content_releaseDate(ctx, field)
-			case "maturityRating":
-				return ec.fieldContext_Content_maturityRating(ctx, field)
-			case "genreId":
-				return ec.fieldContext_Content_genreId(ctx, field)
-			case "contentType":
-				return ec.fieldContext_Content_contentType(ctx, field)
-			case "contentUrl":
-				return ec.fieldContext_Content_contentUrl(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Content_durationMinutes(ctx, field)
-			case "movieReviews":
-				return ec.fieldContext_Content_movieReviews(ctx, field)
-			case "episodes":
-				return ec.fieldContext_Content_episodes(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Content", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_listKidsContents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_listKidsContents,
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Query().ListKidsContents(ctx)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Content
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
-				if ec.Directives.ProfileSelectionIsRequired == nil {
-					var zeroVal []*model.Content
-					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
-				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
-			}
-
-			next = directive2
-			return next
-		},
-		ec.marshalNContent2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_listKidsContents(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -7802,7 +7697,7 @@ func (ec *executionContext) unmarshalInputCreateContentInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating", "genreId", "contentType", "file", "durationMinutes"}
+	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating", "genreId", "contentType", "contentFile", "durationMinutes"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7851,13 +7746,13 @@ func (ec *executionContext) unmarshalInputCreateContentInput(ctx context.Context
 				return it, err
 			}
 			it.ContentType = data
-		case "file":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+		case "contentFile":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentFile"))
 			data, err := ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.File = data
+			it.ContentFile = data
 		case "durationMinutes":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationMinutes"))
 			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
@@ -8180,7 +8075,7 @@ func (ec *executionContext) unmarshalInputUpdateContentInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating", "genreId", "file", "durationMinutes"}
+	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating", "genreId", "contentFile", "durationMinutes"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8189,46 +8084,46 @@ func (ec *executionContext) unmarshalInputUpdateContentInput(ctx context.Context
 		switch k {
 		case "title":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Title = data
 		case "description":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Description = data
 		case "releaseDate":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("releaseDate"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.ReleaseDate = data
 		case "maturityRating":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maturityRating"))
-			data, err := ec.unmarshalNMaturityRating2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
+			data, err := ec.unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.MaturityRating = data
 		case "genreId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.GenreID = data
-		case "file":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+		case "contentFile":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentFile"))
 			data, err := ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.File = data
+			it.ContentFile = data
 		case "durationMinutes":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationMinutes"))
 			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
@@ -9177,28 +9072,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_listContents(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "listKidsContents":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_listKidsContents(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -10830,6 +10703,22 @@ func (ec *executionContext) unmarshalOLoginInput2ᚖgithubᚗcomᚋecbDeveloper�
 	}
 	res, err := ec.unmarshalInputLoginInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, v any) (*model.MaturityRating, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.MaturityRating)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOMaturityRating2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐMaturityRating(ctx context.Context, sel ast.SelectionSet, v *model.MaturityRating) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalOProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v *model.Profile) graphql.Marshaler {
