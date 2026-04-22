@@ -198,7 +198,7 @@ func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *s
 	profileService := profile.NewService(queries)
 	reviewService := review.NewService(queries)
 	authService := auth.NewService(queries)
-	contentService := content.NewService(queries)
+	contentService := content.NewService(queries, pool, storageService)
 
 	s := scs.New()
 	s.Store = redisstore.New(redisPool)
