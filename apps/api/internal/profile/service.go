@@ -51,7 +51,7 @@ func (s *ServiceImpl) CreateProfile(ctx context.Context, input model.CreateProfi
 	})
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
-			return nil, &apperror.ConflictError{Field: "profile name for this user"}
+			return nil, &apperror.ConflictError{Field: "name"}
 		}
 		return nil, fmt.Errorf("failed to insert profile on database: %w", err)
 	}
@@ -121,7 +121,7 @@ func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input mod
 	p, err := s.queries.UpdateProfile(ctx, params)
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
-			return nil, &apperror.ConflictError{Field: "profile name for this user"}
+			return nil, &apperror.ConflictError{Field: "name"}
 		}
 		return nil, fmt.Errorf("failed to update profile %v from database: %w", id, err)
 	}

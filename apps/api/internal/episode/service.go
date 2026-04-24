@@ -69,7 +69,7 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 	})
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
-			return nil, &apperror.ConflictError{Field: "episode (season + number) in this series"}
+			return nil, &apperror.ConflictError{Field: "episode (season + number)"}
 		}
 		return nil, fmt.Errorf("failed to insert episode on database: %w", err)
 	}
@@ -200,7 +200,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 	ep, err := s.queries.UpdateEpisode(ctx, params)
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
-			return nil, &apperror.ConflictError{Field: "episode (season + number) in this series"}
+			return nil, &apperror.ConflictError{Field: "episode (season + number)"}
 		}
 		return nil, fmt.Errorf("failed to update episode %v from database: %w", id, err)
 	}

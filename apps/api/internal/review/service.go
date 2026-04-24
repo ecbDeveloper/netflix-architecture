@@ -64,6 +64,9 @@ func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReview
 
 	r, err := s.queries.CreateReview(ctx, params)
 	if err != nil {
+		if apperror.IsUniqueViolation(err) {
+			return nil, &apperror.ConflictError{Field: "review + (episode or movie)"}
+		}
 		return nil, fmt.Errorf("failed to insert review on database: %w", err)
 	}
 
