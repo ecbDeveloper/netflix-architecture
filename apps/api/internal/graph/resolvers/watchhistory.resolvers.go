@@ -15,16 +15,6 @@ import (
 	"github.com/google/uuid"
 )
 
-var hContentTypeToGraph = map[historypb.ContentType]model.ContentType{
-	1: model.ContentTypeMovie,
-	2: model.ContentTypeSeries,
-}
-
-var recContentTypeToGraph = map[recommendationpb.ContentType]model.ContentType{
-	1: model.ContentTypeMovie,
-	2: model.ContentTypeSeries,
-}
-
 // CreateWatchHistory is the resolver for the createWatchHistory field.
 func (r *mutationResolver) CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
@@ -243,34 +233,4 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 		}
 	}
 	return result, nil
-}
-
-// protoToWatchHistory converts a protobuf WatchHistoryResponse to the GraphQL model.
-func protoToWatchHistory(resp *historypb.WatchHistoryResponse) *model.WatchHistory {
-	wh := &model.WatchHistory{
-		WatchedAt: resp.WatchedAt,
-	}
-
-	whID, _ := uuid.Parse(resp.Id)
-	wh.ID = whID
-
-	profileID, _ := uuid.Parse(resp.ProfileId)
-	wh.ProfileID = profileID
-
-	if resp.MovieId != nil {
-		movieID, _ := uuid.Parse(*resp.MovieId)
-		wh.MovieID = &movieID
-	}
-	if resp.EpisodeId != nil {
-		episodeID, _ := uuid.Parse(*resp.EpisodeId)
-		wh.EpisodeID = &episodeID
-	}
-
-	lps := resp.LastPositionSeconds
-	wh.LastPositionSeconds = &lps
-
-	ic := resp.IsCompleted
-	wh.IsCompleted = &ic
-
-	return wh
 }
