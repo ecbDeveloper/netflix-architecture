@@ -49,6 +49,14 @@ func (e *UnauthorizedError) Error() string {
 	return e.Message
 }
 
+type UnprocessableEntityError struct {
+	Message string
+}
+
+func (e *UnprocessableEntityError) Error() string {
+	return e.Message
+}
+
 func IsUniqueViolation(err error) bool {
 	var pgErr *pgconn.PgError
 	return errors.As(err, &pgErr) && pgErr.Code == "23505"

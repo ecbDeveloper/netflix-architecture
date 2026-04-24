@@ -66,6 +66,16 @@ func handleError(err error) *gqlerror.Error {
 		}
 	}
 
+	var unprocessableEntityErr *apperror.UnprocessableEntityError
+	if errors.As(err, &unprocessableEntityErr) {
+		return &gqlerror.Error{
+			Message: unprocessableEntityErr.Message,
+			Extensions: map[string]any{
+				"code": "UNPROCESSABLE_ENTITY",
+			},
+		}
+	}
+
 	return &gqlerror.Error{
 		Message: "internal error, try again later",
 		Extensions: map[string]any{
@@ -83,29 +93,28 @@ func handleGRPCError(err error) *gqlerror.Error {
 	switch st.Code() {
 	case codes.InvalidArgument:
 		return &gqlerror.Error{
-			Message: st.Message(),
+			Message:    st.Message(),
 			Extensions: map[string]any{"code": "BAD_REQUEST"},
 		}
 	case codes.NotFound:
 		return &gqlerror.Error{
-			Message: st.Message(),
+			Message:    st.Message(),
 			Extensions: map[string]any{"code": "NOT_FOUND"},
 		}
 	case codes.Unauthenticated:
 		return &gqlerror.Error{
-			Message: st.Message(),
+			Message:    st.Message(),
 			Extensions: map[string]any{"code": "UNAUTHORIZED"},
 		}
 	case codes.PermissionDenied:
 		return &gqlerror.Error{
-			Message: st.Message(),
+			Message:    st.Message(),
 			Extensions: map[string]any{"code": "FORBIDDEN"},
 		}
 	default:
 		return &gqlerror.Error{
-			Message: "internal error from external service",
+			Message:    "internal error from external service",
 			Extensions: map[string]any{"code": "INTERNAL_SERVER"},
 		}
 	}
 }
-
