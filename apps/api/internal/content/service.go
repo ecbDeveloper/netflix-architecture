@@ -19,10 +19,10 @@ import (
 type Service interface {
 	CreateContent(ctx context.Context, input model.CreateContentInput) (uuid.UUID, error)
 	UpdateContent(ctx context.Context, id uuid.UUID, input model.UpdateContentInput) (*model.Content, error)
-	DeleteContent(ctx context.Context, id uuid.UUID) (bool, error)
-	ListContents(ctx context.Context) ([]*model.Content, error)
-	ListContentsByType(ctx context.Context, contentType model.ContentType) ([]*model.Content, error)
-	ListContentsByGenre(ctx context.Context, genreID int32) ([]*model.Content, error)
+	DeleteContent(ctx context.Context, id uuid.UUID) error
+	ListContents(ctx context.Context, profileID uuid.UUID) ([]*model.Content, error)
+	ListContentsByType(ctx context.Context, profileID uuid.UUID, contentType model.ContentType) ([]*model.Content, error)
+	ListContentsByGenre(ctx context.Context, profileID uuid.UUID, genreID int32) ([]*model.Content, error)
 }
 
 type ServiceImpl struct {
@@ -75,21 +75,28 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 			return uuid.Nil, &apperror.ValidationError{Field: "durationMinutes", Message: "durationMinutes is required to movies"}
 		}
 	}
+
 	genres, err := s.queries.ListContentGenres(ctx)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("failed to get content genres list from database: %w", err)
 	}
 
 	genreWasFounded := false
+	genreIsFamily := false
 	for _, genre := range genres {
 		if input.GenreID == genre.ID {
 			genreWasFounded = true
+			genreIsFamily = genre.Description == "Family"
 			break
 		}
 	}
 
 	if !genreWasFounded {
 		return uuid.Nil, &apperror.ValidationError{Field: "genreId", Message: "invalid genreId"}
+	}
+
+	if input.MaturityRating == model.MaturityRatingL && !genreIsFamily {
+		return uuid.Nil, &apperror.UnprocessableEntityError{Message: "invalid genre to a children's content"}
 	}
 
 	if strings.TrimSpace(string(input.ContentType)) == "" {
@@ -311,13 +318,13 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 	return toGraphQlModel(content), nil
 }
 
-func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) (bool, error) {
+func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 	content, err := s.queries.GetContent(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return false, &apperror.NotFoundError{Entity: "content"}
+			return &apperror.NotFoundError{Entity: "content"}
 		}
-		return false, fmt.Errorf("failed to get content from database: %w", err)
+		return fmt.Errorf("failed to get content from database: %w", err)
 	}
 
 	var movie sqlc.GetMovieRow
@@ -325,9 +332,9 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) (bool, er
 		movie, err = s.queries.GetMovie(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				return false, &apperror.NotFoundError{Entity: "movie"}
+				return &apperror.NotFoundError{Entity: "movie"}
 			}
-			return false, fmt.Errorf("failed to get movie from database: %w", err)
+			return fmt.Errorf("failed to get movie from database: %w", err)
 		}
 	}
 
@@ -336,15 +343,15 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) (bool, er
 		episodes, err = s.queries.ListEpisodesBySerie(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				return false, &apperror.NotFoundError{Entity: "series"}
+				return &apperror.NotFoundError{Entity: "series"}
 			}
-			return false, fmt.Errorf("failed to list episodes from database: %w", err)
+			return fmt.Errorf("failed to list episodes from database: %w", err)
 		}
 	}
 
 	err = s.queries.DeleteContent(ctx, id)
 	if err != nil {
-		return false, fmt.Errorf("failed to delete content from database: %w", err)
+		return fmt.Errorf("failed to delete content from database: %w", err)
 	}
 
 	if content.ContentType == sqlc.ContentTypeMOVIE {
@@ -354,7 +361,6 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) (bool, er
 	}
 
 	if content.ContentType == sqlc.ContentTypeSERIES {
-
 		for _, episode := range episodes {
 			if episode.ContentUrl != "" {
 				go s.storage.DeleteFile(context.Background(), episode.ContentUrl)
@@ -362,13 +368,29 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) (bool, er
 		}
 	}
 
-	return true, nil
+	return nil
 }
 
-func (s *ServiceImpl) ListContents(ctx context.Context) ([]*model.Content, error) {
-	contents, err := s.queries.ListContents(ctx)
+func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID) ([]*model.Content, error) {
+	profile, err := s.queries.GetProfile(ctx, profileID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list contents from database: %w", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
+		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+	}
+
+	var contents []sqlc.Content
+	if profile.HasParentalControls {
+		contents, err = s.queries.ListKidsContents(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list contents from database: %w", err)
+		}
+	} else {
+		contents, err = s.queries.ListContents(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list contents from database: %w", err)
+		}
 	}
 
 	result := make([]*model.Content, len(contents))
@@ -379,10 +401,26 @@ func (s *ServiceImpl) ListContents(ctx context.Context) ([]*model.Content, error
 	return result, nil
 }
 
-func (s *ServiceImpl) ListContentsByType(ctx context.Context, contentType model.ContentType) ([]*model.Content, error) {
-	contents, err := s.queries.ListContentsByType(ctx, sqlc.ContentType(contentType))
+func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUID, contentType model.ContentType) ([]*model.Content, error) {
+	profile, err := s.queries.GetProfile(ctx, profileID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list contents by type from database: %w", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
+		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+	}
+
+	var contents []sqlc.Content
+	if profile.HasParentalControls {
+		contents, err = s.queries.ListKidsContentsByType(ctx, sqlc.ContentType(contentType))
+		if err != nil {
+			return nil, fmt.Errorf("failed to list contents by type from database: %w", err)
+		}
+	} else {
+		contents, err = s.queries.ListContentsByType(ctx, sqlc.ContentType(contentType))
+		if err != nil {
+			return nil, fmt.Errorf("failed to list contents by type from database: %w", err)
+		}
 	}
 
 	result := make([]*model.Content, len(contents))
@@ -393,14 +431,43 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, contentType model.
 	return result, nil
 }
 
-func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, genreID int32) ([]*model.Content, error) {
-	if genreID <= 0 {
-		return nil, &apperror.ValidationError{Field: "genreId", Message: "genreId is required"}
+func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UUID, genreID int32) ([]*model.Content, error) {
+	genres, err := s.queries.ListContentGenres(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get content genres list from database: %w", err)
 	}
 
-	contents, err := s.queries.ListContentsByGenre(ctx, genreID)
+	genreWasFounded := false
+	for _, genre := range genres {
+		if genreID == genre.ID {
+			genreWasFounded = true
+			break
+		}
+	}
+
+	if !genreWasFounded {
+		return nil, &apperror.ValidationError{Field: "genreId", Message: "invalid genreId"}
+	}
+
+	profile, err := s.queries.GetProfile(ctx, profileID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list contents by genre from database: %w", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "profile"}
+		}
+		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+	}
+
+	var contents []sqlc.Content
+	if profile.HasParentalControls {
+		contents, err = s.queries.ListKidsContentsByGenre(ctx, genreID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list contents by type from database: %w", err)
+		}
+	} else {
+		contents, err = s.queries.ListContentsByGenre(ctx, genreID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list contents by type from database: %w", err)
+		}
 	}
 
 	result := make([]*model.Content, len(contents))

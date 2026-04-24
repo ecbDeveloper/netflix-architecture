@@ -16,6 +16,16 @@ SELECT * FROM contents;
 SELECT * FROM contents
 WHERE maturity_rating = 'L';
 
+-- name: ListKidsContentsByType :many
+SELECT * FROM contents
+WHERE maturity_rating = 'L'
+AND content_type = $1;
+
+-- name: ListKidsContentsByGenre :many
+SELECT * FROM contents
+WHERE maturity_rating = 'L'
+AND genre_id = $1;
+
 -- name: ListContentsByType :many
 SELECT * FROM contents
 WHERE content_type = $1;

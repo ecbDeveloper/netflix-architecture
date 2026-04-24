@@ -217,6 +217,78 @@ func (q *Queries) ListKidsContents(ctx context.Context) ([]Content, error) {
 	return items, nil
 }
 
+const listKidsContentsByGenre = `-- name: ListKidsContentsByGenre :many
+SELECT id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id FROM contents
+WHERE maturity_rating = 'L'
+AND genre_id = $1
+`
+
+func (q *Queries) ListKidsContentsByGenre(ctx context.Context, genreID int32) ([]Content, error) {
+	rows, err := q.db.Query(ctx, listKidsContentsByGenre, genreID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Content
+	for rows.Next() {
+		var i Content
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.ContentType,
+			&i.Description,
+			&i.ReleaseDate,
+			&i.MaturityRating,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.GenreID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listKidsContentsByType = `-- name: ListKidsContentsByType :many
+SELECT id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id FROM contents
+WHERE maturity_rating = 'L'
+AND content_type = $1
+`
+
+func (q *Queries) ListKidsContentsByType(ctx context.Context, contentType ContentType) ([]Content, error) {
+	rows, err := q.db.Query(ctx, listKidsContentsByType, contentType)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Content
+	for rows.Next() {
+		var i Content
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.ContentType,
+			&i.Description,
+			&i.ReleaseDate,
+			&i.MaturityRating,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.GenreID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateContent = `-- name: UpdateContent :one
 UPDATE contents SET
   title = $2, 

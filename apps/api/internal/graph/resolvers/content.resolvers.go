@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
@@ -44,38 +43,81 @@ func (r *contentResolver) Episodes(ctx context.Context, obj *model.Content) ([]*
 }
 
 // CreateContent is the resolver for the createContent field.
-func (r *mutationResolver) CreateContent(ctx context.Context, input model.CreateContentInput) (*model.Content, error) {
-	panic(fmt.Errorf("not implemented: CreateContent - createContent"))
+func (r *mutationResolver) CreateContent(ctx context.Context, input model.CreateContentInput) (uuid.UUID, error) {
+	contentID, err := r.ContentService.CreateContent(ctx, input)
+	if err != nil {
+		return uuid.Nil, handleError(err)
+	}
+
+	return contentID, nil
 }
 
 // UpdateContent is the resolver for the updateContent field.
 func (r *mutationResolver) UpdateContent(ctx context.Context, id uuid.UUID, input model.UpdateContentInput) (*model.Content, error) {
-	panic(fmt.Errorf("not implemented: UpdateContent - updateContent"))
+	updatedContent, err := r.ContentService.UpdateContent(ctx, id, input)
+	if err != nil {
+		return nil, handleError(err)
+	}
+
+	return updatedContent, nil
 }
 
 // DeleteContent is the resolver for the deleteContent field.
 func (r *mutationResolver) DeleteContent(ctx context.Context, id uuid.UUID) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteContent - deleteContent"))
+	err := r.ContentService.DeleteContent(ctx, id)
+	if err != nil {
+		return false, handleError(err)
+	}
+
+	return true, nil
 }
 
 // ListContents is the resolver for the listContents field.
 func (r *queryResolver) ListContents(ctx context.Context) ([]*model.Content, error) {
-	panic(fmt.Errorf("not implemented: ListContents - listContents"))
-}
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
+		return nil, handleError(err)
+	}
 
-// ListKidsContents is the resolver for the listKidsContents field.
-func (r *queryResolver) ListKidsContents(ctx context.Context) ([]*model.Content, error) {
-	panic(fmt.Errorf("not implemented: ListKidsContents - listKidsContents"))
+	contents, err := r.ContentService.ListContents(ctx, profileID)
+	if err != nil {
+		return nil, handleError(err)
+	}
+
+	return contents, nil
 }
 
 // ListContentsByType is the resolver for the listContentsByType field.
 func (r *queryResolver) ListContentsByType(ctx context.Context, contentType model.ContentType) ([]*model.Content, error) {
-	panic(fmt.Errorf("not implemented: ListContentsByType - listContentsByType"))
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	contents, err := r.ContentService.ListContentsByType(ctx, profileID, contentType)
+	if err != nil {
+		return nil, handleError(err)
+	}
+
+	return contents, nil
 }
 
 // ListContentsByGenre is the resolver for the listContentsByGenre field.
 func (r *queryResolver) ListContentsByGenre(ctx context.Context, genreID int32) ([]*model.Content, error) {
-	panic(fmt.Errorf("not implemented: ListContentsByGenre - listContentsByGenre"))
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	contents, err := r.ContentService.ListContentsByGenre(ctx, profileID, genreID)
+	if err != nil {
+		return nil, handleError(err)
+	}
+
+	return contents, nil
 }
 
 // Content returns graph.ContentResolver implementation.
