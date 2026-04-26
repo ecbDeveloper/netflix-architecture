@@ -120,7 +120,7 @@ type ComplexityRoot struct {
 	Query struct {
 		GetContent              func(childComplexity int, id uuid.UUID) int
 		GetEpisode              func(childComplexity int, id uuid.UUID) int
-		GetProfile              func(childComplexity int) int
+		GetProfile              func(childComplexity int, id uuid.UUID) int
 		GetRecommendations      func(childComplexity int, limit *int32) int
 		GetReview               func(childComplexity int, id uuid.UUID) int
 		GetUser                 func(childComplexity int, id uuid.UUID) int
@@ -218,7 +218,7 @@ type QueryResolver interface {
 	ListContentsByGenre(ctx context.Context, genreID int32) ([]*model.Content, error)
 	GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error)
 	ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([]*model.Episode, error)
-	GetProfile(ctx context.Context) (*model.Profile, error)
+	GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error)
 	ListProfiles(ctx context.Context) ([]*model.Profile, error)
 	GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error)
 	ListReviews(ctx context.Context) ([]*model.Review, error)
@@ -711,7 +711,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		return e.ComplexityRoot.Query.GetProfile(childComplexity), true
+		args, err := ec.field_Query_getProfile_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.GetProfile(childComplexity, args["id"].(uuid.UUID)), true
 	case "Query.getRecommendations":
 		if e.ComplexityRoot.Query.GetRecommendations == nil {
 			break
@@ -1415,6 +1420,17 @@ func (ec *executionContext) field_Query_getContent_args(ctx context.Context, raw
 }
 
 func (ec *executionContext) field_Query_getEpisode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getProfile_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
@@ -4671,7 +4687,8 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_Query_getProfile,
 		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Query().GetProfile(ctx)
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().GetProfile(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -4705,7 +4722,7 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_getProfile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -4732,6 +4749,17 @@ func (ec *executionContext) fieldContext_Query_getProfile(_ context.Context, fie
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }

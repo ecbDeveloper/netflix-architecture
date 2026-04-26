@@ -64,6 +64,8 @@ func (r *mutationResolver) DeleteProfile(ctx context.Context, id uuid.UUID) (boo
 		return false, handleError(err)
 	}
 
+	r.Sessions.Remove(ctx, shared.SessionProfileIDKey)
+
 	return true, nil
 }
 
@@ -116,20 +118,14 @@ func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile
 }
 
 // GetProfile is the resolver for the getProfile field.
-func (r *queryResolver) GetProfile(ctx context.Context) (*model.Profile, error) {
-	profileID, err := r.getProfileIDFromSession(ctx)
-	if err != nil {
-		r.Logger.Error("failed to parse profile id to get it", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
+func (r *queryResolver) GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error) {
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
 		r.Logger.Error("failed to parse user id to get profile", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
-	profile, err := r.ProfileService.GetProfile(ctx, profileID, userID)
+	profile, err := r.ProfileService.GetProfile(ctx, id, userID)
 	if err != nil {
 		r.Logger.Error("failed to get profile", slog.Any("error", err))
 		return nil, handleError(err)
