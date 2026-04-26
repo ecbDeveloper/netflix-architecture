@@ -23,12 +23,12 @@ input UpdateReviewInput {
 }
 
 extend type Query {
-  getReview(id: ID!): Review @auth @profileSelectionIsRequired
-  listReviews: [Review!]! @auth @profileSelectionIsRequired
+  getReview(id: ID!): Review @profileSelectionIsRequired @auth
+  listReviews: [Review!]! @profileSelectionIsRequired @auth
 }
 
 extend type Mutation {
-  createReview(input: CreateReviewInput!): Review! @auth @profileSelectionIsRequired @hasRole(role: MEMBER)
-  updateReview(id: ID!, input: UpdateReviewInput!): Review! @auth @profileSelectionIsRequired @hasRole(role: MEMBER)
-  deleteReview(id: ID!): Boolean! @auth @profileSelectionIsRequired @hasRole(role: MEMBER) 
+  createReview(input: CreateReviewInput!): Review! @profileSelectionIsRequired @hasRole(role: MEMBER) @auth
+  updateReview(id: ID!, input: UpdateReviewInput!): Review! @profileSelectionIsRequired @hasRole(role: MEMBER) @auth
+  deleteReview(id: ID!): Boolean! @profileSelectionIsRequired @hasRole(role: MEMBER) @auth
 }

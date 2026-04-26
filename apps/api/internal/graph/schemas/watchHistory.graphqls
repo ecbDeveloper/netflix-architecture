@@ -37,15 +37,15 @@ input UpdateWatchHistoryInput {
 }
 
 extend type Query {
-  getWatchHistory(id: ID!): WatchHistory @auth @profileSelectionIsRequired
-  listWatchHistories: [WatchHistory!]! @auth @profileSelectionIsRequired
+  getWatchHistory(id: ID!): WatchHistory @profileSelectionIsRequired @auth
+  listWatchHistories: [WatchHistory!]! @profileSelectionIsRequired @auth
   mostWatchedContents(limit: Int): [MostWatchedContent!]! @auth
-  recentlyWatchedContents(limit: Int): [WatchHistory!]! @auth @profileSelectionIsRequired
-  getRecommendations(limit: Int): [RecommendedContent!]! @auth @profileSelectionIsRequired
+  recentlyWatchedContents(limit: Int): [WatchHistory!]! @profileSelectionIsRequired @auth
+  getRecommendations(limit: Int): [RecommendedContent!]! @profileSelectionIsRequired @auth
 }
 
 extend type Mutation {
-  createWatchHistory(input: CreateWatchHistoryInput!): WatchHistory! @auth @profileSelectionIsRequired @hasRole(role: MEMBER)
-  updateWatchHistory(id: ID!, input: UpdateWatchHistoryInput!): WatchHistory! @auth @profileSelectionIsRequired @hasRole(role: MEMBER)
-  deleteWatchHistory(id: ID!): Boolean! @auth @profileSelectionIsRequired @hasRole(role: MEMBER)
+  createWatchHistory(input: CreateWatchHistoryInput!): WatchHistory! @profileSelectionIsRequired @hasRole(role: MEMBER) @auth
+  updateWatchHistory(id: ID!, input: UpdateWatchHistoryInput!): WatchHistory! @profileSelectionIsRequired @hasRole(role: MEMBER) @auth
+  deleteWatchHistory(id: ID!): Boolean! @profileSelectionIsRequired @hasRole(role: MEMBER) @auth
 }

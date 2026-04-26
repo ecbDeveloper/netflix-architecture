@@ -24,7 +24,7 @@ input UpdateUserInput {
 
 extend type Query {
   getUser(id: ID!): User @auth
-  listUsers: [User!]! @auth @hasRole(role: ADMIN)
+  listUsers: [User!]! @hasRole(role: ADMIN) @auth
 }
 
 extend type Mutation {

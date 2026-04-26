@@ -1104,7 +1104,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "schemas/auth.graphqls" "schemas/content.graphqls" "schemas/episode.graphqls" "schemas/profile.graphqls" "schemas/review.graphqls" "schemas/schema.graphqls" "schemas/user.graphqls" "schemas/watchhistory.graphqls"
+//go:embed "schemas/auth.graphqls" "schemas/content.graphqls" "schemas/episode.graphqls" "schemas/profile.graphqls" "schemas/review.graphqls" "schemas/schema.graphqls" "schemas/user.graphqls" "schemas/watchHistory.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -1123,7 +1123,7 @@ var sources = []*ast.Source{
 	{Name: "schemas/review.graphqls", Input: sourceData("schemas/review.graphqls"), BuiltIn: false},
 	{Name: "schemas/schema.graphqls", Input: sourceData("schemas/schema.graphqls"), BuiltIn: false},
 	{Name: "schemas/user.graphqls", Input: sourceData("schemas/user.graphqls"), BuiltIn: false},
-	{Name: "schemas/watchhistory.graphqls", Input: sourceData("schemas/watchhistory.graphqls"), BuiltIn: false},
+	{Name: "schemas/watchHistory.graphqls", Input: sourceData("schemas/watchHistory.graphqls"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -2483,13 +2483,6 @@ func (ec *executionContext) _Mutation_createContent(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal uuid.UUID
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal uuid.UUID
@@ -2499,7 +2492,14 @@ func (ec *executionContext) _Mutation_createContent(ctx context.Context, field g
 					var zeroVal uuid.UUID
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal uuid.UUID
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -2549,13 +2549,6 @@ func (ec *executionContext) _Mutation_updateContent(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Content
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Content
@@ -2565,7 +2558,14 @@ func (ec *executionContext) _Mutation_updateContent(ctx context.Context, field g
 					var zeroVal *model.Content
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Content
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -2639,13 +2639,6 @@ func (ec *executionContext) _Mutation_deleteContent(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal bool
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal bool
@@ -2655,7 +2648,14 @@ func (ec *executionContext) _Mutation_deleteContent(ctx context.Context, field g
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -2705,13 +2705,6 @@ func (ec *executionContext) _Mutation_createEpisode(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Episode
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Episode
@@ -2721,7 +2714,14 @@ func (ec *executionContext) _Mutation_createEpisode(ctx context.Context, field g
 					var zeroVal *model.Episode
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Episode
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -2791,13 +2791,6 @@ func (ec *executionContext) _Mutation_updateEpisode(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Episode
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal *model.Episode
@@ -2807,7 +2800,14 @@ func (ec *executionContext) _Mutation_updateEpisode(ctx context.Context, field g
 					var zeroVal *model.Episode
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Episode
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -2877,13 +2877,6 @@ func (ec *executionContext) _Mutation_deleteEpisode(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal bool
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal bool
@@ -2893,7 +2886,14 @@ func (ec *executionContext) _Mutation_deleteEpisode(ctx context.Context, field g
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -2943,13 +2943,6 @@ func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Profile
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Profile
@@ -2959,7 +2952,14 @@ func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field g
 					var zeroVal *model.Profile
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Profile
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -3027,13 +3027,6 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Profile
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Profile
@@ -3043,7 +3036,14 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 					var zeroVal *model.Profile
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Profile
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -3111,13 +3111,6 @@ func (ec *executionContext) _Mutation_deleteProfile(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal bool
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
@@ -3127,7 +3120,14 @@ func (ec *executionContext) _Mutation_deleteProfile(ctx context.Context, field g
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -3231,20 +3231,13 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Review
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal *model.Review
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
 			}
-			directive3 := func(ctx context.Context) (any, error) {
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Review
@@ -3254,7 +3247,14 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 					var zeroVal *model.Review
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive2, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive2)
 			}
 
 			next = directive3
@@ -3322,20 +3322,13 @@ func (ec *executionContext) _Mutation_updateReview(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Review
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal *model.Review
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
 			}
-			directive3 := func(ctx context.Context) (any, error) {
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Review
@@ -3345,7 +3338,14 @@ func (ec *executionContext) _Mutation_updateReview(ctx context.Context, field gr
 					var zeroVal *model.Review
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive2, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive2)
 			}
 
 			next = directive3
@@ -3413,20 +3413,13 @@ func (ec *executionContext) _Mutation_deleteReview(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal bool
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal bool
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
 			}
-			directive3 := func(ctx context.Context) (any, error) {
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
@@ -3436,7 +3429,14 @@ func (ec *executionContext) _Mutation_deleteReview(ctx context.Context, field gr
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive2, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive2)
 			}
 
 			next = directive3
@@ -3671,20 +3671,13 @@ func (ec *executionContext) _Mutation_createWatchHistory(ctx context.Context, fi
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.WatchHistory
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal *model.WatchHistory
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
 			}
-			directive3 := func(ctx context.Context) (any, error) {
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.WatchHistory
@@ -3694,7 +3687,14 @@ func (ec *executionContext) _Mutation_createWatchHistory(ctx context.Context, fi
 					var zeroVal *model.WatchHistory
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive2, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive2)
 			}
 
 			next = directive3
@@ -3760,20 +3760,13 @@ func (ec *executionContext) _Mutation_updateWatchHistory(ctx context.Context, fi
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.WatchHistory
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal *model.WatchHistory
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
 			}
-			directive3 := func(ctx context.Context) (any, error) {
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.WatchHistory
@@ -3783,7 +3776,14 @@ func (ec *executionContext) _Mutation_updateWatchHistory(ctx context.Context, fi
 					var zeroVal *model.WatchHistory
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive2, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive2)
 			}
 
 			next = directive3
@@ -3849,20 +3849,13 @@ func (ec *executionContext) _Mutation_deleteWatchHistory(ctx context.Context, fi
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal bool
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal bool
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
 			}
-			directive3 := func(ctx context.Context) (any, error) {
+			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal bool
@@ -3872,7 +3865,14 @@ func (ec *executionContext) _Mutation_deleteWatchHistory(ctx context.Context, fi
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive2, role)
+				return ec.Directives.HasRole(ctx, nil, directive1, role)
+			}
+			directive3 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive2)
 			}
 
 			next = directive3
@@ -4188,18 +4188,18 @@ func (ec *executionContext) _Query_getContent(ctx context.Context, field graphql
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Content
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal *model.Content
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Content
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -4272,18 +4272,18 @@ func (ec *executionContext) _Query_listContents(ctx context.Context, field graph
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Content
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal []*model.Content
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Content
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -4346,18 +4346,18 @@ func (ec *executionContext) _Query_listContentsByType(ctx context.Context, field
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Content
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal []*model.Content
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Content
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -4431,18 +4431,18 @@ func (ec *executionContext) _Query_listContentsByGenre(ctx context.Context, fiel
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Content
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal []*model.Content
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Content
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -4597,18 +4597,18 @@ func (ec *executionContext) _Query_listEpisodes(ctx context.Context, field graph
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Episode
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal []*model.Episode
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Episode
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -4677,13 +4677,6 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Profile
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "MEMBER")
 				if err != nil {
 					var zeroVal *model.Profile
@@ -4693,7 +4686,14 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 					var zeroVal *model.Profile
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Profile
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -4810,18 +4810,18 @@ func (ec *executionContext) _Query_getReview(ctx context.Context, field graphql.
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Review
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal *model.Review
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.Review
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -4888,18 +4888,18 @@ func (ec *executionContext) _Query_listReviews(ctx context.Context, field graphq
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Review
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal []*model.Review
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Review
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -5027,13 +5027,6 @@ func (ec *executionContext) _Query_listUsers(ctx context.Context, field graphql.
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.User
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				role, err := ec.unmarshalNUserRole2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐUserRole(ctx, "ADMIN")
 				if err != nil {
 					var zeroVal []*model.User
@@ -5043,7 +5036,14 @@ func (ec *executionContext) _Query_listUsers(ctx context.Context, field graphql.
 					var zeroVal []*model.User
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, nil, directive1, role)
+				return ec.Directives.HasRole(ctx, nil, directive0, role)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.User
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -5100,18 +5100,18 @@ func (ec *executionContext) _Query_getWatchHistory(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.WatchHistory
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal *model.WatchHistory
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal *model.WatchHistory
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -5176,18 +5176,18 @@ func (ec *executionContext) _Query_listWatchHistories(ctx context.Context, field
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.WatchHistory
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal []*model.WatchHistory
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.WatchHistory
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -5306,18 +5306,18 @@ func (ec *executionContext) _Query_recentlyWatchedContents(ctx context.Context, 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.WatchHistory
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal []*model.WatchHistory
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.WatchHistory
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -5383,18 +5383,18 @@ func (ec *executionContext) _Query_getRecommendations(ctx context.Context, field
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.RecommendedContent
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ProfileSelectionIsRequired == nil {
 					var zeroVal []*model.RecommendedContent
 					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
 				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive1)
+				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.RecommendedContent
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive1)
 			}
 
 			next = directive2
