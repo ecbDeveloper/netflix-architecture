@@ -9,6 +9,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -16,8 +17,8 @@ import (
 
 type Service interface {
 	CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error)
-	GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Episode, error)
-	ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID) ([]*model.Episode, error)
+	GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID, userID uuid.UUID) (*model.Episode, error)
+	ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID, userID uuid.UUID) ([]*model.Episode, error)
 	UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error)
 	DeleteEpisode(ctx context.Context, id uuid.UUID) error
 }
@@ -25,12 +26,14 @@ type Service interface {
 type ServiceImpl struct {
 	queries        *sqlc.Queries
 	storageService storage.Service
+	profileService profile.Service
 }
 
-func NewService(queries *sqlc.Queries, storageService storage.Service) Service {
+func NewService(queries *sqlc.Queries, storageService storage.Service, ps profile.Service) Service {
 	return &ServiceImpl{
 		queries:        queries,
 		storageService: storageService,
+		profileService: ps,
 	}
 }
 
@@ -77,13 +80,10 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 	return toGraphQLModel(ep), nil
 }
 
-func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID) (*model.Episode, error) {
-	profile, err := s.queries.GetProfile(ctx, profileID)
+func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID, userID uuid.UUID) (*model.Episode, error) {
+	profile, err := s.profileService.GetProfile(ctx, profileID, userID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, &apperror.NotFoundError{Entity: "profile"}
-		}
-		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+		return nil, fmt.Errorf("failed to get profile %v: %w", profileID, err)
 	}
 
 	ep, err := s.queries.GetEpisode(ctx, id)
@@ -109,12 +109,9 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 	return toGraphQLModel(ep), nil
 }
 
-func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID) ([]*model.Episode, error) {
-	profile, err := s.queries.GetProfile(ctx, profileID)
+func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID, userID uuid.UUID) ([]*model.Episode, error) {
+	profile, err := s.profileService.GetProfile(ctx, profileID, userID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, &apperror.NotFoundError{Entity: "profile"}
-		}
 		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
 	}
 

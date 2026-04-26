@@ -17,6 +17,7 @@ import (
 type Service interface {
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error)
 	GetUser(ctx context.Context, id uuid.UUID) (*model.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*sqlc.User, error)
 	ListUsers(ctx context.Context) ([]*model.User, error)
 	UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) error
@@ -167,6 +168,18 @@ func (s *ServiceImpl) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func (s *ServiceImpl) GetUserByEmail(ctx context.Context, email string) (*sqlc.User, error) {
+	user, err := s.queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "user"}
+		}
+		return nil, fmt.Errorf("failed to fetch user %v from database: %w", user.ID, err)
+	}
+
+	return &user, nil
 }
 
 func toGraphQLModel(u sqlc.User) *model.User {

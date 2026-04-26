@@ -10,6 +10,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -20,22 +21,24 @@ type Service interface {
 	CreateContent(ctx context.Context, input model.CreateContentInput) (uuid.UUID, error)
 	UpdateContent(ctx context.Context, id uuid.UUID, input model.UpdateContentInput) (*model.Content, error)
 	DeleteContent(ctx context.Context, id uuid.UUID) error
-	ListContents(ctx context.Context, profileID uuid.UUID) ([]*model.Content, error)
-	ListContentsByType(ctx context.Context, profileID uuid.UUID, contentType model.ContentType) ([]*model.Content, error)
-	ListContentsByGenre(ctx context.Context, profileID uuid.UUID, genreID int32) ([]*model.Content, error)
+	ListContents(ctx context.Context, profileID uuid.UUID, userID uuid.UUID) ([]*model.Content, error)
+	ListContentsByType(ctx context.Context, profileID uuid.UUID, userID uuid.UUID, contentType model.ContentType) ([]*model.Content, error)
+	ListContentsByGenre(ctx context.Context, profileID uuid.UUID, userID uuid.UUID, genreID int32) ([]*model.Content, error)
 }
 
 type ServiceImpl struct {
-	queries *sqlc.Queries
-	pool    *pgxpool.Pool
-	storage storage.Service
+	queries        *sqlc.Queries
+	pool           *pgxpool.Pool
+	storage        storage.Service
+	profileService profile.Service
 }
 
-func NewService(queries *sqlc.Queries, pool *pgxpool.Pool, storage storage.Service) Service {
+func NewService(queries *sqlc.Queries, pool *pgxpool.Pool, storage storage.Service, ps profile.Service) Service {
 	return &ServiceImpl{
-		queries: queries,
-		pool:    pool,
-		storage: storage,
+		queries:        queries,
+		pool:           pool,
+		storage:        storage,
+		profileService: ps,
 	}
 }
 
@@ -371,13 +374,10 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID) ([]*model.Content, error) {
-	profile, err := s.queries.GetProfile(ctx, profileID)
+func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, userID uuid.UUID) ([]*model.Content, error) {
+	profile, err := s.profileService.GetProfile(ctx, profileID, userID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, &apperror.NotFoundError{Entity: "profile"}
-		}
-		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+		return nil, fmt.Errorf("failed to get profile %v: %w", profileID, err)
 	}
 
 	var contents []sqlc.Content
@@ -401,13 +401,10 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID) ([]
 	return result, nil
 }
 
-func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUID, contentType model.ContentType) ([]*model.Content, error) {
-	profile, err := s.queries.GetProfile(ctx, profileID)
+func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUID, userID uuid.UUID, contentType model.ContentType) ([]*model.Content, error) {
+	profile, err := s.profileService.GetProfile(ctx, profileID, userID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, &apperror.NotFoundError{Entity: "profile"}
-		}
-		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+		return nil, fmt.Errorf("failed to get profile %v: %w", profileID, err)
 	}
 
 	var contents []sqlc.Content
@@ -431,7 +428,7 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 	return result, nil
 }
 
-func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UUID, genreID int32) ([]*model.Content, error) {
+func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UUID, userID uuid.UUID, genreID int32) ([]*model.Content, error) {
 	genres, err := s.queries.ListContentGenres(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get content genres list from database: %w", err)
@@ -449,12 +446,9 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 		return nil, &apperror.ValidationError{Field: "genreId", Message: "invalid genreId"}
 	}
 
-	profile, err := s.queries.GetProfile(ctx, profileID)
+	profile, err := s.profileService.GetProfile(ctx, profileID, userID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, &apperror.NotFoundError{Entity: "profile"}
-		}
-		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
+		return nil, fmt.Errorf("failed to get profile %v: %w", profileID, err)
 	}
 
 	var contents []sqlc.Content

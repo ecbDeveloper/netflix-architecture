@@ -16,7 +16,19 @@ import (
 
 // Reviews is the resolver for the reviews field.
 func (r *episodeResolver) Reviews(ctx context.Context, obj *model.Episode) ([]*model.Review, error) {
-	reviews, err := r.ReviewService.ListReviewsByEpisode(ctx, obj.ID)
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to get episode", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	userID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	reviews, err := r.ReviewService.ListReviewsByEpisode(ctx, obj.ID, profileID, userID)
 	if err != nil {
 		r.Logger.Error("failed to list reviews", slog.Any("error", err))
 		return nil, handleError(err)
@@ -66,7 +78,13 @@ func (r *queryResolver) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Ep
 		return nil, handleError(err)
 	}
 
-	episode, err := r.EpisodeService.GetEpisode(ctx, id, profileID)
+	userID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	episode, err := r.EpisodeService.GetEpisode(ctx, id, profileID, userID)
 	if err != nil {
 		r.Logger.Error("failed to get episode", slog.Any("error", err))
 		return nil, handleError(err)
@@ -83,7 +101,13 @@ func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([
 		return nil, handleError(err)
 	}
 
-	episodes, err := r.EpisodeService.ListEpisodesBySeries(ctx, seriesID, profileID)
+	userID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	episodes, err := r.EpisodeService.ListEpisodesBySeries(ctx, seriesID, profileID, userID)
 	if err != nil {
 		r.Logger.Error("failed to list all episodes from a series", slog.Any("error", err))
 		return nil, handleError(err)

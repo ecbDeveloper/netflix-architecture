@@ -7,6 +7,7 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/episode"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -17,19 +18,21 @@ type Service interface {
 	CreateReview(ctx context.Context, input model.CreateReviewInput, profileID uuid.UUID) (*model.Review, error)
 	GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error)
 	ListReviewsByProfile(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error)
-	ListReviewsByEpisode(ctx context.Context, episodeID uuid.UUID) ([]*model.Review, error)
+	ListReviewsByEpisode(ctx context.Context, episodeID uuid.UUID, profileID uuid.UUID, userID uuid.UUID) ([]*model.Review, error)
 	ListReviewsByMovie(ctx context.Context, movieID uuid.UUID) ([]*model.Review, error)
 	UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput, profileID uuid.UUID) (*model.Review, error)
 	DeleteReview(ctx context.Context, id uuid.UUID, profileID uuid.UUID) error
 }
 
 type ServiceImpl struct {
-	queries *sqlc.Queries
+	queries        *sqlc.Queries
+	episodeService episode.Service
 }
 
-func NewService(queries *sqlc.Queries) Service {
+func NewService(queries *sqlc.Queries, es episode.Service) Service {
 	return &ServiceImpl{
-		queries: queries,
+		queries:        queries,
+		episodeService: es,
 	}
 }
 
@@ -98,7 +101,12 @@ func (s *ServiceImpl) ListReviewsByProfile(ctx context.Context, profileID uuid.U
 	return result, nil
 }
 
-func (s *ServiceImpl) ListReviewsByEpisode(ctx context.Context, episodeID uuid.UUID) ([]*model.Review, error) {
+func (s *ServiceImpl) ListReviewsByEpisode(ctx context.Context, episodeID uuid.UUID, profileID uuid.UUID, userID uuid.UUID) ([]*model.Review, error) {
+	_, err := s.episodeService.GetEpisode(ctx, episodeID, profileID, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch episode %v from database: %w", episodeID, err)
+	}
+
 	episodeIDPG := pgtype.UUID{Bytes: episodeID, Valid: true}
 	reviews, err := s.queries.ListReviewsByEpisode(ctx, episodeIDPG)
 	if err != nil {
@@ -114,6 +122,14 @@ func (s *ServiceImpl) ListReviewsByEpisode(ctx context.Context, episodeID uuid.U
 }
 
 func (s *ServiceImpl) ListReviewsByMovie(ctx context.Context, movieID uuid.UUID) ([]*model.Review, error) {
+	_, err := s.queries.GetMovie(ctx, movieID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "movie"}
+		}
+		return nil, fmt.Errorf("failed to fetch movie %v from database: %w", movieID, err)
+	}
+
 	movieIDPG := pgtype.UUID{Bytes: movieID, Valid: true}
 	reviews, err := s.queries.ListReviewsByMovie(ctx, movieIDPG)
 	if err != nil {

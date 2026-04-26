@@ -38,6 +38,7 @@ input UpdateContentInput {
 }
 
 extend type Query {
+  getContent(id: ID!): Content! @auth @profileSelectionIsRequired
   listContents: [Content!]! @auth @profileSelectionIsRequired
   listContentsByType(contentType: ContentType!): [Content!]! @auth @profileSelectionIsRequired
   listContentsByGenre(genreId: Int!): [Content!]! @auth @profileSelectionIsRequired

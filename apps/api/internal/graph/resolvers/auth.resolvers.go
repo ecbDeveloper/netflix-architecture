@@ -18,7 +18,7 @@ import (
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (string, error) {
-	user, err := r.AuthService.Login(ctx, *input)
+	user, err := r.AuthService.Login(ctx, input)
 	if err != nil {
 		var validationErr *apperror.ValidationError
 		if errors.As(err, &validationErr) {
