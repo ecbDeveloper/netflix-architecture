@@ -9,11 +9,11 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateUser is the resolver for the createUser field.
@@ -36,7 +36,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id uuid.UUID, input m
 	}
 
 	if sessionUserID != id {
-		return nil, gqlerror.Errorf("you can't update others users")
+		return nil, handleError(&apperror.ForbiddenError{Message: "you can't update others users"})
 	}
 
 	user, err := r.UserService.UpdateUser(ctx, id, input)
@@ -57,7 +57,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, 
 	}
 
 	if sessionUserID != id {
-		return false, gqlerror.Errorf("you can't delete others users")
+		return false, handleError(&apperror.ForbiddenError{Message: "you can't delete others users"})
 	}
 
 	err = r.UserService.DeleteUser(ctx, id)
@@ -68,7 +68,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, 
 
 	if err := r.Sessions.Destroy(ctx); err != nil {
 		r.Logger.Error("failed to destroy session", slog.Any("error", err))
-		return false, gqlerror.Errorf("error deleting user, try again later")
+		return false, handleError(err)
 	}
 
 	return true, nil
@@ -90,7 +90,7 @@ func (r *queryResolver) GetUser(ctx context.Context, id uuid.UUID) (*model.User,
 
 	if sessionUserID != id && sessionRoleID != shared.DBRoleAdmin {
 		r.Logger.Error("user is not authorized to get user")
-		return nil, gqlerror.Errorf("you can't access others users data")
+		return nil, handleError(&apperror.ForbiddenError{Message: "you can't access others users data"})
 	}
 
 	user, err := r.UserService.GetUser(ctx, id)

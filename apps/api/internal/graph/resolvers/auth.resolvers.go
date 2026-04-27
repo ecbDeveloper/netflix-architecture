@@ -13,7 +13,6 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Login is the resolver for the login field.
@@ -32,7 +31,7 @@ func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (
 	err = r.Sessions.RenewToken(ctx)
 	if err != nil {
 		r.Logger.Error("failed to renew user token", slog.Any("error", err))
-		return "", gqlerror.Errorf("error logging in, try again after")
+		return "", handleError(err)
 	}
 
 	r.Sessions.Put(ctx, shared.SessionUserIDKey, user.ID)
@@ -49,7 +48,7 @@ func (r *mutationResolver) Logout(ctx context.Context) (string, error) {
 
 	if err := r.Sessions.Destroy(ctx); err != nil {
 		r.Logger.Error("failed to destroy session", slog.Any("error", err))
-		return "", gqlerror.Errorf("error logging out, try again later")
+		return "", handleError(err)
 	}
 
 	return "user successfully logged out", nil
