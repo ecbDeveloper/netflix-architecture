@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS watch_histories;
 CREATE TABLE watch_histories (
   id UUID PRIMARY KEY,
   profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  movie_id UUID REFERENCES movies(id) ON DELETE CASCADE,
+  movie_id UUID REFERENCES movies(content_id) ON DELETE CASCADE,
   episode_id UUID REFERENCES episodes(id) ON DELETE CASCADE,
   watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   last_position_seconds INT DEFAULT 0,

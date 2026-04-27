@@ -7,7 +7,7 @@ ALTER TABLE contents
   ON DELETE RESTRICT
   ON UPDATE CASCADE;
 ---- create above / drop below ----
-ALTER TABLE content 
+ALTER TABLE contents
   DROP CONSTRAINT IF EXISTS content_genre_fk,
   DROP COLUMN IF EXISTS genre;
 
