@@ -25,7 +25,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  createProfile(input: CreateProfileInput!): Profile!  @hasRole(role: MEMBER) @auth
+  createProfile(input: CreateProfileInput!): Profile! @hasRole(role: MEMBER) @auth
   updateProfile(id: ID!, input: UpdateProfileInput!): Profile! @hasRole(role: MEMBER) @auth
   deleteProfile(id: ID!): Boolean! @hasRole(role: MEMBER) @auth
   selectProfile(id: ID!): ID! @auth
