@@ -36,7 +36,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id uuid.UUID, input m
 	}
 
 	if sessionUserID != id {
-		return nil, gqlerror.Errorf("access denied")
+		return nil, gqlerror.Errorf("you can't update others users")
 	}
 
 	user, err := r.UserService.UpdateUser(ctx, id, input)
@@ -57,7 +57,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, 
 	}
 
 	if sessionUserID != id {
-		return false, gqlerror.Errorf("you can't delete other users")
+		return false, gqlerror.Errorf("you can't delete others users")
 	}
 
 	err = r.UserService.DeleteUser(ctx, id)
@@ -90,7 +90,7 @@ func (r *queryResolver) GetUser(ctx context.Context, id uuid.UUID) (*model.User,
 
 	if sessionUserID != id && sessionRoleID != shared.DBRoleAdmin {
 		r.Logger.Error("user is not authorized to get user")
-		return nil, gqlerror.Errorf("you can't access other users data")
+		return nil, gqlerror.Errorf("you can't access others users data")
 	}
 
 	user, err := r.UserService.GetUser(ctx, id)
