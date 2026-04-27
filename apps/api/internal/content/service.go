@@ -21,6 +21,7 @@ type Service interface {
 	CreateContent(ctx context.Context, input model.CreateContentInput) (uuid.UUID, error)
 	UpdateContent(ctx context.Context, id uuid.UUID, input model.UpdateContentInput) (*model.Content, error)
 	DeleteContent(ctx context.Context, id uuid.UUID) error
+	GetContent(ctx context.Context, id uuid.UUID, profileID uuid.UUID, userID uuid.UUID) (*model.Content, error)
 	ListContents(ctx context.Context, profileID uuid.UUID, userID uuid.UUID) ([]*model.Content, error)
 	ListContentsByType(ctx context.Context, profileID uuid.UUID, userID uuid.UUID, contentType model.ContentType) ([]*model.Content, error)
 	ListContentsByGenre(ctx context.Context, profileID uuid.UUID, userID uuid.UUID, genreID int32) ([]*model.Content, error)
@@ -318,7 +319,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 		go s.storage.DeleteFile(context.Background(), oldURL)
 	}
 
-	return toGraphQlModel(content), nil
+	return toGraphQlModel(content, nil, nil), nil
 }
 
 func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
@@ -395,7 +396,7 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, use
 
 	result := make([]*model.Content, len(contents))
 	for i, content := range contents {
-		result[i] = toGraphQlModel(content)
+		result[i] = toGraphQlModel(content, nil, nil)
 	}
 
 	return result, nil
@@ -422,7 +423,7 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 
 	result := make([]*model.Content, len(contents))
 	for i, content := range contents {
-		result[i] = toGraphQlModel(content)
+		result[i] = toGraphQlModel(content, nil, nil)
 	}
 
 	return result, nil
@@ -466,20 +467,54 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 
 	result := make([]*model.Content, len(contents))
 	for i, content := range contents {
-		result[i] = toGraphQlModel(content)
+		result[i] = toGraphQlModel(content, nil, nil)
 	}
 
 	return result, nil
 }
 
-func toGraphQlModel(c sqlc.Content) *model.Content {
+func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uuid.UUID, userID uuid.UUID) (*model.Content, error) {
+	profile, err := s.profileService.GetProfile(ctx, profileID, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get profile %v: %w", profileID, err)
+	}
+
+	content, err := s.queries.GetContent(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &apperror.NotFoundError{Entity: "content"}
+		}
+		return nil, fmt.Errorf("failed to fetch content %v from database: %w", id, err)
+	}
+
+	if profile.HasParentalControls && content.MaturityRating != sqlc.MaturityRatingL {
+		return nil, &apperror.ForbiddenError{Message: "you can't access this content, because your profile has parental control"}
+	}
+
+	if content.ContentType == sqlc.ContentTypeMOVIE {
+		movie, err := s.queries.GetMovie(ctx, id)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, &apperror.NotFoundError{Entity: "movie"}
+			}
+			return nil, fmt.Errorf("failed to fetch movie %v from database: %w", id, err)
+		}
+		return toGraphQlModel(content, &movie.ContentUrl, &movie.DurationMinutes), nil
+	}
+
+	return toGraphQlModel(content, nil, nil), nil
+}
+
+func toGraphQlModel(c sqlc.Content, contentURL *string, durationMinutes *int32) *model.Content {
 	return &model.Content{
-		ID:             c.ID,
-		Title:          c.Title,
-		Description:    c.Description,
-		MaturityRating: model.MaturityRating(c.MaturityRating),
-		ContentType:    model.ContentType(c.ContentType),
-		ReleaseDate:    c.ReleaseDate.String(),
-		GenreID:        c.GenreID,
+		ID:              c.ID,
+		Title:           c.Title,
+		Description:     c.Description,
+		MaturityRating:  model.MaturityRating(c.MaturityRating),
+		ContentType:     model.ContentType(c.ContentType),
+		ReleaseDate:     c.ReleaseDate.String(),
+		GenreID:         c.GenreID,
+		ContentURL:      contentURL,
+		DurationMinutes: durationMinutes,
 	}
 }

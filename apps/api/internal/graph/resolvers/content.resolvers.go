@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
@@ -81,7 +80,24 @@ func (r *mutationResolver) DeleteContent(ctx context.Context, id uuid.UUID) (boo
 
 // GetContent is the resolver for the getContent field.
 func (r *queryResolver) GetContent(ctx context.Context, id uuid.UUID) (*model.Content, error) {
-	panic(fmt.Errorf("not implemented: GetContent - getContent"))
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	userID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	content, err := r.ContentService.GetContent(ctx, id, profileID, userID)
+	if err != nil {
+		return nil, handleError(err)
+	}
+
+	return content, nil
 }
 
 // ListContents is the resolver for the listContents field.
