@@ -24,7 +24,6 @@ input UpdateReviewInput {
 
 extend type Query {
   getReview(id: ID!): Review @profileSelectionIsRequired @auth
-  listReviews: [Review!]! @profileSelectionIsRequired @auth
 }
 
 extend type Mutation {

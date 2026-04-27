@@ -74,20 +74,3 @@ func (r *queryResolver) GetReview(ctx context.Context, id uuid.UUID) (*model.Rev
 
 	return review, nil
 }
-
-// ListReviews is the resolver for the listReviews field.
-func (r *queryResolver) ListReviews(ctx context.Context) ([]*model.Review, error) {
-	profileID, err := r.getProfileIDFromSession(ctx)
-	if err != nil {
-		r.Logger.Error("failed to get profile id to list reviews", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	reviews, err := r.ReviewService.ListReviewsByProfile(ctx, profileID)
-	if err != nil {
-		r.Logger.Error("failed to list reviews", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	return reviews, nil
-}

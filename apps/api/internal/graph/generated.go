@@ -130,7 +130,6 @@ type ComplexityRoot struct {
 		ListContentsByType      func(childComplexity int, contentType model.ContentType) int
 		ListEpisodes            func(childComplexity int, seriesID uuid.UUID) int
 		ListProfiles            func(childComplexity int) int
-		ListReviews             func(childComplexity int) int
 		ListUsers               func(childComplexity int) int
 		ListWatchHistories      func(childComplexity int) int
 		MostWatchedContents     func(childComplexity int, limit *int32) int
@@ -221,7 +220,6 @@ type QueryResolver interface {
 	GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error)
 	ListProfiles(ctx context.Context) ([]*model.Profile, error)
 	GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error)
-	ListReviews(ctx context.Context) ([]*model.Review, error)
 	GetUser(ctx context.Context, id uuid.UUID) (*model.User, error)
 	ListUsers(ctx context.Context) ([]*model.User, error)
 	GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error)
@@ -807,12 +805,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.ListProfiles(childComplexity), true
-	case "Query.listReviews":
-		if e.ComplexityRoot.Query.ListReviews == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Query.ListReviews(childComplexity), true
 	case "Query.listUsers":
 		if e.ComplexityRoot.Query.ListUsers == nil {
 			break
@@ -4899,73 +4891,6 @@ func (ec *executionContext) fieldContext_Query_getReview(ctx context.Context, fi
 	if fc.Args, err = ec.field_Query_getReview_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_listReviews(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_listReviews,
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Query().ListReviews(ctx)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.ProfileSelectionIsRequired == nil {
-					var zeroVal []*model.Review
-					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
-				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Review
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive1)
-			}
-
-			next = directive2
-			return next
-		},
-		ec.marshalNReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_listReviews(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Review_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_Review_profileId(ctx, field)
-			case "movieId":
-				return ec.fieldContext_Review_movieId(ctx, field)
-			case "episodeId":
-				return ec.fieldContext_Review_episodeId(ctx, field)
-			case "rating":
-				return ec.fieldContext_Review_rating(ctx, field)
-			case "comment":
-				return ec.fieldContext_Review_comment(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Review_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Review_updatedAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
-		},
 	}
 	return fc, nil
 }
@@ -9379,28 +9304,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getReview(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "listReviews":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_listReviews(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
 				return res
 			}
 
