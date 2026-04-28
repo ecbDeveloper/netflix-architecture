@@ -15,6 +15,7 @@ var hContentTypeToGraph = map[historypb.ContentType]model.ContentType{
 	1: model.ContentTypeMovie,
 	2: model.ContentTypeSeries,
 }
+
 var recContentTypeToGraph = map[recommendationpb.ContentType]model.ContentType{
 	1: model.ContentTypeMovie,
 	2: model.ContentTypeSeries,
@@ -51,9 +52,6 @@ func protoToWatchHistory(resp *historypb.WatchHistoryResponse) *model.WatchHisto
 
 	whID, _ := uuid.Parse(resp.Id)
 	wh.ID = whID
-
-	profileID, _ := uuid.Parse(resp.ProfileId)
-	wh.ProfileID = profileID
 
 	if resp.MovieId != nil {
 		movieID, _ := uuid.Parse(*resp.MovieId)
