@@ -21,3 +21,6 @@ type ContentGenre {
   id: Int!
   description: String!
 }
+
+union WatchedContent = Content | Episode
+union ReviewedContent = Content | Episode
