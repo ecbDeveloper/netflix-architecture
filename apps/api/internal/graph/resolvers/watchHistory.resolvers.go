@@ -9,6 +9,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
 	recommendationpb "github.com/ecbDeveloper/netflix-architecture/proto/recommendation"
@@ -234,3 +235,31 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 	}
 	return result, nil
 }
+
+// Profile is the resolver for the profile field.
+func (r *watchHistoryResolver) Profile(ctx context.Context, obj *model.WatchHistory) (*model.Profile, error) {
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	userID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get user id", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	profile, err := r.ProfileService.GetProfile(ctx, profileID, userID)
+	if err != nil {
+		r.Logger.Error("failed to get profile %v: %w", profileID, err)
+		return nil, handleError(err)
+	}
+
+	return profile, nil
+}
+
+// WatchHistory returns graph.WatchHistoryResolver implementation.
+func (r *Resolver) WatchHistory() graph.WatchHistoryResolver { return &watchHistoryResolver{r} }
+
+type watchHistoryResolver struct{ *Resolver }

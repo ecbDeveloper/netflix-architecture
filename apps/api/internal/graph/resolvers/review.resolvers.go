@@ -9,6 +9,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/google/uuid"
 )
@@ -74,3 +75,31 @@ func (r *queryResolver) GetReview(ctx context.Context, id uuid.UUID) (*model.Rev
 
 	return review, nil
 }
+
+// Profile is the resolver for the profile field.
+func (r *reviewResolver) Profile(ctx context.Context, obj *model.Review) (*model.Profile, error) {
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	userID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get user id", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	profile, err := r.ProfileService.GetProfile(ctx, profileID, userID)
+	if err != nil {
+		r.Logger.Error("failed to get profile %v: %w", profileID, err)
+		return nil, handleError(err)
+	}
+
+	return profile, nil
+}
+
+// Review returns graph.ReviewResolver implementation.
+func (r *Resolver) Review() graph.ReviewResolver { return &reviewResolver{r} }
+
+type reviewResolver struct{ *Resolver }

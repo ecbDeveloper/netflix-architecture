@@ -1,6 +1,6 @@
 type WatchHistory {
   id: ID!
-  profileId: ID!
+  profile: Profile!
   movieId: ID
   episodeId: ID
   watchedAt: String!

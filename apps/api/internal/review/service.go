@@ -210,9 +210,6 @@ func toGraphQLModel(r sqlc.Review) *model.Review {
 		Rating: r.Rating,
 	}
 
-	if r.ProfileID != uuid.Nil {
-		m.ProfileID = r.ProfileID
-	}
 	if r.MovieID.Valid {
 		movieID, _ := uuid.Parse(r.MovieID.String())
 		m.MovieID = &movieID

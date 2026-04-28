@@ -1,6 +1,6 @@
 type Review {
   id: ID!
-  profileId: ID!
+  profile: Profile!
   movieId: ID
   episodeId: ID
   rating: Int!
