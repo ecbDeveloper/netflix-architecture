@@ -29,7 +29,6 @@ input UpdateEpisodeInput {
 
 extend type Query {
   getEpisode(id: ID!): Episode @auth @profileSelectionIsRequired
-  listEpisodes(seriesId: ID!): [Episode!]! @profileSelectionIsRequired @auth
 }
 
 extend type Mutation {

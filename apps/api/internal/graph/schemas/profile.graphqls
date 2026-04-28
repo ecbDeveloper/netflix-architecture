@@ -21,7 +21,6 @@ input UpdateProfileInput {
 
 extend type Query {
   getProfile(id: ID!): Profile @hasRole(role: MEMBER) @auth
-  listProfiles: [Profile!]! @auth
 }
 
 extend type Mutation {

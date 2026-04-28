@@ -93,29 +93,6 @@ func (r *queryResolver) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Ep
 	return episode, nil
 }
 
-// ListEpisodes is the resolver for the listEpisodes field.
-func (r *queryResolver) ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([]*model.Episode, error) {
-	profileID, err := r.getProfileIDFromSession(ctx)
-	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	userID, err := r.getUserIDFromSession(ctx)
-	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	episodes, err := r.EpisodeService.ListEpisodesBySeries(ctx, seriesID, profileID, userID)
-	if err != nil {
-		r.Logger.Error("failed to list all episodes from a series", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	return episodes, nil
-}
-
 // Episode returns graph.EpisodeResolver implementation.
 func (r *Resolver) Episode() graph.EpisodeResolver { return &episodeResolver{r} }
 

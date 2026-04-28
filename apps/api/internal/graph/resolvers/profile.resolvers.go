@@ -134,23 +134,6 @@ func (r *queryResolver) GetProfile(ctx context.Context, id uuid.UUID) (*model.Pr
 	return profile, nil
 }
 
-// ListProfiles is the resolver for the listProfiles field.
-func (r *queryResolver) ListProfiles(ctx context.Context) ([]*model.Profile, error) {
-	userID, err := r.getUserIDFromSession(ctx)
-	if err != nil {
-		r.Logger.Error("failed to parse user id to list profiles", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	profiles, err := r.ProfileService.ListProfilesByUser(ctx, userID)
-	if err != nil {
-		r.Logger.Error("failed to list profiles", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	return profiles, nil
-}
-
 // Profile returns graph.ProfileResolver implementation.
 func (r *Resolver) Profile() graph.ProfileResolver { return &profileResolver{r} }
 
