@@ -212,6 +212,13 @@ models:
     fields:
       episodes:
         resolver: true
-      movieReviews:
+      reviews:
         resolver: true
-
+  Review:
+    fields:
+      profile:
+        resolver: true
+  WatchHistory:
+    fields:
+      profile:
+        resolver: true

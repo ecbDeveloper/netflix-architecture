@@ -34,7 +34,9 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	Profile() ProfileResolver
 	Query() QueryResolver
+	Review() ReviewResolver
 	User() UserResolver
+	WatchHistory() WatchHistoryResolver
 }
 
 type DirectiveRoot struct {
@@ -53,8 +55,8 @@ type ComplexityRoot struct {
 		GenreID         func(childComplexity int) int
 		ID              func(childComplexity int) int
 		MaturityRating  func(childComplexity int) int
-		MovieReviews    func(childComplexity int) int
 		ReleaseDate     func(childComplexity int) int
+		Reviews         func(childComplexity int) int
 		Title           func(childComplexity int) int
 	}
 
@@ -128,8 +130,6 @@ type ComplexityRoot struct {
 		ListContents            func(childComplexity int) int
 		ListContentsByGenre     func(childComplexity int, genreID int32) int
 		ListContentsByType      func(childComplexity int, contentType model.ContentType) int
-		ListEpisodes            func(childComplexity int, seriesID uuid.UUID) int
-		ListProfiles            func(childComplexity int) int
 		ListUsers               func(childComplexity int) int
 		ListWatchHistories      func(childComplexity int) int
 		MostWatchedContents     func(childComplexity int, limit *int32) int
@@ -149,7 +149,7 @@ type ComplexityRoot struct {
 		EpisodeID func(childComplexity int) int
 		ID        func(childComplexity int) int
 		MovieID   func(childComplexity int) int
-		ProfileID func(childComplexity int) int
+		Profile   func(childComplexity int) int
 		Rating    func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 	}
@@ -171,13 +171,13 @@ type ComplexityRoot struct {
 		IsCompleted         func(childComplexity int) int
 		LastPositionSeconds func(childComplexity int) int
 		MovieID             func(childComplexity int) int
-		ProfileID           func(childComplexity int) int
+		Profile             func(childComplexity int) int
 		WatchedAt           func(childComplexity int) int
 	}
 }
 
 type ContentResolver interface {
-	MovieReviews(ctx context.Context, obj *model.Content) ([]*model.Review, error)
+	Reviews(ctx context.Context, obj *model.Content) ([]*model.Review, error)
 	Episodes(ctx context.Context, obj *model.Content) ([]*model.Episode, error)
 }
 type EpisodeResolver interface {
@@ -216,9 +216,7 @@ type QueryResolver interface {
 	ListContentsByType(ctx context.Context, contentType model.ContentType) ([]*model.Content, error)
 	ListContentsByGenre(ctx context.Context, genreID int32) ([]*model.Content, error)
 	GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error)
-	ListEpisodes(ctx context.Context, seriesID uuid.UUID) ([]*model.Episode, error)
 	GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error)
-	ListProfiles(ctx context.Context) ([]*model.Profile, error)
 	GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error)
 	GetUser(ctx context.Context, id uuid.UUID) (*model.User, error)
 	ListUsers(ctx context.Context) ([]*model.User, error)
@@ -228,8 +226,14 @@ type QueryResolver interface {
 	RecentlyWatchedContents(ctx context.Context, limit *int32) ([]*model.WatchHistory, error)
 	GetRecommendations(ctx context.Context, limit *int32) ([]*model.RecommendedContent, error)
 }
+type ReviewResolver interface {
+	Profile(ctx context.Context, obj *model.Review) (*model.Profile, error)
+}
 type UserResolver interface {
 	Profiles(ctx context.Context, obj *model.User) ([]*model.Profile, error)
+}
+type WatchHistoryResolver interface {
+	Profile(ctx context.Context, obj *model.WatchHistory) (*model.Profile, error)
 }
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -294,18 +298,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Content.MaturityRating(childComplexity), true
-	case "Content.movieReviews":
-		if e.ComplexityRoot.Content.MovieReviews == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Content.MovieReviews(childComplexity), true
 	case "Content.releaseDate":
 		if e.ComplexityRoot.Content.ReleaseDate == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Content.ReleaseDate(childComplexity), true
+	case "Content.reviews":
+		if e.ComplexityRoot.Content.Reviews == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Content.Reviews(childComplexity), true
 	case "Content.title":
 		if e.ComplexityRoot.Content.Title == nil {
 			break
@@ -788,23 +792,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.ListContentsByType(childComplexity, args["contentType"].(model.ContentType)), true
-	case "Query.listEpisodes":
-		if e.ComplexityRoot.Query.ListEpisodes == nil {
-			break
-		}
-
-		args, err := ec.field_Query_listEpisodes_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.ListEpisodes(childComplexity, args["seriesId"].(uuid.UUID)), true
-	case "Query.listProfiles":
-		if e.ComplexityRoot.Query.ListProfiles == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Query.ListProfiles(childComplexity), true
 	case "Query.listUsers":
 		if e.ComplexityRoot.Query.ListUsers == nil {
 			break
@@ -895,12 +882,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Review.MovieID(childComplexity), true
-	case "Review.profileId":
-		if e.ComplexityRoot.Review.ProfileID == nil {
+	case "Review.profile":
+		if e.ComplexityRoot.Review.Profile == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Review.ProfileID(childComplexity), true
+		return e.ComplexityRoot.Review.Profile(childComplexity), true
 	case "Review.rating":
 		if e.ComplexityRoot.Review.Rating == nil {
 			break
@@ -993,12 +980,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.WatchHistory.MovieID(childComplexity), true
-	case "WatchHistory.profileId":
-		if e.ComplexityRoot.WatchHistory.ProfileID == nil {
+	case "WatchHistory.profile":
+		if e.ComplexityRoot.WatchHistory.Profile == nil {
 			break
 		}
 
-		return e.ComplexityRoot.WatchHistory.ProfileID(childComplexity), true
+		return e.ComplexityRoot.WatchHistory.Profile(childComplexity), true
 	case "WatchHistory.watchedAt":
 		if e.ComplexityRoot.WatchHistory.WatchedAt == nil {
 			break
@@ -1499,17 +1486,6 @@ func (ec *executionContext) field_Query_listContentsByType_args(ctx context.Cont
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_listEpisodes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "seriesId", ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
-	if err != nil {
-		return nil, err
-	}
-	args["seriesId"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_mostWatchedContents_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1845,14 +1821,14 @@ func (ec *executionContext) fieldContext_Content_durationMinutes(_ context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Content_movieReviews(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
+func (ec *executionContext) _Content_reviews(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Content_movieReviews,
+		ec.fieldContext_Content_reviews,
 		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Content().MovieReviews(ctx, obj)
+			return ec.Resolvers.Content().Reviews(ctx, obj)
 		},
 		nil,
 		ec.marshalOReview2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐReviewᚄ,
@@ -1861,7 +1837,7 @@ func (ec *executionContext) _Content_movieReviews(ctx context.Context, field gra
 	)
 }
 
-func (ec *executionContext) fieldContext_Content_movieReviews(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Content_reviews(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Content",
 		Field:      field,
@@ -1871,8 +1847,8 @@ func (ec *executionContext) fieldContext_Content_movieReviews(_ context.Context,
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Review_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_Review_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_Review_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_Review_movieId(ctx, field)
 			case "episodeId":
@@ -2257,8 +2233,8 @@ func (ec *executionContext) fieldContext_Episode_reviews(_ context.Context, fiel
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Review_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_Review_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_Review_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_Review_movieId(ctx, field)
 			case "episodeId":
@@ -2611,8 +2587,8 @@ func (ec *executionContext) fieldContext_Mutation_updateContent(ctx context.Cont
 				return ec.fieldContext_Content_contentUrl(ctx, field)
 			case "durationMinutes":
 				return ec.fieldContext_Content_durationMinutes(ctx, field)
-			case "movieReviews":
-				return ec.fieldContext_Content_movieReviews(ctx, field)
+			case "reviews":
+				return ec.fieldContext_Content_reviews(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
 			}
@@ -3284,8 +3260,8 @@ func (ec *executionContext) fieldContext_Mutation_createReview(ctx context.Conte
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Review_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_Review_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_Review_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_Review_movieId(ctx, field)
 			case "episodeId":
@@ -3375,8 +3351,8 @@ func (ec *executionContext) fieldContext_Mutation_updateReview(ctx context.Conte
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Review_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_Review_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_Review_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_Review_movieId(ctx, field)
 			case "episodeId":
@@ -3724,8 +3700,8 @@ func (ec *executionContext) fieldContext_Mutation_createWatchHistory(ctx context
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_WatchHistory_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_WatchHistory_movieId(ctx, field)
 			case "episodeId":
@@ -3813,8 +3789,8 @@ func (ec *executionContext) fieldContext_Mutation_updateWatchHistory(ctx context
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_WatchHistory_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_WatchHistory_movieId(ctx, field)
 			case "episodeId":
@@ -4116,8 +4092,8 @@ func (ec *executionContext) fieldContext_Profile_reviews(_ context.Context, fiel
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Review_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_Review_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_Review_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_Review_movieId(ctx, field)
 			case "episodeId":
@@ -4163,8 +4139,8 @@ func (ec *executionContext) fieldContext_Profile_watchHistories(_ context.Contex
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_WatchHistory_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_WatchHistory_movieId(ctx, field)
 			case "episodeId":
@@ -4245,8 +4221,8 @@ func (ec *executionContext) fieldContext_Query_getContent(ctx context.Context, f
 				return ec.fieldContext_Content_contentUrl(ctx, field)
 			case "durationMinutes":
 				return ec.fieldContext_Content_durationMinutes(ctx, field)
-			case "movieReviews":
-				return ec.fieldContext_Content_movieReviews(ctx, field)
+			case "reviews":
+				return ec.fieldContext_Content_reviews(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
 			}
@@ -4329,8 +4305,8 @@ func (ec *executionContext) fieldContext_Query_listContents(_ context.Context, f
 				return ec.fieldContext_Content_contentUrl(ctx, field)
 			case "durationMinutes":
 				return ec.fieldContext_Content_durationMinutes(ctx, field)
-			case "movieReviews":
-				return ec.fieldContext_Content_movieReviews(ctx, field)
+			case "reviews":
+				return ec.fieldContext_Content_reviews(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
 			}
@@ -4403,8 +4379,8 @@ func (ec *executionContext) fieldContext_Query_listContentsByType(ctx context.Co
 				return ec.fieldContext_Content_contentUrl(ctx, field)
 			case "durationMinutes":
 				return ec.fieldContext_Content_durationMinutes(ctx, field)
-			case "movieReviews":
-				return ec.fieldContext_Content_movieReviews(ctx, field)
+			case "reviews":
+				return ec.fieldContext_Content_reviews(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
 			}
@@ -4488,8 +4464,8 @@ func (ec *executionContext) fieldContext_Query_listContentsByGenre(ctx context.C
 				return ec.fieldContext_Content_contentUrl(ctx, field)
 			case "durationMinutes":
 				return ec.fieldContext_Content_durationMinutes(ctx, field)
-			case "movieReviews":
-				return ec.fieldContext_Content_movieReviews(ctx, field)
+			case "reviews":
+				return ec.fieldContext_Content_reviews(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
 			}
@@ -4591,87 +4567,6 @@ func (ec *executionContext) fieldContext_Query_getEpisode(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_listEpisodes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_listEpisodes,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().ListEpisodes(ctx, fc.Args["seriesId"].(uuid.UUID))
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.ProfileSelectionIsRequired == nil {
-					var zeroVal []*model.Episode
-					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
-				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Episode
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive1)
-			}
-
-			next = directive2
-			return next
-		},
-		ec.marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_listEpisodes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Episode_id(ctx, field)
-			case "seriesId":
-				return ec.fieldContext_Episode_seriesId(ctx, field)
-			case "season":
-				return ec.fieldContext_Episode_season(ctx, field)
-			case "episodeNumber":
-				return ec.fieldContext_Episode_episodeNumber(ctx, field)
-			case "title":
-				return ec.fieldContext_Episode_title(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Episode_durationMinutes(ctx, field)
-			case "contentURL":
-				return ec.fieldContext_Episode_contentURL(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Episode_createdAt(ctx, field)
-			case "reviews":
-				return ec.fieldContext_Episode_reviews(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Episode", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_listEpisodes_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -4756,66 +4651,6 @@ func (ec *executionContext) fieldContext_Query_getProfile(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_listProfiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_listProfiles,
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Query().ListProfiles(ctx)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Profile
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0)
-			}
-
-			next = directive1
-			return next
-		},
-		ec.marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfileᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_listProfiles(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Profile_id(ctx, field)
-			case "userId":
-				return ec.fieldContext_Profile_userId(ctx, field)
-			case "name":
-				return ec.fieldContext_Profile_name(ctx, field)
-			case "hasParentalControls":
-				return ec.fieldContext_Profile_hasParentalControls(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Profile_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Profile_updatedAt(ctx, field)
-			case "reviews":
-				return ec.fieldContext_Profile_reviews(ctx, field)
-			case "watchHistories":
-				return ec.fieldContext_Profile_watchHistories(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query_getReview(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -4863,8 +4698,8 @@ func (ec *executionContext) fieldContext_Query_getReview(ctx context.Context, fi
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Review_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_Review_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_Review_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_Review_movieId(ctx, field)
 			case "episodeId":
@@ -5086,8 +4921,8 @@ func (ec *executionContext) fieldContext_Query_getWatchHistory(ctx context.Conte
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_WatchHistory_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_WatchHistory_movieId(ctx, field)
 			case "episodeId":
@@ -5162,8 +4997,8 @@ func (ec *executionContext) fieldContext_Query_listWatchHistories(_ context.Cont
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_WatchHistory_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_WatchHistory_movieId(ctx, field)
 			case "episodeId":
@@ -5292,8 +5127,8 @@ func (ec *executionContext) fieldContext_Query_recentlyWatchedContents(ctx conte
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profileId":
-				return ec.fieldContext_WatchHistory_profileId(ctx, field)
+			case "profile":
+				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "movieId":
 				return ec.fieldContext_WatchHistory_movieId(ctx, field)
 			case "episodeId":
@@ -5646,30 +5481,48 @@ func (ec *executionContext) fieldContext_Review_id(_ context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _Review_profileId(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
+func (ec *executionContext) _Review_profile(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Review_profileId,
+		ec.fieldContext_Review_profile,
 		func(ctx context.Context) (any, error) {
-			return obj.ProfileID, nil
+			return ec.Resolvers.Review().Profile(ctx, obj)
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
+		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Review_profileId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Review_profile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Review",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Profile_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Profile_userId(ctx, field)
+			case "name":
+				return ec.fieldContext_Profile_name(ctx, field)
+			case "hasParentalControls":
+				return ec.fieldContext_Profile_hasParentalControls(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Profile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Profile_updatedAt(ctx, field)
+			case "reviews":
+				return ec.fieldContext_Profile_reviews(ctx, field)
+			case "watchHistories":
+				return ec.fieldContext_Profile_watchHistories(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
 	}
 	return fc, nil
@@ -6128,30 +5981,48 @@ func (ec *executionContext) fieldContext_WatchHistory_id(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _WatchHistory_profileId(ctx context.Context, field graphql.CollectedField, obj *model.WatchHistory) (ret graphql.Marshaler) {
+func (ec *executionContext) _WatchHistory_profile(ctx context.Context, field graphql.CollectedField, obj *model.WatchHistory) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_WatchHistory_profileId,
+		ec.fieldContext_WatchHistory_profile,
 		func(ctx context.Context) (any, error) {
-			return obj.ProfileID, nil
+			return ec.Resolvers.WatchHistory().Profile(ctx, obj)
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
+		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_WatchHistory_profileId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_WatchHistory_profile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "WatchHistory",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Profile_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Profile_userId(ctx, field)
+			case "name":
+				return ec.fieldContext_Profile_name(ctx, field)
+			case "hasParentalControls":
+				return ec.fieldContext_Profile_hasParentalControls(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Profile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Profile_updatedAt(ctx, field)
+			case "reviews":
+				return ec.fieldContext_Profile_reviews(ctx, field)
+			case "watchHistories":
+				return ec.fieldContext_Profile_watchHistories(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
 	}
 	return fc, nil
@@ -8429,11 +8300,65 @@ func (ec *executionContext) unmarshalInputUpdateWatchHistoryInput(ctx context.Co
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _ReviewedContent(ctx context.Context, sel ast.SelectionSet, obj model.ReviewedContent) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Episode:
+		return ec._Episode(ctx, sel, &obj)
+	case *model.Episode:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Episode(ctx, sel, obj)
+	case model.Content:
+		return ec._Content(ctx, sel, &obj)
+	case *model.Content:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Content(ctx, sel, obj)
+	default:
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of ReviewedContent must implement graphql.Marshaler", obj))
+		}
+	}
+}
+
+func (ec *executionContext) _WatchedContent(ctx context.Context, sel ast.SelectionSet, obj model.WatchedContent) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Episode:
+		return ec._Episode(ctx, sel, &obj)
+	case *model.Episode:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Episode(ctx, sel, obj)
+	case model.Content:
+		return ec._Content(ctx, sel, &obj)
+	case *model.Content:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Content(ctx, sel, obj)
+	default:
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of WatchedContent must implement graphql.Marshaler", obj))
+		}
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
 
-var contentImplementors = []string{"Content"}
+var contentImplementors = []string{"Content", "WatchedContent", "ReviewedContent"}
 
 func (ec *executionContext) _Content(ctx context.Context, sel ast.SelectionSet, obj *model.Content) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, contentImplementors)
@@ -8483,7 +8408,7 @@ func (ec *executionContext) _Content(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Content_contentUrl(ctx, field, obj)
 		case "durationMinutes":
 			out.Values[i] = ec._Content_durationMinutes(ctx, field, obj)
-		case "movieReviews":
+		case "reviews":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -8492,7 +8417,7 @@ func (ec *executionContext) _Content(ctx context.Context, sel ast.SelectionSet, 
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Content_movieReviews(ctx, field, obj)
+				res = ec._Content_reviews(ctx, field, obj)
 				return res
 			}
 
@@ -8616,7 +8541,7 @@ func (ec *executionContext) _ContentGenre(ctx context.Context, sel ast.Selection
 	return out
 }
 
-var episodeImplementors = []string{"Episode"}
+var episodeImplementors = []string{"Episode", "WatchedContent", "ReviewedContent"}
 
 func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, obj *model.Episode) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, episodeImplementors)
@@ -9231,28 +9156,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "listEpisodes":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_listEpisodes(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "getProfile":
 			field := field
 
@@ -9263,28 +9166,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getProfile(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "listProfiles":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_listProfiles(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
 				return res
 			}
 
@@ -9560,13 +9441,44 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 		case "id":
 			out.Values[i] = ec._Review_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "profileId":
-			out.Values[i] = ec._Review_profileId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+		case "profile":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Review_profile(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "movieId":
 			out.Values[i] = ec._Review_movieId(ctx, field, obj)
 		case "episodeId":
@@ -9574,19 +9486,19 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 		case "rating":
 			out.Values[i] = ec._Review_rating(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "comment":
 			out.Values[i] = ec._Review_comment(ctx, field, obj)
 		case "createdAt":
 			out.Values[i] = ec._Review_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "updatedAt":
 			out.Values[i] = ec._Review_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -9730,13 +9642,44 @@ func (ec *executionContext) _WatchHistory(ctx context.Context, sel ast.Selection
 		case "id":
 			out.Values[i] = ec._WatchHistory_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "profileId":
-			out.Values[i] = ec._WatchHistory_profileId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+		case "profile":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._WatchHistory_profile(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "movieId":
 			out.Values[i] = ec._WatchHistory_movieId(ctx, field, obj)
 		case "episodeId":
@@ -9744,7 +9687,7 @@ func (ec *executionContext) _WatchHistory(ctx context.Context, sel ast.Selection
 		case "watchedAt":
 			out.Values[i] = ec._WatchHistory_watchedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "lastPositionSeconds":
 			out.Values[i] = ec._WatchHistory_lastPositionSeconds(ctx, field, obj)
@@ -10196,22 +10139,6 @@ func (ec *executionContext) unmarshalNCreateWatchHistoryInput2githubᚗcomᚋecb
 
 func (ec *executionContext) marshalNEpisode2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisode(ctx context.Context, sel ast.SelectionSet, v model.Episode) graphql.Marshaler {
 	return ec._Episode(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Episode) graphql.Marshaler {
-	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
-		fc := graphql.GetFieldContext(ctx)
-		fc.Result = &v[i]
-		return ec.marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisode(ctx, sel, v[i])
-	})
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalNEpisode2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisode(ctx context.Context, sel ast.SelectionSet, v *model.Episode) graphql.Marshaler {

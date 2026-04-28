@@ -9,7 +9,7 @@ type Content {
 
   contentUrl: String
   durationMinutes: Int
-  movieReviews: [Review!]
+  reviews: [Review!]
 
   episodes: [Episode!]
 }

@@ -14,8 +14,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// MovieReviews is the resolver for the movieReviews field.
-func (r *contentResolver) MovieReviews(ctx context.Context, obj *model.Content) ([]*model.Review, error) {
+// Reviews is the resolver for the reviews field.
+func (r *contentResolver) Reviews(ctx context.Context, obj *model.Content) ([]*model.Review, error) {
 	reviews, err := r.ReviewService.ListReviewsByMovie(ctx, obj.ID)
 	if err != nil {
 		r.Logger.Error("failed to list reviews", slog.Any("error", err))

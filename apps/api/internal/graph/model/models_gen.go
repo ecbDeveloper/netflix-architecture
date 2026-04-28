@@ -12,6 +12,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type ReviewedContent interface {
+	IsReviewedContent()
+}
+
+type WatchedContent interface {
+	IsWatchedContent()
+}
+
 type Content struct {
 	ID              uuid.UUID      `json:"id"`
 	Title           string         `json:"title"`
@@ -23,6 +31,10 @@ type Content struct {
 	ContentURL      *string        `json:"contentUrl,omitempty"`
 	DurationMinutes *int32         `json:"durationMinutes,omitempty"`
 }
+
+func (Content) IsWatchedContent() {}
+
+func (Content) IsReviewedContent() {}
 
 type ContentGenre struct {
 	ID          int32  `json:"id"`
@@ -87,6 +99,10 @@ type Episode struct {
 	CreatedAt       string    `json:"createdAt"`
 }
 
+func (Episode) IsWatchedContent() {}
+
+func (Episode) IsReviewedContent() {}
+
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -123,7 +139,6 @@ type RecommendedContent struct {
 
 type Review struct {
 	ID        uuid.UUID  `json:"id"`
-	ProfileID uuid.UUID  `json:"profileId"`
 	MovieID   *uuid.UUID `json:"movieId,omitempty"`
 	EpisodeID *uuid.UUID `json:"episodeId,omitempty"`
 	Rating    int32      `json:"rating"`
@@ -185,7 +200,6 @@ type User struct {
 
 type WatchHistory struct {
 	ID                  uuid.UUID  `json:"id"`
-	ProfileID           uuid.UUID  `json:"profileId"`
 	MovieID             *uuid.UUID `json:"movieId,omitempty"`
 	EpisodeID           *uuid.UUID `json:"episodeId,omitempty"`
 	WatchedAt           string     `json:"watchedAt"`
