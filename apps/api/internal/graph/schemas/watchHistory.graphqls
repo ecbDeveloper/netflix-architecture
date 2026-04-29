@@ -1,8 +1,7 @@
 type WatchHistory {
   id: ID!
   profile: Profile!
-  movieId: ID
-  episodeId: ID
+  content: WatchedContent!
   watchedAt: String!
   lastPositionSeconds: Int
   isCompleted: Boolean

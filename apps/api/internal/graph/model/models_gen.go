@@ -12,6 +12,10 @@ import (
 	"github.com/google/uuid"
 )
 
+type ReviewedContent interface {
+	IsReviewedContent()
+}
+
 type WatchedContent interface {
 	IsWatchedContent()
 }
@@ -29,6 +33,8 @@ type Content struct {
 }
 
 func (Content) IsWatchedContent() {}
+
+func (Content) IsReviewedContent() {}
 
 type ContentGenre struct {
 	ID          int32  `json:"id"`
@@ -95,6 +101,8 @@ type Episode struct {
 
 func (Episode) IsWatchedContent() {}
 
+func (Episode) IsReviewedContent() {}
+
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -135,6 +143,10 @@ type Review struct {
 	Comment   *string   `json:"comment,omitempty"`
 	CreatedAt string    `json:"createdAt"`
 	UpdatedAt string    `json:"updatedAt"`
+	// episode ID, used by content field resolver
+	EpisodeID uuid.UUID `json:"-"`
+	// movie ID, used by content field resolver
+	MovieID uuid.UUID `json:"-"`
 }
 
 type UpdateContentInput struct {
@@ -189,12 +201,14 @@ type User struct {
 }
 
 type WatchHistory struct {
-	ID                  uuid.UUID  `json:"id"`
-	MovieID             *uuid.UUID `json:"movieId,omitempty"`
-	EpisodeID           *uuid.UUID `json:"episodeId,omitempty"`
-	WatchedAt           string     `json:"watchedAt"`
-	LastPositionSeconds *int32     `json:"lastPositionSeconds,omitempty"`
-	IsCompleted         *bool      `json:"isCompleted,omitempty"`
+	ID                  uuid.UUID `json:"id"`
+	WatchedAt           string    `json:"watchedAt"`
+	LastPositionSeconds *int32    `json:"lastPositionSeconds,omitempty"`
+	IsCompleted         *bool     `json:"isCompleted,omitempty"`
+	// episode ID, used by content field resolver
+	EpisodeID uuid.UUID `json:"-"`
+	// movie ID, used by content field resolver
+	MovieID uuid.UUID `json:"-"`
 }
 
 type ContentType string

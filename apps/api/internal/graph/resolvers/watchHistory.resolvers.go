@@ -9,6 +9,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
@@ -234,6 +235,43 @@ func (r *watchHistoryResolver) Profile(ctx context.Context, obj *model.WatchHist
 	}
 
 	return profile, nil
+}
+
+// Content is the resolver for the content field.
+func (r *watchHistoryResolver) Content(ctx context.Context, obj *model.WatchHistory) (model.WatchedContent, error) {
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	userID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get user id", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	if obj.EpisodeID != uuid.Nil {
+		episode, err := r.EpisodeService.GetEpisode(ctx, obj.EpisodeID, profileID, userID)
+		if err != nil {
+			r.Logger.Error("failed to get episode", slog.Any("error", err))
+			return nil, handleError(err)
+		}
+
+		return episode, nil
+	}
+
+	if obj.MovieID != uuid.Nil {
+		content, err := r.ContentService.GetContent(ctx, obj.MovieID, profileID, userID)
+		if err != nil {
+			r.Logger.Error("failed to get content", slog.Any("error", err))
+			return nil, handleError(err)
+		}
+
+		return content, nil
+	}
+
+	return nil, handleError(&apperror.UnprocessableEntityError{Message: "it was not possible to find the watched content"})
 }
 
 // WatchHistory returns graph.WatchHistoryResolver implementation.

@@ -23,3 +23,4 @@ type ContentGenre {
 }
 
 union WatchedContent = Content | Episode
+union ReviewedContent = Content | Episode

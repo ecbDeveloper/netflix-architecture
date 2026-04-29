@@ -9,6 +9,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/google/uuid"
@@ -97,6 +98,43 @@ func (r *reviewResolver) Profile(ctx context.Context, obj *model.Review) (*model
 	}
 
 	return profile, nil
+}
+
+// Content is the resolver for the content field.
+func (r *reviewResolver) Content(ctx context.Context, obj *model.Review) (model.ReviewedContent, error) {
+	profileID, err := r.getProfileIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get profile id", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	userID, err := r.getUserIDFromSession(ctx)
+	if err != nil {
+		r.Logger.Error("failed to get user id", slog.Any("error", err))
+		return nil, handleError(err)
+	}
+
+	if obj.EpisodeID != uuid.Nil {
+		episode, err := r.EpisodeService.GetEpisode(ctx, obj.EpisodeID, profileID, userID)
+		if err != nil {
+			r.Logger.Error("failed to get episode", slog.Any("error", err))
+			return nil, handleError(err)
+		}
+
+		return episode, nil
+	}
+
+	if obj.MovieID != uuid.Nil {
+		content, err := r.ContentService.GetContent(ctx, obj.MovieID, profileID, userID)
+		if err != nil {
+			r.Logger.Error("failed to get content", slog.Any("error", err))
+			return nil, handleError(err)
+		}
+
+		return content, nil
+	}
+
+	return nil, handleError(&apperror.UnprocessableEntityError{Message: "it was not possible to find the reviewed content"})
 }
 
 // Review returns graph.ReviewResolver implementation.

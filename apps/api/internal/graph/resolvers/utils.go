@@ -55,11 +55,11 @@ func protoToWatchHistory(resp *historypb.WatchHistoryResponse) *model.WatchHisto
 
 	if resp.MovieId != nil {
 		movieID, _ := uuid.Parse(*resp.MovieId)
-		wh.MovieID = &movieID
+		wh.MovieID = movieID
 	}
 	if resp.EpisodeId != nil {
 		episodeID, _ := uuid.Parse(*resp.EpisodeId)
-		wh.EpisodeID = &episodeID
+		wh.EpisodeID = episodeID
 	}
 
 	lps := resp.LastPositionSeconds

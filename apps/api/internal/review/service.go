@@ -210,6 +210,13 @@ func toGraphQLModel(r sqlc.Review) *model.Review {
 		Rating: r.Rating,
 	}
 
+	if r.EpisodeID.Valid {
+		m.EpisodeID = r.EpisodeID.Bytes
+	}
+	if r.MovieID.Valid {
+		m.MovieID = r.MovieID.Bytes
+	}
+
 	if r.Comment.Valid {
 		m.Comment = &r.Comment.String
 	}

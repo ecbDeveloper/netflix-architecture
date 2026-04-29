@@ -215,10 +215,27 @@ models:
       reviews:
         resolver: true
   Review:
+    extraFields:
+      MovieID:
+        type: "github.com/google/uuid.UUID"
+        description: "movie ID, used by content field resolver"
+      EpisodeID:
+        type: "github.com/google/uuid.UUID"
+        description: "episode ID, used by content field resolver"
     fields:
       profile:
         resolver: true
+      content:
+        resolver: true
+
   WatchHistory:
+    extraFields:
+      MovieID:
+        type: "github.com/google/uuid.UUID"
+        description: "movie ID, used by content field resolver"
+      EpisodeID:
+        type: "github.com/google/uuid.UUID"
+        description: "episode ID, used by content field resolver"
     fields:
-      profile:
+      content:
         resolver: true
