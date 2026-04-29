@@ -138,13 +138,11 @@ type RecommendedContent struct {
 }
 
 type Review struct {
-	ID        uuid.UUID  `json:"id"`
-	MovieID   *uuid.UUID `json:"movieId,omitempty"`
-	EpisodeID *uuid.UUID `json:"episodeId,omitempty"`
-	Rating    int32      `json:"rating"`
-	Comment   *string    `json:"comment,omitempty"`
-	CreatedAt string     `json:"createdAt"`
-	UpdatedAt string     `json:"updatedAt"`
+	ID        uuid.UUID `json:"id"`
+	Rating    int32     `json:"rating"`
+	Comment   *string   `json:"comment,omitempty"`
+	CreatedAt string    `json:"createdAt"`
+	UpdatedAt string    `json:"updatedAt"`
 }
 
 type UpdateContentInput struct {

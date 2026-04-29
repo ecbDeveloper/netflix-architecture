@@ -146,9 +146,7 @@ type ComplexityRoot struct {
 	Review struct {
 		Comment   func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
-		EpisodeID func(childComplexity int) int
 		ID        func(childComplexity int) int
-		MovieID   func(childComplexity int) int
 		Profile   func(childComplexity int) int
 		Rating    func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
@@ -864,24 +862,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Review.CreatedAt(childComplexity), true
-	case "Review.episodeId":
-		if e.ComplexityRoot.Review.EpisodeID == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Review.EpisodeID(childComplexity), true
 	case "Review.id":
 		if e.ComplexityRoot.Review.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Review.ID(childComplexity), true
-	case "Review.movieId":
-		if e.ComplexityRoot.Review.MovieID == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Review.MovieID(childComplexity), true
 	case "Review.profile":
 		if e.ComplexityRoot.Review.Profile == nil {
 			break
@@ -1849,10 +1835,6 @@ func (ec *executionContext) fieldContext_Content_reviews(_ context.Context, fiel
 				return ec.fieldContext_Review_id(ctx, field)
 			case "profile":
 				return ec.fieldContext_Review_profile(ctx, field)
-			case "movieId":
-				return ec.fieldContext_Review_movieId(ctx, field)
-			case "episodeId":
-				return ec.fieldContext_Review_episodeId(ctx, field)
 			case "rating":
 				return ec.fieldContext_Review_rating(ctx, field)
 			case "comment":
@@ -2235,10 +2217,6 @@ func (ec *executionContext) fieldContext_Episode_reviews(_ context.Context, fiel
 				return ec.fieldContext_Review_id(ctx, field)
 			case "profile":
 				return ec.fieldContext_Review_profile(ctx, field)
-			case "movieId":
-				return ec.fieldContext_Review_movieId(ctx, field)
-			case "episodeId":
-				return ec.fieldContext_Review_episodeId(ctx, field)
 			case "rating":
 				return ec.fieldContext_Review_rating(ctx, field)
 			case "comment":
@@ -3262,10 +3240,6 @@ func (ec *executionContext) fieldContext_Mutation_createReview(ctx context.Conte
 				return ec.fieldContext_Review_id(ctx, field)
 			case "profile":
 				return ec.fieldContext_Review_profile(ctx, field)
-			case "movieId":
-				return ec.fieldContext_Review_movieId(ctx, field)
-			case "episodeId":
-				return ec.fieldContext_Review_episodeId(ctx, field)
 			case "rating":
 				return ec.fieldContext_Review_rating(ctx, field)
 			case "comment":
@@ -3353,10 +3327,6 @@ func (ec *executionContext) fieldContext_Mutation_updateReview(ctx context.Conte
 				return ec.fieldContext_Review_id(ctx, field)
 			case "profile":
 				return ec.fieldContext_Review_profile(ctx, field)
-			case "movieId":
-				return ec.fieldContext_Review_movieId(ctx, field)
-			case "episodeId":
-				return ec.fieldContext_Review_episodeId(ctx, field)
 			case "rating":
 				return ec.fieldContext_Review_rating(ctx, field)
 			case "comment":
@@ -4094,10 +4064,6 @@ func (ec *executionContext) fieldContext_Profile_reviews(_ context.Context, fiel
 				return ec.fieldContext_Review_id(ctx, field)
 			case "profile":
 				return ec.fieldContext_Review_profile(ctx, field)
-			case "movieId":
-				return ec.fieldContext_Review_movieId(ctx, field)
-			case "episodeId":
-				return ec.fieldContext_Review_episodeId(ctx, field)
 			case "rating":
 				return ec.fieldContext_Review_rating(ctx, field)
 			case "comment":
@@ -4700,10 +4666,6 @@ func (ec *executionContext) fieldContext_Query_getReview(ctx context.Context, fi
 				return ec.fieldContext_Review_id(ctx, field)
 			case "profile":
 				return ec.fieldContext_Review_profile(ctx, field)
-			case "movieId":
-				return ec.fieldContext_Review_movieId(ctx, field)
-			case "episodeId":
-				return ec.fieldContext_Review_episodeId(ctx, field)
 			case "rating":
 				return ec.fieldContext_Review_rating(ctx, field)
 			case "comment":
@@ -5523,64 +5485,6 @@ func (ec *executionContext) fieldContext_Review_profile(_ context.Context, field
 				return ec.fieldContext_Profile_watchHistories(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Review_movieId(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Review_movieId,
-		func(ctx context.Context) (any, error) {
-			return obj.MovieID, nil
-		},
-		nil,
-		ec.marshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Review_movieId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Review",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Review_episodeId(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Review_episodeId,
-		func(ctx context.Context) (any, error) {
-			return obj.EpisodeID, nil
-		},
-		nil,
-		ec.marshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Review_episodeId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Review",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -9479,10 +9383,6 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "movieId":
-			out.Values[i] = ec._Review_movieId(ctx, field, obj)
-		case "episodeId":
-			out.Values[i] = ec._Review_episodeId(ctx, field, obj)
 		case "rating":
 			out.Values[i] = ec._Review_rating(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
