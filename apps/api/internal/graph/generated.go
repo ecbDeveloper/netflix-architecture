@@ -168,7 +168,6 @@ type ComplexityRoot struct {
 		ID                  func(childComplexity int) int
 		IsCompleted         func(childComplexity int) int
 		LastPositionSeconds func(childComplexity int) int
-		Profile             func(childComplexity int) int
 		WatchedAt           func(childComplexity int) int
 	}
 }
@@ -230,7 +229,6 @@ type UserResolver interface {
 	Profiles(ctx context.Context, obj *model.User) ([]*model.Profile, error)
 }
 type WatchHistoryResolver interface {
-	Profile(ctx context.Context, obj *model.WatchHistory) (*model.Profile, error)
 	Content(ctx context.Context, obj *model.WatchHistory) (model.WatchedContent, error)
 }
 
@@ -960,12 +958,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.WatchHistory.LastPositionSeconds(childComplexity), true
-	case "WatchHistory.profile":
-		if e.ComplexityRoot.WatchHistory.Profile == nil {
-			break
-		}
-
-		return e.ComplexityRoot.WatchHistory.Profile(childComplexity), true
 	case "WatchHistory.watchedAt":
 		if e.ComplexityRoot.WatchHistory.WatchedAt == nil {
 			break
@@ -3672,8 +3664,6 @@ func (ec *executionContext) fieldContext_Mutation_createWatchHistory(ctx context
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profile":
-				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "content":
 				return ec.fieldContext_WatchHistory_content(ctx, field)
 			case "watchedAt":
@@ -3759,8 +3749,6 @@ func (ec *executionContext) fieldContext_Mutation_updateWatchHistory(ctx context
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profile":
-				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "content":
 				return ec.fieldContext_WatchHistory_content(ctx, field)
 			case "watchedAt":
@@ -4105,8 +4093,6 @@ func (ec *executionContext) fieldContext_Profile_watchHistories(_ context.Contex
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profile":
-				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "content":
 				return ec.fieldContext_WatchHistory_content(ctx, field)
 			case "watchedAt":
@@ -4883,8 +4869,6 @@ func (ec *executionContext) fieldContext_Query_getWatchHistory(ctx context.Conte
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profile":
-				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "content":
 				return ec.fieldContext_WatchHistory_content(ctx, field)
 			case "watchedAt":
@@ -5022,8 +5006,6 @@ func (ec *executionContext) fieldContext_Query_recentlyWatchedContents(ctx conte
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profile":
-				return ec.fieldContext_WatchHistory_profile(ctx, field)
 			case "content":
 				return ec.fieldContext_WatchHistory_content(ctx, field)
 			case "watchedAt":
@@ -5840,53 +5822,6 @@ func (ec *executionContext) fieldContext_WatchHistory_id(_ context.Context, fiel
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _WatchHistory_profile(ctx context.Context, field graphql.CollectedField, obj *model.WatchHistory) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_WatchHistory_profile,
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.WatchHistory().Profile(ctx, obj)
-		},
-		nil,
-		ec.marshalNProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_WatchHistory_profile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "WatchHistory",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Profile_id(ctx, field)
-			case "userId":
-				return ec.fieldContext_Profile_userId(ctx, field)
-			case "name":
-				return ec.fieldContext_Profile_name(ctx, field)
-			case "hasParentalControls":
-				return ec.fieldContext_Profile_hasParentalControls(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Profile_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Profile_updatedAt(ctx, field)
-			case "reviews":
-				return ec.fieldContext_Profile_reviews(ctx, field)
-			case "watchHistories":
-				return ec.fieldContext_Profile_watchHistories(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
 	}
 	return fc, nil
@@ -9489,42 +9424,6 @@ func (ec *executionContext) _WatchHistory(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "profile":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._WatchHistory_profile(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "content":
 			field := field
 

@@ -214,29 +214,6 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 	return result, nil
 }
 
-// Profile is the resolver for the profile field.
-func (r *watchHistoryResolver) Profile(ctx context.Context, obj *model.WatchHistory) (*model.Profile, error) {
-	profileID, err := r.getProfileIDFromSession(ctx)
-	if err != nil {
-		r.Logger.Error("failed to get profile id", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	userID, err := r.getUserIDFromSession(ctx)
-	if err != nil {
-		r.Logger.Error("failed to get user id", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	profile, err := r.ProfileService.GetProfile(ctx, profileID, userID)
-	if err != nil {
-		r.Logger.Error("failed to get profile %v: %w", profileID, err)
-		return nil, handleError(err)
-	}
-
-	return profile, nil
-}
-
 // Content is the resolver for the content field.
 func (r *watchHistoryResolver) Content(ctx context.Context, obj *model.WatchHistory) (model.WatchedContent, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)

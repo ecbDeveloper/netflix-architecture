@@ -1,6 +1,5 @@
 type WatchHistory {
   id: ID!
-  profile: Profile!
   content: WatchedContent!
   watchedAt: String!
   lastPositionSeconds: Int
