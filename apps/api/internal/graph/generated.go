@@ -181,7 +181,7 @@ type EpisodeResolver interface {
 	Reviews(ctx context.Context, obj *model.Episode) ([]*model.Review, error)
 }
 type MutationResolver interface {
-	Login(ctx context.Context, input *model.LoginInput) (string, error)
+	Login(ctx context.Context, input *model.LoginInput) (uuid.UUID, error)
 	Logout(ctx context.Context) (string, error)
 	CreateContent(ctx context.Context, input model.CreateContentInput) (uuid.UUID, error)
 	UpdateContent(ctx context.Context, id uuid.UUID, input model.UpdateContentInput) (*model.Content, error)
@@ -2357,7 +2357,7 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 			return ec.Resolvers.Mutation().Login(ctx, fc.Args["input"].(*model.LoginInput))
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
 		true,
 		true,
 	)
@@ -2370,7 +2370,7 @@ func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, fie
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	defer func() {

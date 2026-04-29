@@ -13,31 +13,32 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
+	"github.com/google/uuid"
 )
 
 // Login is the resolver for the login field.
-func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (string, error) {
+func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (uuid.UUID, error) {
 	user, err := r.AuthService.Login(ctx, input)
 	if err != nil {
 		var validationErr *apperror.ValidationError
 		if errors.As(err, &validationErr) {
-			return "", handleError(err)
+			return uuid.Nil, handleError(err)
 		}
 
 		r.Logger.Error("failed to make login", slog.Any("error", err))
-		return "", ErrInvalidEmailOrPassword
+		return uuid.Nil, ErrInvalidEmailOrPassword
 	}
 
 	err = r.Sessions.RenewToken(ctx)
 	if err != nil {
 		r.Logger.Error("failed to renew user token", slog.Any("error", err))
-		return "", handleError(err)
+		return uuid.Nil, handleError(err)
 	}
 
 	r.Sessions.Put(ctx, shared.SessionUserIDKey, user.ID)
 	r.Sessions.Put(ctx, shared.SessionRoleIDKey, user.RoleID)
 
-	return "user authenticated successfully", nil
+	return user.ID, nil
 }
 
 // Logout is the resolver for the logout field.

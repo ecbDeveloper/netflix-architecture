@@ -13,6 +13,6 @@ input LoginInput {
 }
 
 extend type Mutation {
-  login(input: LoginInput): String!
+  login(input: LoginInput): ID!
   logout: String! @auth
 }
