@@ -12,10 +12,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type ReviewedContent interface {
-	IsReviewedContent()
-}
-
 type WatchedContent interface {
 	IsWatchedContent()
 }
@@ -33,8 +29,6 @@ type Content struct {
 }
 
 func (Content) IsWatchedContent() {}
-
-func (Content) IsReviewedContent() {}
 
 type ContentGenre struct {
 	ID          int32  `json:"id"`
@@ -100,8 +94,6 @@ type Episode struct {
 }
 
 func (Episode) IsWatchedContent() {}
-
-func (Episode) IsReviewedContent() {}
 
 type LoginInput struct {
 	Email    string `json:"email"`

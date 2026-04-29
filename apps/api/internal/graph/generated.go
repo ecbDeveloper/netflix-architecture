@@ -8131,33 +8131,6 @@ func (ec *executionContext) unmarshalInputUpdateWatchHistoryInput(ctx context.Co
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _ReviewedContent(ctx context.Context, sel ast.SelectionSet, obj model.ReviewedContent) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.Episode:
-		return ec._Episode(ctx, sel, &obj)
-	case *model.Episode:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Episode(ctx, sel, obj)
-	case model.Content:
-		return ec._Content(ctx, sel, &obj)
-	case *model.Content:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Content(ctx, sel, obj)
-	default:
-		if typedObj, ok := obj.(graphql.Marshaler); ok {
-			return typedObj
-		} else {
-			panic(fmt.Errorf("unexpected type %T; non-generated variants of ReviewedContent must implement graphql.Marshaler", obj))
-		}
-	}
-}
-
 func (ec *executionContext) _WatchedContent(ctx context.Context, sel ast.SelectionSet, obj model.WatchedContent) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -8189,7 +8162,7 @@ func (ec *executionContext) _WatchedContent(ctx context.Context, sel ast.Selecti
 
 // region    **************************** object.gotpl ****************************
 
-var contentImplementors = []string{"Content", "WatchedContent", "ReviewedContent"}
+var contentImplementors = []string{"Content", "WatchedContent"}
 
 func (ec *executionContext) _Content(ctx context.Context, sel ast.SelectionSet, obj *model.Content) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, contentImplementors)
@@ -8372,7 +8345,7 @@ func (ec *executionContext) _ContentGenre(ctx context.Context, sel ast.Selection
 	return out
 }
 
-var episodeImplementors = []string{"Episode", "WatchedContent", "ReviewedContent"}
+var episodeImplementors = []string{"Episode", "WatchedContent"}
 
 func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, obj *model.Episode) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, episodeImplementors)
