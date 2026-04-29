@@ -131,7 +131,6 @@ type ComplexityRoot struct {
 		ListContentsByGenre     func(childComplexity int, genreID int32) int
 		ListContentsByType      func(childComplexity int, contentType model.ContentType) int
 		ListUsers               func(childComplexity int) int
-		ListWatchHistories      func(childComplexity int) int
 		MostWatchedContents     func(childComplexity int, limit *int32) int
 		RecentlyWatchedContents func(childComplexity int, limit *int32) int
 	}
@@ -219,7 +218,6 @@ type QueryResolver interface {
 	GetUser(ctx context.Context, id uuid.UUID) (*model.User, error)
 	ListUsers(ctx context.Context) ([]*model.User, error)
 	GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error)
-	ListWatchHistories(ctx context.Context) ([]*model.WatchHistory, error)
 	MostWatchedContents(ctx context.Context, limit *int32) ([]*model.MostWatchedContent, error)
 	RecentlyWatchedContents(ctx context.Context, limit *int32) ([]*model.WatchHistory, error)
 	GetRecommendations(ctx context.Context, limit *int32) ([]*model.RecommendedContent, error)
@@ -796,12 +794,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.ListUsers(childComplexity), true
-	case "Query.listWatchHistories":
-		if e.ComplexityRoot.Query.ListWatchHistories == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Query.ListWatchHistories(childComplexity), true
 	case "Query.mostWatchedContents":
 		if e.ComplexityRoot.Query.MostWatchedContents == nil {
 			break
@@ -4909,71 +4901,6 @@ func (ec *executionContext) fieldContext_Query_getWatchHistory(ctx context.Conte
 	if fc.Args, err = ec.field_Query_getWatchHistory_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_listWatchHistories(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_listWatchHistories,
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Query().ListWatchHistories(ctx)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.ProfileSelectionIsRequired == nil {
-					var zeroVal []*model.WatchHistory
-					return zeroVal, errors.New("directive profileSelectionIsRequired is not implemented")
-				}
-				return ec.Directives.ProfileSelectionIsRequired(ctx, nil, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.WatchHistory
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive1)
-			}
-
-			next = directive2
-			return next
-		},
-		ec.marshalNWatchHistory2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐWatchHistoryᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_listWatchHistories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_WatchHistory_id(ctx, field)
-			case "profile":
-				return ec.fieldContext_WatchHistory_profile(ctx, field)
-			case "movieId":
-				return ec.fieldContext_WatchHistory_movieId(ctx, field)
-			case "episodeId":
-				return ec.fieldContext_WatchHistory_episodeId(ctx, field)
-			case "watchedAt":
-				return ec.fieldContext_WatchHistory_watchedAt(ctx, field)
-			case "lastPositionSeconds":
-				return ec.fieldContext_WatchHistory_lastPositionSeconds(ctx, field)
-			case "isCompleted":
-				return ec.fieldContext_WatchHistory_isCompleted(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type WatchHistory", field.Name)
-		},
 	}
 	return fc, nil
 }
@@ -9149,28 +9076,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getWatchHistory(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "listWatchHistories":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_listWatchHistories(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
 				return res
 			}
 

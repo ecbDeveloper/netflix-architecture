@@ -38,7 +38,6 @@ input UpdateWatchHistoryInput {
 
 extend type Query {
   getWatchHistory(id: ID!): WatchHistory @profileSelectionIsRequired @auth
-  listWatchHistories: [WatchHistory!]! @profileSelectionIsRequired @auth
   mostWatchedContents(limit: Int): [MostWatchedContent!]! @auth
   recentlyWatchedContents(limit: Int): [WatchHistory!]! @profileSelectionIsRequired @auth
   getRecommendations(limit: Int): [RecommendedContent!]! @profileSelectionIsRequired @auth

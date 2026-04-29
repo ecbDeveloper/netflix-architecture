@@ -121,29 +121,6 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*mod
 	return protoToWatchHistory(resp), nil
 }
 
-// ListWatchHistories is the resolver for the listWatchHistories field.
-func (r *queryResolver) ListWatchHistories(ctx context.Context) ([]*model.WatchHistory, error) {
-	profileID, err := r.getProfileIDFromSession(ctx)
-	if err != nil {
-		r.Logger.Error("failed to get profile id to list watch histories", slog.Any("error", err))
-		return nil, handleError(err)
-	}
-
-	resp, err := r.HistoryClient.ListWatchHistory(ctx, &historypb.ListWatchHistoryRequest{
-		ProfileId: profileID.String(),
-	})
-	if err != nil {
-		r.Logger.Error("failed to list watch histories via grpc", slog.Any("error", err))
-		return nil, handleGRPCError(err)
-	}
-
-	result := make([]*model.WatchHistory, len(resp.Histories))
-	for i, h := range resp.Histories {
-		result[i] = protoToWatchHistory(h)
-	}
-	return result, nil
-}
-
 // MostWatchedContents is the resolver for the mostWatchedContents field.
 func (r *queryResolver) MostWatchedContents(ctx context.Context, limit *int32) ([]*model.MostWatchedContent, error) {
 	var l int32 = 10
