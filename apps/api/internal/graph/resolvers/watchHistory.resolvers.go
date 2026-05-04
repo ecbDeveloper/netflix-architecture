@@ -17,37 +17,38 @@ import (
 	"github.com/google/uuid"
 )
 
-// CreateWatchHistory is the resolver for the createWatchHistory field.
-func (r *mutationResolver) CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
+// RecordWatchHistory is the resolver for the recordWatchHistory field.
+func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
 		r.Logger.Error("failed to get profile id to create watch history", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
-	req := &historypb.RecordWatchRequest{
+	reqBody := &historypb.RecordWatchHistoryRequest{
 		ProfileId: profileID.String(),
+		GenreId:   *input.GenreID,
 	}
 
 	if input.MovieID != nil {
 		movieStr := input.MovieID.String()
-		req.MovieId = &movieStr
-	}
-	if input.EpisodeID != nil {
-		episodeStr := input.EpisodeID.String()
-		req.EpisodeId = &episodeStr
-	}
-	if input.LastPositionSeconds != nil {
-		req.LastPositionSeconds = input.LastPositionSeconds
-	}
-	if input.IsCompleted != nil {
-		req.IsCompleted = input.IsCompleted
-	}
-	if input.GenreID != nil {
-		req.GenreId = input.GenreID
+		reqBody.MovieId = &movieStr
 	}
 
-	resp, err := r.HistoryClient.RecordWatch(ctx, req)
+	if input.EpisodeID != nil {
+		episodeStr := input.EpisodeID.String()
+		reqBody.EpisodeId = &episodeStr
+	}
+
+	if input.LastPositionSeconds != nil {
+		reqBody.LastPositionSeconds = input.LastPositionSeconds
+	}
+
+	if input.IsCompleted != nil {
+		reqBody.IsCompleted = input.IsCompleted
+	}
+
+	resp, err := r.HistoryClient.RecordWatchHistory(ctx, reqBody)
 	if err != nil {
 		r.Logger.Error("failed to create watch history via grpc", slog.Any("error", err))
 		return nil, handleGRPCError(err)
@@ -58,24 +59,25 @@ func (r *mutationResolver) CreateWatchHistory(ctx context.Context, input model.C
 
 // UpdateWatchHistory is the resolver for the updateWatchHistory field.
 func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
-	_, err := r.getProfileIDFromSession(ctx)
+	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
 		r.Logger.Error("failed to get profile id to update watch history", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
-	req := &historypb.UpdateWatchProgressRequest{
-		Id: id.String(),
+	reqBody := &historypb.UpdateWatchProgressRequest{
+		Id:        id.String(),
+		ProfileId: profileID.String(),
 	}
 
 	if input.LastPositionSeconds != nil {
-		req.LastPositionSeconds = input.LastPositionSeconds
+		reqBody.LastPositionSeconds = input.LastPositionSeconds
 	}
 	if input.IsCompleted != nil {
-		req.IsCompleted = input.IsCompleted
+		reqBody.IsCompleted = input.IsCompleted
 	}
 
-	resp, err := r.HistoryClient.UpdateWatchProgress(ctx, req)
+	resp, err := r.HistoryClient.UpdateWatchProgress(ctx, reqBody)
 	if err != nil {
 		r.Logger.Error("failed to update watch history via grpc", slog.Any("error", err))
 		return nil, handleGRPCError(err)
@@ -86,15 +88,18 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID,
 
 // DeleteWatchHistory is the resolver for the deleteWatchHistory field.
 func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID) (bool, error) {
-	_, err := r.getProfileIDFromSession(ctx)
+	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
 		r.Logger.Error("failed to get profile id to delete watch history", slog.Any("error", err))
 		return false, handleError(err)
 	}
 
-	_, err = r.HistoryClient.DeleteWatchHistory(ctx, &historypb.DeleteWatchHistoryRequest{
-		Id: id.String(),
-	})
+	reqBody := &historypb.DeleteWatchHistoryRequest{
+		Id:        id.String(),
+		ProfileId: profileID.String(),
+	}
+
+	_, err = r.HistoryClient.DeleteWatchHistory(ctx, reqBody)
 	if err != nil {
 		r.Logger.Error("failed to delete watch history via grpc", slog.Any("error", err))
 		return false, handleGRPCError(err)
@@ -105,15 +110,18 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID)
 
 // GetWatchHistory is the resolver for the getWatchHistory field.
 func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error) {
-	_, err := r.getProfileIDFromSession(ctx)
+	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
 		r.Logger.Error("failed to get profile id to get one watch history", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
-	resp, err := r.HistoryClient.GetWatchHistory(ctx, &historypb.GetWatchHistoryRequest{
-		Id: id.String(),
-	})
+	reqBody := &historypb.GetWatchHistoryRequest{
+		Id:        id.String(),
+		ProfileId: profileID.String(),
+	}
+
+	resp, err := r.HistoryClient.GetWatchHistory(ctx, reqBody)
 	if err != nil {
 		r.Logger.Error("failed to get watch history via grpc", slog.Any("error", err))
 		return nil, handleGRPCError(err)
@@ -123,15 +131,23 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*mod
 }
 
 // MostWatchedContents is the resolver for the mostWatchedContents field.
-func (r *queryResolver) MostWatchedContents(ctx context.Context, limit *int32) ([]*model.MostWatchedContent, error) {
-	var l int32 = 10
-	if limit != nil {
-		l = *limit
+func (r *queryResolver) MostWatchedContents(ctx context.Context, input *model.PaginationInput) ([]*model.MostWatchedContent, error) {
+	var limit int32 = 10
+	if input.Limit != nil {
+		limit = *input.Limit
 	}
 
-	resp, err := r.HistoryClient.GetMostWatched(ctx, &historypb.GetMostWatchedRequest{
-		Limit: l,
-	})
+	var offset int32 = 0
+	if input.Offset != nil {
+		offset = *input.Offset
+	}
+
+	reqBody := &historypb.GetMostWatchedRequest{
+		Limit:  limit,
+		Offset: offset,
+	}
+
+	resp, err := r.HistoryClient.GetMostWatched(ctx, reqBody)
 	if err != nil {
 		r.Logger.Error("failed to get most watched via grpc", slog.Any("error", err))
 		return nil, handleGRPCError(err)
@@ -151,22 +167,30 @@ func (r *queryResolver) MostWatchedContents(ctx context.Context, limit *int32) (
 }
 
 // RecentlyWatchedContents is the resolver for the recentlyWatchedContents field.
-func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, limit *int32) ([]*model.WatchHistory, error) {
+func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, input *model.PaginationInput) ([]*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
 		r.Logger.Error("failed to get profile id for recently watched", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
-	var l int32 = 10
-	if limit != nil {
-		l = *limit
+	var limit int32 = 10
+	if input.Limit != nil {
+		limit = *input.Limit
 	}
 
-	resp, err := r.HistoryClient.GetRecentlyWatched(ctx, &historypb.GetRecentlyWatchedRequest{
+	var offset int32 = 0
+	if input.Offset != nil {
+		offset = *input.Offset
+	}
+
+	reqBody := &historypb.GetRecentlyWatchedRequest{
 		ProfileId: profileID.String(),
-		Limit:     l,
-	})
+		Limit:     limit,
+		Offset:    offset,
+	}
+
+	resp, err := r.HistoryClient.GetRecentlyWatched(ctx, reqBody)
 	if err != nil {
 		r.Logger.Error("failed to get recently watched via grpc", slog.Any("error", err))
 		return nil, handleGRPCError(err)
@@ -192,10 +216,12 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 		l = *limit
 	}
 
-	resp, err := r.RecommendationClient.GetRecommendations(ctx, &recommendationpb.GetRecommendationsRequest{
+	reqBody := &recommendationpb.GetRecommendationsRequest{
 		ProfileId: profileID.String(),
 		Limit:     l,
-	})
+	}
+
+	resp, err := r.RecommendationClient.GetRecommendations(ctx, reqBody)
 	if err != nil {
 		r.Logger.Error("failed to get recommendations via grpc", slog.Any("error", err))
 		return nil, handleGRPCError(err)

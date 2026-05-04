@@ -90,7 +90,6 @@ type ComplexityRoot struct {
 		CreateProfile      func(childComplexity int, input model.CreateProfileInput) int
 		CreateReview       func(childComplexity int, input model.CreateReviewInput) int
 		CreateUser         func(childComplexity int, input model.CreateUserInput) int
-		CreateWatchHistory func(childComplexity int, input model.CreateWatchHistoryInput) int
 		DeleteContent      func(childComplexity int, id uuid.UUID) int
 		DeleteEpisode      func(childComplexity int, id uuid.UUID) int
 		DeleteProfile      func(childComplexity int, id uuid.UUID) int
@@ -99,6 +98,7 @@ type ComplexityRoot struct {
 		DeleteWatchHistory func(childComplexity int, id uuid.UUID) int
 		Login              func(childComplexity int, input *model.LoginInput) int
 		Logout             func(childComplexity int) int
+		RecordWatchHistory func(childComplexity int, input model.CreateWatchHistoryInput) int
 		SelectProfile      func(childComplexity int, id uuid.UUID) int
 		UpdateContent      func(childComplexity int, id uuid.UUID, input model.UpdateContentInput) int
 		UpdateEpisode      func(childComplexity int, id uuid.UUID, input model.UpdateEpisodeInput) int
@@ -131,8 +131,8 @@ type ComplexityRoot struct {
 		ListContentsByGenre     func(childComplexity int, genreID int32) int
 		ListContentsByType      func(childComplexity int, contentType model.ContentType) int
 		ListUsers               func(childComplexity int) int
-		MostWatchedContents     func(childComplexity int, limit *int32) int
-		RecentlyWatchedContents func(childComplexity int, limit *int32) int
+		MostWatchedContents     func(childComplexity int, input *model.PaginationInput) int
+		RecentlyWatchedContents func(childComplexity int, input *model.PaginationInput) int
 	}
 
 	RecommendedContent struct {
@@ -198,7 +198,7 @@ type MutationResolver interface {
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error)
 	UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) (bool, error)
-	CreateWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error)
+	RecordWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error)
 	UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error)
 	DeleteWatchHistory(ctx context.Context, id uuid.UUID) (bool, error)
 }
@@ -217,8 +217,8 @@ type QueryResolver interface {
 	GetUser(ctx context.Context, id uuid.UUID) (*model.User, error)
 	ListUsers(ctx context.Context) ([]*model.User, error)
 	GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error)
-	MostWatchedContents(ctx context.Context, limit *int32) ([]*model.MostWatchedContent, error)
-	RecentlyWatchedContents(ctx context.Context, limit *int32) ([]*model.WatchHistory, error)
+	MostWatchedContents(ctx context.Context, input *model.PaginationInput) ([]*model.MostWatchedContent, error)
+	RecentlyWatchedContents(ctx context.Context, input *model.PaginationInput) ([]*model.WatchHistory, error)
 	GetRecommendations(ctx context.Context, limit *int32) ([]*model.RecommendedContent, error)
 }
 type ReviewResolver interface {
@@ -461,17 +461,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CreateUser(childComplexity, args["input"].(model.CreateUserInput)), true
-	case "Mutation.createWatchHistory":
-		if e.ComplexityRoot.Mutation.CreateWatchHistory == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createWatchHistory_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Mutation.CreateWatchHistory(childComplexity, args["input"].(model.CreateWatchHistoryInput)), true
 	case "Mutation.deleteContent":
 		if e.ComplexityRoot.Mutation.DeleteContent == nil {
 			break
@@ -555,6 +544,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.Logout(childComplexity), true
+	case "Mutation.recordWatchHistory":
+		if e.ComplexityRoot.Mutation.RecordWatchHistory == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_recordWatchHistory_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.RecordWatchHistory(childComplexity, args["input"].(model.CreateWatchHistoryInput)), true
 	case "Mutation.selectProfile":
 		if e.ComplexityRoot.Mutation.SelectProfile == nil {
 			break
@@ -804,7 +804,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.MostWatchedContents(childComplexity, args["limit"].(*int32)), true
+		return e.ComplexityRoot.Query.MostWatchedContents(childComplexity, args["input"].(*model.PaginationInput)), true
 	case "Query.recentlyWatchedContents":
 		if e.ComplexityRoot.Query.RecentlyWatchedContents == nil {
 			break
@@ -815,7 +815,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.RecentlyWatchedContents(childComplexity, args["limit"].(*int32)), true
+		return e.ComplexityRoot.Query.RecentlyWatchedContents(childComplexity, args["input"].(*model.PaginationInput)), true
 
 	case "RecommendedContent.contentId":
 		if e.ComplexityRoot.RecommendedContent.ContentID == nil {
@@ -980,6 +980,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateUserInput,
 		ec.unmarshalInputCreateWatchHistoryInput,
 		ec.unmarshalInputLoginInput,
+		ec.unmarshalInputPaginationInput,
 		ec.unmarshalInputUpdateContentInput,
 		ec.unmarshalInputUpdateEpisodeInput,
 		ec.unmarshalInputUpdateProfileInput,
@@ -1153,17 +1154,6 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createWatchHistory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateWatchHistoryInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateWatchHistoryInput)
-	if err != nil {
-		return nil, err
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_deleteContent_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1234,6 +1224,17 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOLoginInput2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐLoginInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_recordWatchHistory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateWatchHistoryInput2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐCreateWatchHistoryInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1461,22 +1462,22 @@ func (ec *executionContext) field_Query_listContentsByType_args(ctx context.Cont
 func (ec *executionContext) field_Query_mostWatchedContents_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint32)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOPaginationInput2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐPaginationInput)
 	if err != nil {
 		return nil, err
 	}
-	args["limit"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
 func (ec *executionContext) field_Query_recentlyWatchedContents_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint32)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOPaginationInput2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐPaginationInput)
 	if err != nil {
 		return nil, err
 	}
-	args["limit"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -3605,15 +3606,15 @@ func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_createWatchHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_recordWatchHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_createWatchHistory,
+		ec.fieldContext_Mutation_recordWatchHistory,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().CreateWatchHistory(ctx, fc.Args["input"].(model.CreateWatchHistoryInput))
+			return ec.Resolvers.Mutation().RecordWatchHistory(ctx, fc.Args["input"].(model.CreateWatchHistoryInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -3654,7 +3655,7 @@ func (ec *executionContext) _Mutation_createWatchHistory(ctx context.Context, fi
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_createWatchHistory(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_recordWatchHistory(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -3683,7 +3684,7 @@ func (ec *executionContext) fieldContext_Mutation_createWatchHistory(ctx context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createWatchHistory_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_recordWatchHistory_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4903,7 +4904,7 @@ func (ec *executionContext) _Query_mostWatchedContents(ctx context.Context, fiel
 		ec.fieldContext_Query_mostWatchedContents,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().MostWatchedContents(ctx, fc.Args["limit"].(*int32))
+			return ec.Resolvers.Query().MostWatchedContents(ctx, fc.Args["input"].(*model.PaginationInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -4967,7 +4968,7 @@ func (ec *executionContext) _Query_recentlyWatchedContents(ctx context.Context, 
 		ec.fieldContext_Query_recentlyWatchedContents,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().RecentlyWatchedContents(ctx, fc.Args["limit"].(*int32))
+			return ec.Resolvers.Query().RecentlyWatchedContents(ctx, fc.Args["input"].(*model.PaginationInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -7767,6 +7768,43 @@ func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj an
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputPaginationInput(ctx context.Context, obj any) (model.PaginationInput, error) {
+	var it model.PaginationInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"limit", "offset"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "limit":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Limit = data
+		case "offset":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Offset = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateContentInput(ctx context.Context, obj any) (model.UpdateContentInput, error) {
 	var it model.UpdateContentInput
 	if obj == nil {
@@ -8620,9 +8658,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "createWatchHistory":
+		case "recordWatchHistory":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createWatchHistory(ctx, field)
+				return ec._Mutation_recordWatchHistory(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -10504,6 +10542,14 @@ func (ec *executionContext) marshalOMaturityRating2ᚖgithubᚗcomᚋecbDevelope
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) unmarshalOPaginationInput2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐPaginationInput(ctx context.Context, v any) (*model.PaginationInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPaginationInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOProfile2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v *model.Profile) graphql.Marshaler {

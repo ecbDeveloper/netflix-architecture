@@ -118,6 +118,11 @@ type MostWatchedContent struct {
 type Mutation struct {
 }
 
+type PaginationInput struct {
+	Limit  *int32 `json:"limit,omitempty"`
+	Offset *int32 `json:"offset,omitempty"`
+}
+
 type Profile struct {
 	ID                  uuid.UUID `json:"id"`
 	UserID              uuid.UUID `json:"userId"`

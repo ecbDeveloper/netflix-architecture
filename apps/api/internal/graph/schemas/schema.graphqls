@@ -22,5 +22,11 @@ type ContentGenre {
   description: String!
 }
 
+input PaginationInput {
+  limit: Int
+  offset: Int
+}
+
 union WatchedContent = Content | Episode
 union ReviewedContent = Content | Episode
+
