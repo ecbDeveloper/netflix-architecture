@@ -50,7 +50,7 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 
 	resp, err := r.HistoryClient.RecordWatchHistory(ctx, reqBody)
 	if err != nil {
-		r.Logger.Error("failed to create watch history via grpc", slog.Any("error", err))
+		r.Logger.Error("failed to record watch history via grpc", slog.Any("error", err))
 		return nil, handleGRPCError(err)
 	}
 

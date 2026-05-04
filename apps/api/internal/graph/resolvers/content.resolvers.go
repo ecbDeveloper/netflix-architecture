@@ -52,6 +52,7 @@ func (r *contentResolver) Episodes(ctx context.Context, obj *model.Content) ([]*
 func (r *mutationResolver) CreateContent(ctx context.Context, input model.CreateContentInput) (uuid.UUID, error) {
 	contentID, err := r.ContentService.CreateContent(ctx, input)
 	if err != nil {
+		r.Logger.Error("failed to create content", slog.Any("error", err))
 		return uuid.Nil, handleError(err)
 	}
 
@@ -62,6 +63,7 @@ func (r *mutationResolver) CreateContent(ctx context.Context, input model.Create
 func (r *mutationResolver) UpdateContent(ctx context.Context, id uuid.UUID, input model.UpdateContentInput) (*model.Content, error) {
 	updatedContent, err := r.ContentService.UpdateContent(ctx, id, input)
 	if err != nil {
+		r.Logger.Error("failed to update content", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
@@ -72,6 +74,7 @@ func (r *mutationResolver) UpdateContent(ctx context.Context, id uuid.UUID, inpu
 func (r *mutationResolver) DeleteContent(ctx context.Context, id uuid.UUID) (bool, error) {
 	err := r.ContentService.DeleteContent(ctx, id)
 	if err != nil {
+		r.Logger.Error("failed to delete content", slog.Any("error", err))
 		return false, handleError(err)
 	}
 
@@ -94,6 +97,7 @@ func (r *queryResolver) GetContent(ctx context.Context, id uuid.UUID) (*model.Co
 
 	content, err := r.ContentService.GetContent(ctx, id, profileID, userID)
 	if err != nil {
+		r.Logger.Error("failed to get content", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
@@ -116,6 +120,7 @@ func (r *queryResolver) ListContents(ctx context.Context) ([]*model.Content, err
 
 	contents, err := r.ContentService.ListContents(ctx, profileID, userID)
 	if err != nil {
+		r.Logger.Error("failed to get list contents", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
@@ -138,6 +143,7 @@ func (r *queryResolver) ListContentsByType(ctx context.Context, contentType mode
 
 	contents, err := r.ContentService.ListContentsByType(ctx, profileID, userID, contentType)
 	if err != nil {
+		r.Logger.Error("failed to get list contents by type", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
@@ -160,6 +166,7 @@ func (r *queryResolver) ListContentsByGenre(ctx context.Context, genreID int32) 
 
 	contents, err := r.ContentService.ListContentsByGenre(ctx, profileID, userID, genreID)
 	if err != nil {
+		r.Logger.Error("failed to get list contents by genre", slog.Any("error", err))
 		return nil, handleError(err)
 	}
 
