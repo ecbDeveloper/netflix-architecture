@@ -1,30 +1,30 @@
 syntax = "proto3";
 
 package history;
-
 option go_package = "github.com/ecbDeveloper/netflix-architecture/proto/history";
 
 service HistoryService {
-  rpc RecordWatch(RecordWatchRequest) returns (WatchHistoryResponse);
+  rpc RecordWatchHistory(RecordWatchHistoryRequest) returns (WatchHistoryResponse);
   rpc GetWatchHistory(GetWatchHistoryRequest) returns (WatchHistoryResponse);
+  rpc GetMostWatched(GetMostWatchedRequest) returns (MostWatchedResponse);
+  rpc GetRecentlyWatched(GetRecentlyWatchedRequest) returns (ListWatchHistoryResponse);
   rpc ListWatchHistory(ListWatchHistoryRequest) returns (ListWatchHistoryResponse);
   rpc UpdateWatchProgress(UpdateWatchProgressRequest) returns (WatchHistoryResponse);
   rpc DeleteWatchHistory(DeleteWatchHistoryRequest) returns (DeleteWatchHistoryResponse);
-  rpc GetMostWatched(GetMostWatchedRequest) returns (MostWatchedResponse);
-  rpc GetRecentlyWatched(GetRecentlyWatchedRequest) returns (ListWatchHistoryResponse);
 }
 
-message RecordWatchRequest {
+message RecordWatchHistoryRequest {
   string profile_id = 1;
-  optional string movie_id = 2;
-  optional string episode_id = 3;
-  optional int32 last_position_seconds = 4;
-  optional bool is_completed = 5;
-  optional int32 genre_id = 6;
+  int32 genre_id = 2;
+  optional string movie_id = 3;
+  optional string episode_id = 4;
+  optional int32 last_position_seconds = 5;
+  optional bool is_completed = 6;
 }
 
 message GetWatchHistoryRequest {
   string id = 1;
+  string profile_id = 2;
 }
 
 message ListWatchHistoryRequest {
@@ -33,12 +33,14 @@ message ListWatchHistoryRequest {
 
 message UpdateWatchProgressRequest {
   string id = 1;
-  optional int32 last_position_seconds = 2;
-  optional bool is_completed = 3;
+  string profile_id = 2;
+  optional int32 last_position_seconds = 3;
+  optional bool is_completed = 4;
 }
 
 message DeleteWatchHistoryRequest {
   string id = 1;
+  string profile_id = 2;
 }
 
 message DeleteWatchHistoryResponse {
@@ -62,6 +64,7 @@ message ListWatchHistoryResponse {
 
 message GetMostWatchedRequest {
   int32 limit = 1;
+  int32 offset = 2;
 }
 
 message MostWatchedItem {
@@ -78,6 +81,7 @@ message MostWatchedResponse {
 message GetRecentlyWatchedRequest {
   string profile_id = 1;
   int32 limit = 2;
+  int32 offset = 3;
 }
 
 enum contentType {

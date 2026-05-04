@@ -19,26 +19,26 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	HistoryService_RecordWatch_FullMethodName         = "/history.HistoryService/RecordWatch"
+	HistoryService_RecordWatchHistory_FullMethodName  = "/history.HistoryService/RecordWatchHistory"
 	HistoryService_GetWatchHistory_FullMethodName     = "/history.HistoryService/GetWatchHistory"
+	HistoryService_GetMostWatched_FullMethodName      = "/history.HistoryService/GetMostWatched"
+	HistoryService_GetRecentlyWatched_FullMethodName  = "/history.HistoryService/GetRecentlyWatched"
 	HistoryService_ListWatchHistory_FullMethodName    = "/history.HistoryService/ListWatchHistory"
 	HistoryService_UpdateWatchProgress_FullMethodName = "/history.HistoryService/UpdateWatchProgress"
 	HistoryService_DeleteWatchHistory_FullMethodName  = "/history.HistoryService/DeleteWatchHistory"
-	HistoryService_GetMostWatched_FullMethodName      = "/history.HistoryService/GetMostWatched"
-	HistoryService_GetRecentlyWatched_FullMethodName  = "/history.HistoryService/GetRecentlyWatched"
 )
 
 // HistoryServiceClient is the client API for HistoryService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HistoryServiceClient interface {
-	RecordWatch(ctx context.Context, in *RecordWatchRequest, opts ...grpc.CallOption) (*WatchHistoryResponse, error)
+	RecordWatchHistory(ctx context.Context, in *RecordWatchHistoryRequest, opts ...grpc.CallOption) (*WatchHistoryResponse, error)
 	GetWatchHistory(ctx context.Context, in *GetWatchHistoryRequest, opts ...grpc.CallOption) (*WatchHistoryResponse, error)
+	GetMostWatched(ctx context.Context, in *GetMostWatchedRequest, opts ...grpc.CallOption) (*MostWatchedResponse, error)
+	GetRecentlyWatched(ctx context.Context, in *GetRecentlyWatchedRequest, opts ...grpc.CallOption) (*ListWatchHistoryResponse, error)
 	ListWatchHistory(ctx context.Context, in *ListWatchHistoryRequest, opts ...grpc.CallOption) (*ListWatchHistoryResponse, error)
 	UpdateWatchProgress(ctx context.Context, in *UpdateWatchProgressRequest, opts ...grpc.CallOption) (*WatchHistoryResponse, error)
 	DeleteWatchHistory(ctx context.Context, in *DeleteWatchHistoryRequest, opts ...grpc.CallOption) (*DeleteWatchHistoryResponse, error)
-	GetMostWatched(ctx context.Context, in *GetMostWatchedRequest, opts ...grpc.CallOption) (*MostWatchedResponse, error)
-	GetRecentlyWatched(ctx context.Context, in *GetRecentlyWatchedRequest, opts ...grpc.CallOption) (*ListWatchHistoryResponse, error)
 }
 
 type historyServiceClient struct {
@@ -49,10 +49,10 @@ func NewHistoryServiceClient(cc grpc.ClientConnInterface) HistoryServiceClient {
 	return &historyServiceClient{cc}
 }
 
-func (c *historyServiceClient) RecordWatch(ctx context.Context, in *RecordWatchRequest, opts ...grpc.CallOption) (*WatchHistoryResponse, error) {
+func (c *historyServiceClient) RecordWatchHistory(ctx context.Context, in *RecordWatchHistoryRequest, opts ...grpc.CallOption) (*WatchHistoryResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(WatchHistoryResponse)
-	err := c.cc.Invoke(ctx, HistoryService_RecordWatch_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, HistoryService_RecordWatchHistory_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +63,26 @@ func (c *historyServiceClient) GetWatchHistory(ctx context.Context, in *GetWatch
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(WatchHistoryResponse)
 	err := c.cc.Invoke(ctx, HistoryService_GetWatchHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *historyServiceClient) GetMostWatched(ctx context.Context, in *GetMostWatchedRequest, opts ...grpc.CallOption) (*MostWatchedResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MostWatchedResponse)
+	err := c.cc.Invoke(ctx, HistoryService_GetMostWatched_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *historyServiceClient) GetRecentlyWatched(ctx context.Context, in *GetRecentlyWatchedRequest, opts ...grpc.CallOption) (*ListWatchHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListWatchHistoryResponse)
+	err := c.cc.Invoke(ctx, HistoryService_GetRecentlyWatched_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,37 +119,17 @@ func (c *historyServiceClient) DeleteWatchHistory(ctx context.Context, in *Delet
 	return out, nil
 }
 
-func (c *historyServiceClient) GetMostWatched(ctx context.Context, in *GetMostWatchedRequest, opts ...grpc.CallOption) (*MostWatchedResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(MostWatchedResponse)
-	err := c.cc.Invoke(ctx, HistoryService_GetMostWatched_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *historyServiceClient) GetRecentlyWatched(ctx context.Context, in *GetRecentlyWatchedRequest, opts ...grpc.CallOption) (*ListWatchHistoryResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListWatchHistoryResponse)
-	err := c.cc.Invoke(ctx, HistoryService_GetRecentlyWatched_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // HistoryServiceServer is the server API for HistoryService service.
 // All implementations must embed UnimplementedHistoryServiceServer
 // for forward compatibility.
 type HistoryServiceServer interface {
-	RecordWatch(context.Context, *RecordWatchRequest) (*WatchHistoryResponse, error)
+	RecordWatchHistory(context.Context, *RecordWatchHistoryRequest) (*WatchHistoryResponse, error)
 	GetWatchHistory(context.Context, *GetWatchHistoryRequest) (*WatchHistoryResponse, error)
+	GetMostWatched(context.Context, *GetMostWatchedRequest) (*MostWatchedResponse, error)
+	GetRecentlyWatched(context.Context, *GetRecentlyWatchedRequest) (*ListWatchHistoryResponse, error)
 	ListWatchHistory(context.Context, *ListWatchHistoryRequest) (*ListWatchHistoryResponse, error)
 	UpdateWatchProgress(context.Context, *UpdateWatchProgressRequest) (*WatchHistoryResponse, error)
 	DeleteWatchHistory(context.Context, *DeleteWatchHistoryRequest) (*DeleteWatchHistoryResponse, error)
-	GetMostWatched(context.Context, *GetMostWatchedRequest) (*MostWatchedResponse, error)
-	GetRecentlyWatched(context.Context, *GetRecentlyWatchedRequest) (*ListWatchHistoryResponse, error)
 	mustEmbedUnimplementedHistoryServiceServer()
 }
 
@@ -140,11 +140,17 @@ type HistoryServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedHistoryServiceServer struct{}
 
-func (UnimplementedHistoryServiceServer) RecordWatch(context.Context, *RecordWatchRequest) (*WatchHistoryResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method RecordWatch not implemented")
+func (UnimplementedHistoryServiceServer) RecordWatchHistory(context.Context, *RecordWatchHistoryRequest) (*WatchHistoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RecordWatchHistory not implemented")
 }
 func (UnimplementedHistoryServiceServer) GetWatchHistory(context.Context, *GetWatchHistoryRequest) (*WatchHistoryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetWatchHistory not implemented")
+}
+func (UnimplementedHistoryServiceServer) GetMostWatched(context.Context, *GetMostWatchedRequest) (*MostWatchedResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMostWatched not implemented")
+}
+func (UnimplementedHistoryServiceServer) GetRecentlyWatched(context.Context, *GetRecentlyWatchedRequest) (*ListWatchHistoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetRecentlyWatched not implemented")
 }
 func (UnimplementedHistoryServiceServer) ListWatchHistory(context.Context, *ListWatchHistoryRequest) (*ListWatchHistoryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListWatchHistory not implemented")
@@ -154,12 +160,6 @@ func (UnimplementedHistoryServiceServer) UpdateWatchProgress(context.Context, *U
 }
 func (UnimplementedHistoryServiceServer) DeleteWatchHistory(context.Context, *DeleteWatchHistoryRequest) (*DeleteWatchHistoryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteWatchHistory not implemented")
-}
-func (UnimplementedHistoryServiceServer) GetMostWatched(context.Context, *GetMostWatchedRequest) (*MostWatchedResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetMostWatched not implemented")
-}
-func (UnimplementedHistoryServiceServer) GetRecentlyWatched(context.Context, *GetRecentlyWatchedRequest) (*ListWatchHistoryResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetRecentlyWatched not implemented")
 }
 func (UnimplementedHistoryServiceServer) mustEmbedUnimplementedHistoryServiceServer() {}
 func (UnimplementedHistoryServiceServer) testEmbeddedByValue()                        {}
@@ -182,20 +182,20 @@ func RegisterHistoryServiceServer(s grpc.ServiceRegistrar, srv HistoryServiceSer
 	s.RegisterService(&HistoryService_ServiceDesc, srv)
 }
 
-func _HistoryService_RecordWatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RecordWatchRequest)
+func _HistoryService_RecordWatchHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecordWatchHistoryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HistoryServiceServer).RecordWatch(ctx, in)
+		return srv.(HistoryServiceServer).RecordWatchHistory(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: HistoryService_RecordWatch_FullMethodName,
+		FullMethod: HistoryService_RecordWatchHistory_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HistoryServiceServer).RecordWatch(ctx, req.(*RecordWatchRequest))
+		return srv.(HistoryServiceServer).RecordWatchHistory(ctx, req.(*RecordWatchHistoryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -214,6 +214,42 @@ func _HistoryService_GetWatchHistory_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryServiceServer).GetWatchHistory(ctx, req.(*GetWatchHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _HistoryService_GetMostWatched_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMostWatchedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HistoryServiceServer).GetMostWatched(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: HistoryService_GetMostWatched_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HistoryServiceServer).GetMostWatched(ctx, req.(*GetMostWatchedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _HistoryService_GetRecentlyWatched_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRecentlyWatchedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HistoryServiceServer).GetRecentlyWatched(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: HistoryService_GetRecentlyWatched_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HistoryServiceServer).GetRecentlyWatched(ctx, req.(*GetRecentlyWatchedRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -272,42 +308,6 @@ func _HistoryService_DeleteWatchHistory_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _HistoryService_GetMostWatched_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMostWatchedRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HistoryServiceServer).GetMostWatched(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: HistoryService_GetMostWatched_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HistoryServiceServer).GetMostWatched(ctx, req.(*GetMostWatchedRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _HistoryService_GetRecentlyWatched_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRecentlyWatchedRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HistoryServiceServer).GetRecentlyWatched(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: HistoryService_GetRecentlyWatched_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HistoryServiceServer).GetRecentlyWatched(ctx, req.(*GetRecentlyWatchedRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // HistoryService_ServiceDesc is the grpc.ServiceDesc for HistoryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -316,12 +316,20 @@ var HistoryService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*HistoryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "RecordWatch",
-			Handler:    _HistoryService_RecordWatch_Handler,
+			MethodName: "RecordWatchHistory",
+			Handler:    _HistoryService_RecordWatchHistory_Handler,
 		},
 		{
 			MethodName: "GetWatchHistory",
 			Handler:    _HistoryService_GetWatchHistory_Handler,
+		},
+		{
+			MethodName: "GetMostWatched",
+			Handler:    _HistoryService_GetMostWatched_Handler,
+		},
+		{
+			MethodName: "GetRecentlyWatched",
+			Handler:    _HistoryService_GetRecentlyWatched_Handler,
 		},
 		{
 			MethodName: "ListWatchHistory",
@@ -334,14 +342,6 @@ var HistoryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteWatchHistory",
 			Handler:    _HistoryService_DeleteWatchHistory_Handler,
-		},
-		{
-			MethodName: "GetMostWatched",
-			Handler:    _HistoryService_GetMostWatched_Handler,
-		},
-		{
-			MethodName: "GetRecentlyWatched",
-			Handler:    _HistoryService_GetRecentlyWatched_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

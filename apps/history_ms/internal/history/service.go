@@ -25,7 +25,7 @@ func NewServer(queries *sqlc.Queries) pb.HistoryServiceServer {
 	}
 }
 
-func (s *Server) RecordWatch(ctx context.Context, req *pb.RecordWatchRequest) (*pb.WatchHistoryResponse, error) {
+func (s *Server) RecordWatch(ctx context.Context, req *pb.RecordWatchHistoryRequest) (*pb.WatchHistoryResponse, error) {
 	if req.MovieId == nil && req.EpisodeId == nil {
 		return nil, status.Error(codes.InvalidArgument, "movie_id or episode_id is required")
 	}
@@ -69,10 +69,6 @@ func (s *Server) RecordWatch(ctx context.Context, req *pb.RecordWatchRequest) (*
 		params.IsCompleted = pgtype.Bool{Bool: *req.IsCompleted, Valid: true}
 	}
 
-	if req.GenreId != nil {
-		params.GenreID = pgtype.Int4{Int32: *req.GenreId, Valid: true}
-	}
-
 	wh, err := s.queries.CreateWatchHistory(ctx, params)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to insert watch history: %v", err)
@@ -87,12 +83,21 @@ func (s *Server) GetWatchHistory(ctx context.Context, req *pb.GetWatchHistoryReq
 		return nil, status.Error(codes.InvalidArgument, "invalid id")
 	}
 
+	profileID, err := uuid.Parse(req.ProfileId)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid profile_id")
+	}
+
 	wh, err := s.queries.GetWatchHistory(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, status.Error(codes.NotFound, "watch history not found")
 		}
 		return nil, status.Errorf(codes.Internal, "failed to fetch watch history: %v", err)
+	}
+
+	if wh.ProfileID != profileID {
+		return nil, status.Error(codes.PermissionDenied, "you can't see watch history from others profiles")
 	}
 
 	return toProto(wh), nil
@@ -123,12 +128,21 @@ func (s *Server) UpdateWatchProgress(ctx context.Context, req *pb.UpdateWatchPro
 		return nil, status.Error(codes.InvalidArgument, "invalid id")
 	}
 
+	profileID, err := uuid.Parse(req.ProfileId)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid profile_id")
+	}
+
 	current, err := s.queries.GetWatchHistory(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, status.Error(codes.NotFound, "watch history not found")
 		}
 		return nil, status.Errorf(codes.Internal, "failed to get watch history: %v", err)
+	}
+
+	if current.ProfileID != profileID {
+		return nil, status.Error(codes.PermissionDenied, "you can't see watch history from others profiles")
 	}
 
 	params := sqlc.UpdateWatchProgressParams{
@@ -158,12 +172,21 @@ func (s *Server) DeleteWatchHistory(ctx context.Context, req *pb.DeleteWatchHist
 		return nil, status.Error(codes.InvalidArgument, "invalid id")
 	}
 
-	_, err = s.queries.GetWatchHistory(ctx, id)
+	profileID, err := uuid.Parse(req.ProfileId)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid profile_id")
+	}
+
+	wh, err := s.queries.GetWatchHistory(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, status.Error(codes.NotFound, "watch history not found")
 		}
 		return nil, status.Errorf(codes.Internal, "failed to fetch watch history: %v", err)
+	}
+
+	if wh.ProfileID != profileID {
+		return nil, status.Error(codes.PermissionDenied, "you can't see watch history from others profiles")
 	}
 
 	if err := s.queries.DeleteWatchHistory(ctx, id); err != nil {

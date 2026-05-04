@@ -39,6 +39,12 @@ func main() {
 	}
 	defer pool.Close()
 
+	listener, err := net.Listen("tcp", ":"+grpcPort)
+	if err != nil {
+		logger.Error("failed to listen", slog.Any("error", err))
+		os.Exit(1)
+	}
+
 	queries := sqlc.New(pool)
 	server := history.NewServer(queries)
 	grpcServer := grpc.NewServer()
@@ -46,12 +52,6 @@ func main() {
 
 	if os.Getenv("ENV") == "development" {
 		reflection.Register(grpcServer)
-	}
-
-	listener, err := net.Listen("tcp", ":"+grpcPort)
-	if err != nil {
-		logger.Error("failed to listen", slog.Any("error", err))
-		os.Exit(1)
 	}
 
 	logger.Info("history microservice started", slog.String("port", grpcPort))
