@@ -128,6 +128,10 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 
 	err = qtx.CreateContent(ctx, createContentParams)
 	if err != nil {
+		if apperror.IsUniqueViolation(err) {
+			field := apperror.UniqueViolationField(err)
+			return uuid.Nil, &apperror.ConflictError{Field: field}
+		}
 		return uuid.Nil, fmt.Errorf("failed to insert content on database: %w", err)
 	}
 
@@ -265,6 +269,10 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 
 	content, err := qtx.UpdateContent(ctx, updateContentParams)
 	if err != nil {
+		if apperror.IsUniqueViolation(err) {
+			field := apperror.UniqueViolationField(err)
+			return nil, &apperror.ConflictError{Field: field}
+		}
 		return nil, fmt.Errorf("failed to update content on database: %w", err)
 	}
 
