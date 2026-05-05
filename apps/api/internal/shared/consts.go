@@ -7,4 +7,5 @@ const (
 
 	DBRoleAdmin  int32 = 1
 	DBRoleMember int32 = 2
+	MaturityRatingPrefix = "RATING_"
 )

@@ -11,6 +11,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -122,7 +123,7 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 		Title:          input.Title,
 		Description:    input.Description,
 		ReleaseDate:    date,
-		MaturityRating: sqlc.MaturityRating(input.MaturityRating),
+		MaturityRating: graphQLToDBMaturityRating(input.MaturityRating),
 	}
 
 	err = qtx.CreateContent(ctx, createContentParams)
@@ -255,7 +256,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 	}
 
 	if input.MaturityRating != nil {
-		updateContentParams.MaturityRating = sqlc.MaturityRating(*input.MaturityRating)
+		updateContentParams.MaturityRating = graphQLToDBMaturityRating(*input.MaturityRating)
 	}
 
 	if input.GenreID != nil {
@@ -517,4 +518,11 @@ func toGraphQlModel(c sqlc.Content, contentURL *string, durationMinutes *int32) 
 		ContentURL:      contentURL,
 		DurationMinutes: durationMinutes,
 	}
+}
+
+func graphQLToDBMaturityRating(maturityRating model.MaturityRating) sqlc.MaturityRating {
+	prefix := shared.MaturityRatingPrefix
+	normalizedMaturityRating := strings.TrimPrefix(maturityRating.String(), prefix)
+
+	return sqlc.MaturityRating(normalizedMaturityRating)
 }
