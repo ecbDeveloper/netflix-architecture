@@ -409,7 +409,18 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, use
 
 	result := make([]*model.Content, len(contents))
 	for i, content := range contents {
-		result[i] = toGraphQlModel(content, nil, nil)
+		if content.ContentType == sqlc.ContentTypeMOVIE {
+			movie, err := s.queries.GetMovie(ctx, content.ID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get movie from database: %w", err)
+			}
+
+			result[i] = toGraphQlModel(content, &movie.ContentUrl, &movie.DurationMinutes)
+		}
+
+		if content.ContentType == sqlc.ContentTypeSERIES {
+			result[i] = toGraphQlModel(content, nil, nil)
+		}
 	}
 
 	return result, nil
@@ -436,7 +447,18 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 
 	result := make([]*model.Content, len(contents))
 	for i, content := range contents {
-		result[i] = toGraphQlModel(content, nil, nil)
+		if content.ContentType == sqlc.ContentTypeMOVIE {
+			movie, err := s.queries.GetMovie(ctx, content.ID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get movie from database: %w", err)
+			}
+
+			result[i] = toGraphQlModel(content, &movie.ContentUrl, &movie.DurationMinutes)
+		}
+
+		if content.ContentType == sqlc.ContentTypeSERIES {
+			result[i] = toGraphQlModel(content, nil, nil)
+		}
 	}
 
 	return result, nil
@@ -480,7 +502,18 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 
 	result := make([]*model.Content, len(contents))
 	for i, content := range contents {
-		result[i] = toGraphQlModel(content, nil, nil)
+		if content.ContentType == sqlc.ContentTypeMOVIE {
+			movie, err := s.queries.GetMovie(ctx, content.ID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get movie from database: %w", err)
+			}
+
+			result[i] = toGraphQlModel(content, &movie.ContentUrl, &movie.DurationMinutes)
+		}
+
+		if content.ContentType == sqlc.ContentTypeSERIES {
+			result[i] = toGraphQlModel(content, nil, nil)
+		}
 	}
 
 	return result, nil
