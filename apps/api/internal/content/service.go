@@ -328,6 +328,10 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 		go s.storage.DeleteFile(context.Background(), oldURL)
 	}
 
+	if content.ContentType == sqlc.ContentTypeMOVIE {
+		return toGraphQlModel(content, &currentMovie.ContentUrl, &currentMovie.DurationMinutes), nil
+	}
+
 	return toGraphQlModel(content, nil, nil), nil
 }
 
