@@ -7,3 +7,6 @@
 
 # tmp folder
 **/tmp
+
+# storage folder
+**/.storage
