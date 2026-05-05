@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"path"
+
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 )
 
 type Service interface {
@@ -24,6 +26,10 @@ func NewService(uploadPath string) Service {
 }
 
 func (s *ServiceImpl) Upload(ctx context.Context, fileName string, file io.Reader) (string, error) {
+	if err := os.MkdirAll(s.uploadPath, shared.StorageFolderPermission); err != nil {
+		return "", fmt.Errorf("failed to create directory: %w", err)
+	}
+
 	contentURL := path.Join(s.uploadPath, fileName)
 
 	dst, err := os.Create(contentURL)
