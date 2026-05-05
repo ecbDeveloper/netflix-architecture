@@ -8,7 +8,6 @@ package resolvers
 import (
 	"context"
 	"errors"
-	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
@@ -22,17 +21,15 @@ func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (
 	if err != nil {
 		var validationErr *apperror.ValidationError
 		if errors.As(err, &validationErr) {
-			return uuid.Nil, handleError(err)
+			return uuid.Nil, r.handleError(err)
 		}
 
-		r.Logger.Error("failed to make login", slog.Any("error", err))
 		return uuid.Nil, ErrInvalidEmailOrPassword
 	}
 
 	err = r.Sessions.RenewToken(ctx)
 	if err != nil {
-		r.Logger.Error("failed to renew user token", slog.Any("error", err))
-		return uuid.Nil, handleError(err)
+		return uuid.Nil, r.handleError(err)
 	}
 
 	r.Sessions.Put(ctx, shared.SessionUserIDKey, user.ID)
@@ -48,8 +45,7 @@ func (r *mutationResolver) Logout(ctx context.Context) (string, error) {
 	}
 
 	if err := r.Sessions.Destroy(ctx); err != nil {
-		r.Logger.Error("failed to destroy session", slog.Any("error", err))
-		return "", handleError(err)
+		return "", r.handleError(err)
 	}
 
 	return "user successfully logged out", nil

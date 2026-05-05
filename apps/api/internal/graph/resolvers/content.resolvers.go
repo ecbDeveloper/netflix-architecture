@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
@@ -18,8 +17,7 @@ import (
 func (r *contentResolver) Reviews(ctx context.Context, obj *model.Content) ([]*model.Review, error) {
 	reviews, err := r.ReviewService.ListReviewsByMovie(ctx, obj.ID)
 	if err != nil {
-		r.Logger.Error("failed to list reviews", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return reviews, nil
@@ -29,20 +27,17 @@ func (r *contentResolver) Reviews(ctx context.Context, obj *model.Content) ([]*m
 func (r *contentResolver) Episodes(ctx context.Context, obj *model.Content) ([]*model.Episode, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	reviews, err := r.EpisodeService.ListEpisodesBySeries(ctx, obj.ID, profileID, userID)
 	if err != nil {
-		r.Logger.Error("failed to list reviews", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return reviews, nil
@@ -52,8 +47,7 @@ func (r *contentResolver) Episodes(ctx context.Context, obj *model.Content) ([]*
 func (r *mutationResolver) CreateContent(ctx context.Context, input model.CreateContentInput) (uuid.UUID, error) {
 	contentID, err := r.ContentService.CreateContent(ctx, input)
 	if err != nil {
-		r.Logger.Error("failed to create content", slog.Any("error", err))
-		return uuid.Nil, handleError(err)
+		return uuid.Nil, r.handleError(err)
 	}
 
 	return contentID, nil
@@ -63,8 +57,7 @@ func (r *mutationResolver) CreateContent(ctx context.Context, input model.Create
 func (r *mutationResolver) UpdateContent(ctx context.Context, id uuid.UUID, input model.UpdateContentInput) (*model.Content, error) {
 	updatedContent, err := r.ContentService.UpdateContent(ctx, id, input)
 	if err != nil {
-		r.Logger.Error("failed to update content", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return updatedContent, nil
@@ -74,8 +67,7 @@ func (r *mutationResolver) UpdateContent(ctx context.Context, id uuid.UUID, inpu
 func (r *mutationResolver) DeleteContent(ctx context.Context, id uuid.UUID) (bool, error) {
 	err := r.ContentService.DeleteContent(ctx, id)
 	if err != nil {
-		r.Logger.Error("failed to delete content", slog.Any("error", err))
-		return false, handleError(err)
+		return false, r.handleError(err)
 	}
 
 	return true, nil
@@ -85,20 +77,17 @@ func (r *mutationResolver) DeleteContent(ctx context.Context, id uuid.UUID) (boo
 func (r *queryResolver) GetContent(ctx context.Context, id uuid.UUID) (*model.Content, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	content, err := r.ContentService.GetContent(ctx, id, profileID, userID)
 	if err != nil {
-		r.Logger.Error("failed to get content", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return content, nil
@@ -108,20 +97,17 @@ func (r *queryResolver) GetContent(ctx context.Context, id uuid.UUID) (*model.Co
 func (r *queryResolver) ListContents(ctx context.Context) ([]*model.Content, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	contents, err := r.ContentService.ListContents(ctx, profileID, userID)
 	if err != nil {
-		r.Logger.Error("failed to get list contents", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return contents, nil
@@ -131,20 +117,17 @@ func (r *queryResolver) ListContents(ctx context.Context) ([]*model.Content, err
 func (r *queryResolver) ListContentsByType(ctx context.Context, contentType model.ContentType) ([]*model.Content, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	contents, err := r.ContentService.ListContentsByType(ctx, profileID, userID, contentType)
 	if err != nil {
-		r.Logger.Error("failed to get list contents by type", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return contents, nil
@@ -154,20 +137,17 @@ func (r *queryResolver) ListContentsByType(ctx context.Context, contentType mode
 func (r *queryResolver) ListContentsByGenre(ctx context.Context, genreID int32) ([]*model.Content, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to list episodes", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	contents, err := r.ContentService.ListContentsByGenre(ctx, profileID, userID, genreID)
 	if err != nil {
-		r.Logger.Error("failed to get list contents by genre", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return contents, nil

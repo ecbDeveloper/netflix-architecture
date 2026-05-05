@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
@@ -21,8 +20,7 @@ import (
 func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to create watch history", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	reqBody := &historypb.RecordWatchHistoryRequest{
@@ -50,8 +48,7 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 
 	resp, err := r.HistoryClient.RecordWatchHistory(ctx, reqBody)
 	if err != nil {
-		r.Logger.Error("failed to record watch history via grpc", slog.Any("error", err))
-		return nil, handleGRPCError(err)
+		return nil, r.handleGRPCError(err)
 	}
 
 	return protoToWatchHistory(resp), nil
@@ -61,8 +58,7 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to update watch history", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	reqBody := &historypb.UpdateWatchProgressRequest{
@@ -79,8 +75,7 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID,
 
 	resp, err := r.HistoryClient.UpdateWatchProgress(ctx, reqBody)
 	if err != nil {
-		r.Logger.Error("failed to update watch history via grpc", slog.Any("error", err))
-		return nil, handleGRPCError(err)
+		return nil, r.handleGRPCError(err)
 	}
 
 	return protoToWatchHistory(resp), nil
@@ -90,8 +85,7 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID,
 func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID) (bool, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to delete watch history", slog.Any("error", err))
-		return false, handleError(err)
+		return false, r.handleError(err)
 	}
 
 	reqBody := &historypb.DeleteWatchHistoryRequest{
@@ -101,8 +95,7 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID)
 
 	_, err = r.HistoryClient.DeleteWatchHistory(ctx, reqBody)
 	if err != nil {
-		r.Logger.Error("failed to delete watch history via grpc", slog.Any("error", err))
-		return false, handleGRPCError(err)
+		return false, r.handleGRPCError(err)
 	}
 
 	return true, nil
@@ -112,8 +105,7 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID)
 func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to get one watch history", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	reqBody := &historypb.GetWatchHistoryRequest{
@@ -123,8 +115,7 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*mod
 
 	resp, err := r.HistoryClient.GetWatchHistory(ctx, reqBody)
 	if err != nil {
-		r.Logger.Error("failed to get watch history via grpc", slog.Any("error", err))
-		return nil, handleGRPCError(err)
+		return nil, r.handleGRPCError(err)
 	}
 
 	return protoToWatchHistory(resp), nil
@@ -149,8 +140,7 @@ func (r *queryResolver) MostWatchedContents(ctx context.Context, input *model.Pa
 
 	resp, err := r.HistoryClient.GetMostWatched(ctx, reqBody)
 	if err != nil {
-		r.Logger.Error("failed to get most watched via grpc", slog.Any("error", err))
-		return nil, handleGRPCError(err)
+		return nil, r.handleGRPCError(err)
 	}
 
 	result := make([]*model.MostWatchedContent, len(resp.Items))
@@ -170,8 +160,7 @@ func (r *queryResolver) MostWatchedContents(ctx context.Context, input *model.Pa
 func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, input *model.PaginationInput) ([]*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id for recently watched", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	var limit int32 = 10
@@ -192,8 +181,7 @@ func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, input *mode
 
 	resp, err := r.HistoryClient.GetRecentlyWatched(ctx, reqBody)
 	if err != nil {
-		r.Logger.Error("failed to get recently watched via grpc", slog.Any("error", err))
-		return nil, handleGRPCError(err)
+		return nil, r.handleGRPCError(err)
 	}
 
 	result := make([]*model.WatchHistory, len(resp.Histories))
@@ -207,8 +195,7 @@ func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, input *mode
 func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([]*model.RecommendedContent, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id for recommendations", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	var l int32 = 20
@@ -223,8 +210,7 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 
 	resp, err := r.RecommendationClient.GetRecommendations(ctx, reqBody)
 	if err != nil {
-		r.Logger.Error("failed to get recommendations via grpc", slog.Any("error", err))
-		return nil, handleGRPCError(err)
+		return nil, r.handleGRPCError(err)
 	}
 
 	result := make([]*model.RecommendedContent, len(resp.Recommendations))
@@ -244,21 +230,18 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 func (r *watchHistoryResolver) Content(ctx context.Context, obj *model.WatchHistory) (model.WatchedContent, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get user id", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	if obj.EpisodeID != uuid.Nil {
 		episode, err := r.EpisodeService.GetEpisode(ctx, obj.EpisodeID, profileID, userID)
 		if err != nil {
-			r.Logger.Error("failed to get episode", slog.Any("error", err))
-			return nil, handleError(err)
+			return nil, r.handleError(err)
 		}
 
 		return episode, nil
@@ -267,14 +250,13 @@ func (r *watchHistoryResolver) Content(ctx context.Context, obj *model.WatchHist
 	if obj.MovieID != uuid.Nil {
 		content, err := r.ContentService.GetContent(ctx, obj.MovieID, profileID, userID)
 		if err != nil {
-			r.Logger.Error("failed to get content", slog.Any("error", err))
-			return nil, handleError(err)
+			return nil, r.handleError(err)
 		}
 
 		return content, nil
 	}
 
-	return nil, handleError(&apperror.UnprocessableEntityError{Message: "it was not possible to find the watched content"})
+	return nil, r.handleError(&apperror.UnprocessableEntityError{Message: "it was not possible to find the watched content"})
 }
 
 // WatchHistory returns graph.WatchHistoryResolver implementation.

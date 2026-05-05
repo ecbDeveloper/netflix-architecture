@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
@@ -20,8 +19,7 @@ import (
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
 	user, err := r.UserService.CreateUser(ctx, input)
 	if err != nil {
-		r.Logger.Error("failed to create user", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return user, nil
@@ -31,18 +29,16 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 func (r *mutationResolver) UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error) {
 	sessionUserID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get user id to update user", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	if sessionUserID != id {
-		return nil, handleError(&apperror.ForbiddenError{Message: "you can't update others users"})
+		return nil, r.handleError(&apperror.ForbiddenError{Message: "you can't update others users"})
 	}
 
 	user, err := r.UserService.UpdateUser(ctx, id, input)
 	if err != nil {
-		r.Logger.Error("failed to update user", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return user, nil
@@ -52,23 +48,20 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id uuid.UUID, input m
 func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, error) {
 	sessionUserID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get user id to delete user", slog.Any("error", err))
-		return false, handleError(err)
+		return false, r.handleError(err)
 	}
 
 	if sessionUserID != id {
-		return false, handleError(&apperror.ForbiddenError{Message: "you can't delete others users"})
+		return false, r.handleError(&apperror.ForbiddenError{Message: "you can't delete others users"})
 	}
 
 	err = r.UserService.DeleteUser(ctx, id)
 	if err != nil {
-		r.Logger.Error("failed to delete user", slog.Any("error", err))
-		return false, handleError(err)
+		return false, r.handleError(err)
 	}
 
 	if err := r.Sessions.Destroy(ctx); err != nil {
-		r.Logger.Error("failed to destroy session", slog.Any("error", err))
-		return false, handleError(err)
+		return false, r.handleError(err)
 	}
 
 	return true, nil
@@ -78,25 +71,21 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, 
 func (r *queryResolver) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
 	sessionUserID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get user id to get user", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	sessionRoleID, err := r.getUserRoleIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get user role id to get user", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	if sessionUserID != id && sessionRoleID != shared.DBRoleAdmin {
-		r.Logger.Error("user is not authorized to get user")
-		return nil, handleError(&apperror.ForbiddenError{Message: "you can't access others users data"})
+		return nil, r.handleError(&apperror.ForbiddenError{Message: "you can't access others users data"})
 	}
 
 	user, err := r.UserService.GetUser(ctx, id)
 	if err != nil {
-		r.Logger.Error("failed to get user", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return user, nil
@@ -106,8 +95,7 @@ func (r *queryResolver) GetUser(ctx context.Context, id uuid.UUID) (*model.User,
 func (r *queryResolver) ListUsers(ctx context.Context) ([]*model.User, error) {
 	users, err := r.UserService.ListUsers(ctx)
 	if err != nil {
-		r.Logger.Error("failed to list all users", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return users, nil
@@ -117,8 +105,7 @@ func (r *queryResolver) ListUsers(ctx context.Context) ([]*model.User, error) {
 func (r *userResolver) Profiles(ctx context.Context, obj *model.User) ([]*model.Profile, error) {
 	profiles, err := r.ProfileService.ListProfilesByUser(ctx, obj.ID)
 	if err != nil {
-		r.Logger.Error("failed to list profiles", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return profiles, nil

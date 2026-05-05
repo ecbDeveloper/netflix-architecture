@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
@@ -19,14 +18,12 @@ import (
 func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to create review", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	review, err := r.ReviewService.CreateReview(ctx, input, profileID)
 	if err != nil {
-		r.Logger.Error("failed to create review", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return review, nil
@@ -36,14 +33,12 @@ func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateR
 func (r *mutationResolver) UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput) (*model.Review, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to update review", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	review, err := r.ReviewService.UpdateReview(ctx, id, input, profileID)
 	if err != nil {
-		r.Logger.Error("failed to update review", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return review, nil
@@ -53,14 +48,12 @@ func (r *mutationResolver) UpdateReview(ctx context.Context, id uuid.UUID, input
 func (r *mutationResolver) DeleteReview(ctx context.Context, id uuid.UUID) (bool, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id to delete review", slog.Any("error", err))
-		return false, handleError(err)
+		return false, r.handleError(err)
 	}
 
 	err = r.ReviewService.DeleteReview(ctx, id, profileID)
 	if err != nil {
-		r.Logger.Error("failed to delete review", slog.Any("error", err))
-		return false, handleError(err)
+		return false, r.handleError(err)
 	}
 
 	return true, nil
@@ -70,8 +63,7 @@ func (r *mutationResolver) DeleteReview(ctx context.Context, id uuid.UUID) (bool
 func (r *queryResolver) GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error) {
 	review, err := r.ReviewService.GetReview(ctx, id)
 	if err != nil {
-		r.Logger.Error("failed to get review", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return review, nil
@@ -81,20 +73,17 @@ func (r *queryResolver) GetReview(ctx context.Context, id uuid.UUID) (*model.Rev
 func (r *reviewResolver) Profile(ctx context.Context, obj *model.Review) (*model.Profile, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get user id", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	profile, err := r.ProfileService.GetProfile(ctx, profileID, userID)
 	if err != nil {
-		r.Logger.Error("failed to get profile %v: %w", profileID, err)
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	return profile, nil
@@ -104,21 +93,18 @@ func (r *reviewResolver) Profile(ctx context.Context, obj *model.Review) (*model
 func (r *reviewResolver) Content(ctx context.Context, obj *model.Review) (model.ReviewedContent, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get profile id", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		r.Logger.Error("failed to get user id", slog.Any("error", err))
-		return nil, handleError(err)
+		return nil, r.handleError(err)
 	}
 
 	if obj.EpisodeID != uuid.Nil {
 		episode, err := r.EpisodeService.GetEpisode(ctx, obj.EpisodeID, profileID, userID)
 		if err != nil {
-			r.Logger.Error("failed to get episode", slog.Any("error", err))
-			return nil, handleError(err)
+			return nil, r.handleError(err)
 		}
 
 		return episode, nil
@@ -127,14 +113,13 @@ func (r *reviewResolver) Content(ctx context.Context, obj *model.Review) (model.
 	if obj.MovieID != uuid.Nil {
 		content, err := r.ContentService.GetContent(ctx, obj.MovieID, profileID, userID)
 		if err != nil {
-			r.Logger.Error("failed to get content", slog.Any("error", err))
-			return nil, handleError(err)
+			return nil, r.handleError(err)
 		}
 
 		return content, nil
 	}
 
-	return nil, handleError(&apperror.UnprocessableEntityError{Message: "it was not possible to find the reviewed content"})
+	return nil, r.handleError(&apperror.UnprocessableEntityError{Message: "it was not possible to find the reviewed content"})
 }
 
 // Review returns graph.ReviewResolver implementation.

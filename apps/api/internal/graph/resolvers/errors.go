@@ -3,6 +3,7 @@ package resolvers
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -15,7 +16,9 @@ var (
 	ErrUserNotLoggedIn        = gqlerror.Errorf("user must be logged in")
 )
 
-func handleError(err error) *gqlerror.Error {
+func (r *Resolver) handleError(err error) *gqlerror.Error {
+	r.Logger.Error("resolver error", slog.Any("error", err))
+
 	var validationErr *apperror.ValidationError
 	if errors.As(err, &validationErr) {
 		return &gqlerror.Error{
@@ -84,11 +87,13 @@ func handleError(err error) *gqlerror.Error {
 	}
 }
 
-func handleGRPCError(err error) *gqlerror.Error {
+func (r *Resolver) handleGRPCError(err error) *gqlerror.Error {
 	st, ok := status.FromError(err)
 	if !ok {
-		return handleError(err)
+		return r.handleError(err)
 	}
+
+	r.Logger.Error("grpc error", slog.String("code", st.Code().String()), slog.String("message", st.Message()))
 
 	switch st.Code() {
 	case codes.InvalidArgument:
