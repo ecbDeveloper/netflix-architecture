@@ -94,7 +94,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, fmt.Errorf("failed to fetch episode %v from database: %w", id, err)
 	}
 
-	series, err := s.queries.GetSerie(ctx, ep.SeriesID)
+	series, err := s.queries.GetSeries(ctx, ep.SeriesID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "series"}
@@ -115,7 +115,7 @@ func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UU
 		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
 	}
 
-	series, err := s.queries.GetSerie(ctx, seriesID)
+	series, err := s.queries.GetSeries(ctx, seriesID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "series"}
@@ -127,7 +127,7 @@ func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UU
 		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
-	episodes, err := s.queries.ListEpisodesBySerie(ctx, seriesID)
+	episodes, err := s.queries.ListEpisodesBySeries(ctx, seriesID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all episodes from series %v from database: %w", seriesID, err)
 	}

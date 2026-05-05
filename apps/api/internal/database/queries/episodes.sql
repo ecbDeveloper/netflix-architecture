@@ -6,7 +6,7 @@ RETURNING *;
 -- name: GetEpisode :one
 SELECT * FROM episodes WHERE id = $1;
 
--- name: ListEpisodesBySerie :many
+-- name: ListEpisodesBySeries :many
 SELECT * FROM episodes WHERE series_id = $1 ORDER BY season, episode_number;
 
 -- name: UpdateEpisode :one

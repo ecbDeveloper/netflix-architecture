@@ -82,12 +82,12 @@ func (q *Queries) GetEpisode(ctx context.Context, id uuid.UUID) (Episode, error)
 	return i, err
 }
 
-const listEpisodesBySerie = `-- name: ListEpisodesBySerie :many
+const listEpisodesBySeries = `-- name: ListEpisodesBySeries :many
 SELECT id, series_id, season, episode_number, title, duration_minutes, content_url, created_at, updated_at FROM episodes WHERE series_id = $1 ORDER BY season, episode_number
 `
 
-func (q *Queries) ListEpisodesBySerie(ctx context.Context, seriesID uuid.UUID) ([]Episode, error) {
-	rows, err := q.db.Query(ctx, listEpisodesBySerie, seriesID)
+func (q *Queries) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID) ([]Episode, error) {
+	rows, err := q.db.Query(ctx, listEpisodesBySeries, seriesID)
 	if err != nil {
 		return nil, err
 	}

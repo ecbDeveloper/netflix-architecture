@@ -12,20 +12,20 @@ import (
 	"github.com/google/uuid"
 )
 
-const createSerie = `-- name: CreateSerie :one
+const createSeries = `-- name: CreateSeries :one
 INSERT INTO series (content_id)
 VALUES ($1)
 RETURNING content_id
 `
 
-func (q *Queries) CreateSerie(ctx context.Context, contentID uuid.UUID) (uuid.UUID, error) {
-	row := q.db.QueryRow(ctx, createSerie, contentID)
+func (q *Queries) CreateSeries(ctx context.Context, contentID uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, createSeries, contentID)
 	var content_id uuid.UUID
 	err := row.Scan(&content_id)
 	return content_id, err
 }
 
-const getSerie = `-- name: GetSerie :one
+const getSeries = `-- name: GetSeries :one
 SELECT
   c.id, c.title, c.description, c.release_date, c.created_at, c.updated_at, c.maturity_rating, c.genre_id
 FROM contents c
@@ -33,7 +33,7 @@ JOIN series s ON s.content_id = c.id
 WHERE c.id = $1
 `
 
-type GetSerieRow struct {
+type GetSeriesRow struct {
 	ID             uuid.UUID      `json:"id"`
 	Title          string         `json:"title"`
 	Description    string         `json:"description"`
@@ -44,9 +44,9 @@ type GetSerieRow struct {
 	GenreID        int32          `json:"genre_id"`
 }
 
-func (q *Queries) GetSerie(ctx context.Context, id uuid.UUID) (GetSerieRow, error) {
-	row := q.db.QueryRow(ctx, getSerie, id)
-	var i GetSerieRow
+func (q *Queries) GetSeries(ctx context.Context, id uuid.UUID) (GetSeriesRow, error) {
+	row := q.db.QueryRow(ctx, getSeries, id)
+	var i GetSeriesRow
 	err := row.Scan(
 		&i.ID,
 		&i.Title,

@@ -152,9 +152,9 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 	}
 
 	if input.ContentType == model.ContentTypeSeries {
-		_, err = qtx.CreateSerie(ctx, contentID)
+		_, err = qtx.CreateSeries(ctx, contentID)
 		if err != nil {
-			return uuid.Nil, fmt.Errorf("failed to insert serie on database: %w", err)
+			return uuid.Nil, fmt.Errorf("failed to insert series on database: %w", err)
 		}
 	}
 
@@ -345,7 +345,7 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 
 	var episodes []sqlc.Episode
 	if content.ContentType == sqlc.ContentTypeSERIES {
-		episodes, err = s.queries.ListEpisodesBySerie(ctx, id)
+		episodes, err = s.queries.ListEpisodesBySeries(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return &apperror.NotFoundError{Entity: "series"}
