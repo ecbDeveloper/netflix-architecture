@@ -11,4 +11,7 @@ const (
 	MaturityRatingPrefix = "RATING_"
 
 	StorageFolderPermission = 0755
+
+	MaxUploadSize = 100 * 1 << 20
+	MaxMemory     = 20 * 1 << 20
 )
