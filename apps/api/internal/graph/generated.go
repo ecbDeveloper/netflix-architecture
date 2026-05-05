@@ -130,6 +130,7 @@ type ComplexityRoot struct {
 		ListContents            func(childComplexity int) int
 		ListContentsByGenre     func(childComplexity int, genreID int32) int
 		ListContentsByType      func(childComplexity int, contentType model.ContentType) int
+		ListProfiles            func(childComplexity int) int
 		ListUsers               func(childComplexity int) int
 		MostWatchedContents     func(childComplexity int, input *model.PaginationInput) int
 		RecentlyWatchedContents func(childComplexity int, input *model.PaginationInput) int
@@ -213,6 +214,7 @@ type QueryResolver interface {
 	ListContentsByGenre(ctx context.Context, genreID int32) ([]*model.Content, error)
 	GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error)
 	GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error)
+	ListProfiles(ctx context.Context) ([]*model.Profile, error)
 	GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error)
 	GetUser(ctx context.Context, id uuid.UUID) (*model.User, error)
 	ListUsers(ctx context.Context) ([]*model.User, error)
@@ -788,6 +790,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.ListContentsByType(childComplexity, args["contentType"].(model.ContentType)), true
+	case "Query.listProfiles":
+		if e.ComplexityRoot.Query.ListProfiles == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.ListProfiles(childComplexity), true
 	case "Query.listUsers":
 		if e.ComplexityRoot.Query.ListUsers == nil {
 			break
@@ -4598,6 +4606,66 @@ func (ec *executionContext) fieldContext_Query_getProfile(ctx context.Context, f
 	if fc.Args, err = ec.field_Query_getProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_listProfiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_listProfiles,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().ListProfiles(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.Auth == nil {
+					var zeroVal []*model.Profile
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNProfile2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐProfileᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_listProfiles(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Profile_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Profile_userId(ctx, field)
+			case "name":
+				return ec.fieldContext_Profile_name(ctx, field)
+			case "hasParentalControls":
+				return ec.fieldContext_Profile_hasParentalControls(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Profile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Profile_updatedAt(ctx, field)
+			case "reviews":
+				return ec.fieldContext_Profile_reviews(ctx, field)
+			case "watchHistories":
+				return ec.fieldContext_Profile_watchHistories(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -8974,6 +9042,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getProfile(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "listProfiles":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_listProfiles(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
