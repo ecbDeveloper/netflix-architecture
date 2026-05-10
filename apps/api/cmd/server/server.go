@@ -24,6 +24,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/resolvers"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/middleware"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/review"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
@@ -113,13 +114,15 @@ func main() {
 	resolver, s, queries := initializeDependencies(pool, redisPool, logger, historyClient, recClient)
 
 	router := chi.NewRouter()
-	router.Use(s.LoadAndSave)
+	router.Use(s.LoadAndSave, middleware.RequestLogger(logger))
 
 	uploadPath := os.Getenv("UPLOAD_PATH")
 	if uploadPath == "" {
 		uploadPath = "./storage/"
 	}
-	router.Handle("/storage/*", http.StripPrefix("/storage/", http.FileServer(http.Dir(uploadPath))))
+	router.Handle("/storage/*",
+		http.StripPrefix("/storage/", http.FileServer(http.Dir(uploadPath))),
+	)
 
 	graphConfig := initializeGraphQLConfig(resolver, s, queries)
 
