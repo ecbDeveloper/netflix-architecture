@@ -3,7 +3,6 @@ package history
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/database/sqlc"
 	pb "github.com/ecbDeveloper/netflix-architecture/proto/history"
@@ -278,17 +277,14 @@ func toProto(wh sqlc.WatchHistory) *pb.WatchHistoryResponse {
 	}
 
 	if wh.MovieID.Valid {
-		movieStr := fmt.Sprintf("%x-%x-%x-%x-%x",
-			wh.MovieID.Bytes[0:4], wh.MovieID.Bytes[4:6], wh.MovieID.Bytes[6:8],
-			wh.MovieID.Bytes[8:10], wh.MovieID.Bytes[10:16])
-		resp.MovieId = &movieStr
+		movieIDStr := wh.MovieID.String()
+
+		resp.MovieId = &movieIDStr
 	}
 
 	if wh.EpisodeID.Valid {
-		episodeStr := fmt.Sprintf("%x-%x-%x-%x-%x",
-			wh.EpisodeID.Bytes[0:4], wh.EpisodeID.Bytes[4:6], wh.EpisodeID.Bytes[6:8],
-			wh.EpisodeID.Bytes[8:10], wh.EpisodeID.Bytes[10:16])
-		resp.EpisodeId = &episodeStr
+		episodeIDStr := wh.EpisodeID.String()
+		resp.EpisodeId = &episodeIDStr
 	}
 
 	if wh.WatchedAt.Valid {
