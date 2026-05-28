@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package common.v1;
+
+enum ContentType {
+  CONTENT_TYPE_UNSPECIFIED = 0;
+  CONTENT_TYPE_MOVIE = 1;
+  CONTENT_TYPE_SERIES = 2;
+}

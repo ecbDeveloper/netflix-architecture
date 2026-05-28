@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package recommendation;
+package recommendation.v1;
 
-option go_package = "github.com/ecbDeveloper/netflix-architecture/proto/recommendation";
+import "common/v1/common.proto";
 
 service RecommendationService {
   rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse);
@@ -16,24 +16,18 @@ message GetRecommendationsRequest {
 
 message TopRatedContent {
   string content_id = 1;
-  contentType content_type = 2; 
+  common.v1.ContentType content_type = 2;
   int32 genre_id = 3;
   double avg_rating = 4;
 }
 
 message RecommendedContent {
   string content_id = 1;
-  contentType content_type = 2;
+  common.v1.ContentType content_type = 2;
   double score = 3;
   string reason = 4;
 }
 
 message GetRecommendationsResponse {
   repeated RecommendedContent recommendations = 1;
-}
-
-enum contentType {
-  CONTENT_TYPE_UNSPECIFIED = 0;
-  MOVIE = 1;
-  SERIES = 2;
 }
