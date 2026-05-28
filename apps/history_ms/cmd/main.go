@@ -24,7 +24,7 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		logger.Error("failed to load .env file", slog.Any("error", err))
+		logger.Warn("failed to load .env file", slog.Any("error", err))
 	}
 
 	grpcPort := os.Getenv("GRPC_PORT")
