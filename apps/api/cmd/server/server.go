@@ -69,7 +69,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	redisPool := initializeRedisPool(ctx)
+	redisPool := initializeRedisPool()
 	defer redisPool.Close()
 
 	conn := redisPool.Get()
@@ -120,11 +120,12 @@ func main() {
 	if uploadPath == "" {
 		uploadPath = "./storage/"
 	}
-	router.Handle("/storage/*",
+	router.Handle(
+		"/storage/*",
 		http.StripPrefix("/storage/", http.FileServer(http.Dir(uploadPath))),
 	)
 
-	graphConfig := initializeGraphQLConfig(resolver, s, queries)
+	graphConfig := initializeGraphQLConfig(resolver, s)
 
 	srv := handler.New(graph.NewExecutableSchema(graphConfig))
 
@@ -180,7 +181,7 @@ func initializeDatabaseConnection(ctx context.Context) (*pgxpool.Pool, error) {
 	return pool, nil
 }
 
-func initializeRedisPool(ctx context.Context) *redis.Pool {
+func initializeRedisPool() *redis.Pool {
 	redisPort := os.Getenv("REDIS_PORT")
 	redisPass := os.Getenv("REDIS_PASS")
 	redisHost := os.Getenv("REDIS_HOST")
@@ -195,7 +196,7 @@ func initializeRedisPool(ctx context.Context) *redis.Pool {
 	}
 }
 
-func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *slog.Logger, historyClient historypb.HistoryServiceClient, recClient recommendationpb.RecommendationServiceClient) (*resolvers.Resolver, *scs.SessionManager, *sqlc.Queries) {
+func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *slog.Logger, historyClient historyv1.HistoryServiceClient, recClient recommendationv1.RecommendationServiceClient) (*resolvers.Resolver, *scs.SessionManager) {
 	uploadPath := os.Getenv("UPLOAD_PATH")
 
 	queries := sqlc.New(pool)
@@ -227,10 +228,10 @@ func initializeDependencies(pool *pgxpool.Pool, redisPool *redis.Pool, logger *s
 		recClient,
 	)
 
-	return resolver, s, queries
+	return resolver, s
 }
 
-func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager, queries *sqlc.Queries) graph.Config {
+func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager) graph.Config {
 	graphConfig := graph.Config{Resolvers: resolver}
 
 	graphConfig.Directives.Auth = func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
@@ -308,7 +309,7 @@ func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager
 			}
 		}
 
-		if err != nil || !profileIsFromUser {
+		if !profileIsFromUser {
 			return nil, &gqlerror.Error{
 				Message: "invalid profile selection",
 				Extensions: map[string]any{
