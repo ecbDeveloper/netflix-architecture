@@ -11,8 +11,8 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
-	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
-	recommendationpb "github.com/ecbDeveloper/netflix-architecture/proto/recommendation"
+	historyv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
+	recommendationv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/recommendation/v1"
 	"github.com/google/uuid"
 )
 
@@ -23,7 +23,7 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 		return nil, r.handleError(err)
 	}
 
-	reqBody := &historypb.RecordWatchHistoryRequest{
+	reqBody := &historyv1.RecordWatchHistoryRequest{
 		ProfileId: profileID.String(),
 		GenreId:   *input.GenreID,
 	}
@@ -51,7 +51,7 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 		return nil, r.handleGRPCError(err)
 	}
 
-	return protoToWatchHistory(resp), nil
+	return protoToWatchHistory(resp.WatchHistory), nil
 }
 
 // UpdateWatchHistory is the resolver for the updateWatchHistory field.
@@ -61,7 +61,7 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID,
 		return nil, r.handleError(err)
 	}
 
-	reqBody := &historypb.UpdateWatchProgressRequest{
+	reqBody := &historyv1.UpdateWatchProgressRequest{
 		Id:        id.String(),
 		ProfileId: profileID.String(),
 	}
@@ -78,7 +78,7 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID,
 		return nil, r.handleGRPCError(err)
 	}
 
-	return protoToWatchHistory(resp), nil
+	return protoToWatchHistory(resp.WatchHistory), nil
 }
 
 // DeleteWatchHistory is the resolver for the deleteWatchHistory field.
@@ -88,7 +88,7 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID)
 		return false, r.handleError(err)
 	}
 
-	reqBody := &historypb.DeleteWatchHistoryRequest{
+	reqBody := &historyv1.DeleteWatchHistoryRequest{
 		Id:        id.String(),
 		ProfileId: profileID.String(),
 	}
@@ -108,7 +108,7 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*mod
 		return nil, r.handleError(err)
 	}
 
-	reqBody := &historypb.GetWatchHistoryRequest{
+	reqBody := &historyv1.GetWatchHistoryRequest{
 		Id:        id.String(),
 		ProfileId: profileID.String(),
 	}
@@ -118,7 +118,7 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*mod
 		return nil, r.handleGRPCError(err)
 	}
 
-	return protoToWatchHistory(resp), nil
+	return protoToWatchHistory(resp.WatchHistory), nil
 }
 
 // MostWatchedContents is the resolver for the mostWatchedContents field.
@@ -133,7 +133,7 @@ func (r *queryResolver) MostWatchedContents(ctx context.Context, input *model.Pa
 		offset = *input.Offset
 	}
 
-	reqBody := &historypb.GetMostWatchedRequest{
+	reqBody := &historyv1.GetMostWatchedRequest{
 		Limit:  limit,
 		Offset: offset,
 	}
@@ -148,7 +148,7 @@ func (r *queryResolver) MostWatchedContents(ctx context.Context, input *model.Pa
 		contentID, _ := uuid.Parse(item.ContentId)
 		result[i] = &model.MostWatchedContent{
 			ContentID:   contentID,
-			ContentType: hContentTypeToGraph[item.ContentType],
+			ContentType: protoContentTypeToGraphQL[item.ContentType],
 			GenreID:     item.GenreId,
 			WatchCount:  int32(item.WatchCount),
 		}
@@ -173,7 +173,7 @@ func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, input *mode
 		offset = *input.Offset
 	}
 
-	reqBody := &historypb.GetRecentlyWatchedRequest{
+	reqBody := &historyv1.GetRecentlyWatchedRequest{
 		ProfileId: profileID.String(),
 		Limit:     limit,
 		Offset:    offset,
@@ -203,7 +203,7 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 		l = *limit
 	}
 
-	reqBody := &recommendationpb.GetRecommendationsRequest{
+	reqBody := &recommendationv1.GetRecommendationsRequest{
 		ProfileId: profileID.String(),
 		Limit:     l,
 	}
@@ -218,7 +218,7 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 		contentID, _ := uuid.Parse(rec.ContentId)
 		result[i] = &model.RecommendedContent{
 			ContentID:   contentID,
-			ContentType: recContentTypeToGraph[rec.ContentType],
+			ContentType: protoContentTypeToGraphQL[rec.ContentType],
 			Score:       rec.Score,
 			Reason:      rec.Reason,
 		}

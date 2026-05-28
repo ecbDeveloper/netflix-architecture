@@ -6,19 +6,14 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
-	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
-	recommendationpb "github.com/ecbDeveloper/netflix-architecture/proto/recommendation"
+	commonv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/common/v1"
+	historyv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
 	"github.com/google/uuid"
 )
 
-var hContentTypeToGraph = map[historypb.ContentType]model.ContentType{
-	1: model.ContentTypeMovie,
-	2: model.ContentTypeSeries,
-}
-
-var recContentTypeToGraph = map[recommendationpb.ContentType]model.ContentType{
-	1: model.ContentTypeMovie,
-	2: model.ContentTypeSeries,
+var protoContentTypeToGraphQL = map[commonv1.ContentType]model.ContentType{
+	commonv1.ContentType_CONTENT_TYPE_MOVIE:  model.ContentTypeMovie,
+	commonv1.ContentType_CONTENT_TYPE_SERIES: model.ContentTypeSeries,
 }
 
 func (r *Resolver) getUserIDFromSession(ctx context.Context) (uuid.UUID, error) {
@@ -45,7 +40,7 @@ func (r *Resolver) getProfileIDFromSession(ctx context.Context) (uuid.UUID, erro
 	return profileID, nil
 }
 
-func protoToWatchHistory(resp *historypb.WatchHistoryResponse) *model.WatchHistory {
+func protoToWatchHistory(resp *historyv1.WatchHistory) *model.WatchHistory {
 	wh := &model.WatchHistory{
 		WatchedAt: resp.WatchedAt,
 	}

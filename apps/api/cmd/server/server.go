@@ -30,8 +30,8 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/user"
-	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
-	recommendationpb "github.com/ecbDeveloper/netflix-architecture/proto/recommendation"
+	historyv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
+	recommendationv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/recommendation/v1"
 	"github.com/go-chi/chi/v5"
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
@@ -100,7 +100,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer historyConn.Close()
-	historyClient := historypb.NewHistoryServiceClient(historyConn)
+	historyClient := historyv1.NewHistoryServiceClient(historyConn)
 
 	recAddr := os.Getenv("RECOMMENDATION_GRPC_ADDR")
 	recConn, err := grpc.NewClient(recAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -109,9 +109,9 @@ func main() {
 		os.Exit(1)
 	}
 	defer recConn.Close()
-	recClient := recommendationpb.NewRecommendationServiceClient(recConn)
+	recClient := recommendationv1.NewRecommendationServiceClient(recConn)
 
-	resolver, s, queries := initializeDependencies(pool, redisPool, logger, historyClient, recClient)
+	resolver, s := initializeDependencies(pool, redisPool, logger, historyClient, recClient)
 
 	router := chi.NewRouter()
 	router.Use(s.LoadAndSave, middleware.RequestLogger(logger))

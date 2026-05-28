@@ -11,7 +11,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
-	historypb "github.com/ecbDeveloper/netflix-architecture/proto/history"
+	historyv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
 	"github.com/google/uuid"
 )
 
@@ -91,7 +91,7 @@ func (r *profileResolver) Reviews(ctx context.Context, obj *model.Profile) ([]*m
 
 // WatchHistories is the resolver for the watchHistories field.
 func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile) ([]*model.WatchHistory, error) {
-	resp, err := r.HistoryClient.ListWatchHistory(ctx, &historypb.ListWatchHistoryRequest{
+	resp, err := r.HistoryClient.ListWatchHistory(ctx, &historyv1.ListWatchHistoryRequest{
 		ProfileId: obj.ID.String(),
 	})
 	if err != nil {

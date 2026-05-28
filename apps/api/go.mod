@@ -1,6 +1,6 @@
 module github.com/ecbDeveloper/netflix-architecture/apps/api
 
-go 1.26.0
+go 1.26.2
 
 tool (
 	github.com/99designs/gqlgen
@@ -11,7 +11,7 @@ require (
 	github.com/99designs/gqlgen v0.17.88
 	github.com/alexedwards/scs/redisstore v0.0.0-20251002162104-209de6e426de
 	github.com/alexedwards/scs/v2 v2.9.0
-	github.com/ecbDeveloper/netflix-architecture/proto v0.0.0-00010101000000-000000000000
+	github.com/ecbDeveloper/netflix-architecture/gen/go v0.0.0-20260528154949-cbbc21b0f77d
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/gomodule/redigo v1.9.3
 	github.com/google/uuid v1.6.0
@@ -19,7 +19,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/vektah/gqlparser/v2 v2.5.32
 	golang.org/x/crypto v0.49.0
-	google.golang.org/grpc v1.80.0
+	google.golang.org/grpc v1.81.1
 )
 
 require (
@@ -69,11 +69,11 @@ require (
 	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/text v0.36.0 // indirect
 	golang.org/x/tools v0.43.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260120221211-b8f7ae30c516 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260120221211-b8f7ae30c516 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260226221140-a57be14db171 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260226221140-a57be14db171 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/ecbDeveloper/netflix-architecture/proto => ../../proto
+replace github.com/ecbDeveloper/netflix-architecture/gen/go/ => ../../gen/go/
