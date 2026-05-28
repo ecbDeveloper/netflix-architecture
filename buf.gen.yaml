@@ -1,0 +1,22 @@
+version: v2
+clean: true
+
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/ecbDeveloper/netflix-architecture/gen
+
+plugins:
+  - remote: buf.build/protocolbuffers/go
+    out: gen/go
+    opt:
+      - paths=source_relative
+
+  - remote: buf.build/grpc/go
+    out: gen/go
+    opt:
+      - paths=source_relative
+
+inputs:
+  - directory: proto
