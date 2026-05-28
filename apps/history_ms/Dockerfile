@@ -3,7 +3,7 @@ FROM golang:1.25.3-alpine3.21 AS build
 WORKDIR /app
 
 COPY apps/history_ms/go.mod apps/history_ms/go.sum ./
-COPY proto/ /proto/
+COPY ./gen/ ./gen/
 RUN go mod download
 
 COPY apps/history_ms/ .
