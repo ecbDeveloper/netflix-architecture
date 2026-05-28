@@ -1,23 +1,15 @@
-FROM golang:1.25.3-alpine3.21 AS build
+FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-COPY apps/recommendation_ms/go.mod apps/recommendation_ms/go.sum ./
-COPY proto/ /proto/
-RUN go mod download
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
+COPY gen/python/ gen
 COPY apps/recommendation_ms/ .
-
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/main.go
-
-FROM gcr.io/distroless/base-debian12:nonroot
-
-WORKDIR /
-
-COPY --from=build /app/main .
 
 EXPOSE 50052
 
-USER nonroot:nonroot
+ENV PYTHONPATH=/app/gen/python
 
-ENTRYPOINT [ "/main" ]
+CMD ["python", "main.py"]
