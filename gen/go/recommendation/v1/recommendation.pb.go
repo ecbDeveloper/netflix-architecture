@@ -7,7 +7,7 @@
 package recommendationv1
 
 import (
-	v1 "github.com/ecbDeveloper/netflix-architecture/gen/common/v1"
+	v1 "github.com/ecbDeveloper/netflix-architecture/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -288,8 +288,8 @@ const file_recommendation_v1_recommendation_proto_rawDesc = "" +
 	"\x1aGetRecommendationsResponse\x12O\n" +
 	"\x0frecommendations\x18\x01 \x03(\v2%.recommendation.v1.RecommendedContentR\x0frecommendations2\x8a\x01\n" +
 	"\x15RecommendationService\x12q\n" +
-	"\x12GetRecommendations\x12,.recommendation.v1.GetRecommendationsRequest\x1a-.recommendation.v1.GetRecommendationsResponseB\xe6\x01\n" +
-	"\x15com.recommendation.v1B\x13RecommendationProtoP\x01ZSgithub.com/ecbDeveloper/netflix-architecture/gen/recommendation/v1;recommendationv1\xa2\x02\x03RXX\xaa\x02\x11Recommendation.V1\xca\x02\x11Recommendation\\V1\xe2\x02\x1dRecommendation\\V1\\GPBMetadata\xea\x02\x12Recommendation::V1b\x06proto3"
+	"\x12GetRecommendations\x12,.recommendation.v1.GetRecommendationsRequest\x1a-.recommendation.v1.GetRecommendationsResponseB\xe9\x01\n" +
+	"\x15com.recommendation.v1B\x13RecommendationProtoP\x01ZVgithub.com/ecbDeveloper/netflix-architecture/gen/go/recommendation/v1;recommendationv1\xa2\x02\x03RXX\xaa\x02\x11Recommendation.V1\xca\x02\x11Recommendation\\V1\xe2\x02\x1dRecommendation\\V1\\GPBMetadata\xea\x02\x12Recommendation::V1b\x06proto3"
 
 var (
 	file_recommendation_v1_recommendation_proto_rawDescOnce sync.Once

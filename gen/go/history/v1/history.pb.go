@@ -7,7 +7,7 @@
 package historyv1
 
 import (
-	v1 "github.com/ecbDeveloper/netflix-architecture/gen/common/v1"
+	v1 "github.com/ecbDeveloper/netflix-architecture/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -1202,8 +1202,8 @@ const file_history_v1_history_proto_rawDesc = "" +
 	"\x12GetRecentlyWatched\x12%.history.v1.GetRecentlyWatchedRequest\x1a&.history.v1.GetRecentlyWatchedResponse\x12]\n" +
 	"\x10ListWatchHistory\x12#.history.v1.ListWatchHistoryRequest\x1a$.history.v1.ListWatchHistoryResponse\x12f\n" +
 	"\x13UpdateWatchProgress\x12&.history.v1.UpdateWatchProgressRequest\x1a'.history.v1.UpdateWatchProgressResponse\x12c\n" +
-	"\x12DeleteWatchHistory\x12%.history.v1.DeleteWatchHistoryRequest\x1a&.history.v1.DeleteWatchHistoryResponseB\xae\x01\n" +
-	"\x0ecom.history.v1B\fHistoryProtoP\x01ZEgithub.com/ecbDeveloper/netflix-architecture/gen/history/v1;historyv1\xa2\x02\x03HXX\xaa\x02\n" +
+	"\x12DeleteWatchHistory\x12%.history.v1.DeleteWatchHistoryRequest\x1a&.history.v1.DeleteWatchHistoryResponseB\xb1\x01\n" +
+	"\x0ecom.history.v1B\fHistoryProtoP\x01ZHgithub.com/ecbDeveloper/netflix-architecture/gen/go/history/v1;historyv1\xa2\x02\x03HXX\xaa\x02\n" +
 	"History.V1\xca\x02\n" +
 	"History\\V1\xe2\x02\x16History\\V1\\GPBMetadata\xea\x02\vHistory::V1b\x06proto3"
 

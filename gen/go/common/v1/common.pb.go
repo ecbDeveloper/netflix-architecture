@@ -78,8 +78,8 @@ const file_common_v1_common_proto_rawDesc = "" +
 	"\vContentType\x12\x1c\n" +
 	"\x18CONTENT_TYPE_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12CONTENT_TYPE_MOVIE\x10\x01\x12\x17\n" +
-	"\x13CONTENT_TYPE_SERIES\x10\x02B\xa6\x01\n" +
-	"\rcom.common.v1B\vCommonProtoP\x01ZCgithub.com/ecbDeveloper/netflix-architecture/gen/common/v1;commonv1\xa2\x02\x03CXX\xaa\x02\tCommon.V1\xca\x02\tCommon\\V1\xe2\x02\x15Common\\V1\\GPBMetadata\xea\x02\n" +
+	"\x13CONTENT_TYPE_SERIES\x10\x02B\xa9\x01\n" +
+	"\rcom.common.v1B\vCommonProtoP\x01ZFgithub.com/ecbDeveloper/netflix-architecture/gen/go/common/v1;commonv1\xa2\x02\x03CXX\xaa\x02\tCommon.V1\xca\x02\tCommon\\V1\xe2\x02\x15Common\\V1\\GPBMetadata\xea\x02\n" +
 	"Common::V1b\x06proto3"
 
 var (
