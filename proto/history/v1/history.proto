@@ -51,6 +51,12 @@ message GetMostWatchedRequest {
   int32 offset = 2;
 }
 
+message GetRecentlyWatchedRequest {
+  string profile_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
 message DeleteWatchHistoryResponse {
   bool success = 1;
 }
@@ -75,36 +81,15 @@ message GetRecentlyWatchedResponse {
 }
 
 message RecordWatchHistoryResponse {
-  string id = 1;
-  string profile_id = 2;
-  optional string movie_id = 3;
-  optional string episode_id = 4;
-  string watched_at = 5;
-  int32 last_position_seconds = 6;
-  bool is_completed = 7;
-  int32 genre_id = 8;
+  WatchHistory watch_history = 1;
 }
 
 message GetWatchHistoryResponse {
-  string id = 1;
-  string profile_id = 2;
-  optional string movie_id = 3;
-  optional string episode_id = 4;
-  string watched_at = 5;
-  int32 last_position_seconds = 6;
-  bool is_completed = 7;
-  int32 genre_id = 8;
+  WatchHistory watch_history = 1;
 }
 
 message UpdateWatchProgressResponse {
-  string id = 1;
-  string profile_id = 2;
-  optional string movie_id = 3;
-  optional string episode_id = 4;
-  string watched_at = 5;
-  int32 last_position_seconds = 6;
-  bool is_completed = 7;
-  int32 genre_id = 8;
+  WatchHistory watch_history = 1;
 }
 
 message MostWatchedItem {
@@ -116,10 +101,4 @@ message MostWatchedItem {
 
 message GetMostWatchedResponse {
   repeated MostWatchedItem items = 1;
-}
-
-message GetRecentlyWatchedRequest {
-  string profile_id = 1;
-  int32 limit = 2;
-  int32 offset = 3;
 }

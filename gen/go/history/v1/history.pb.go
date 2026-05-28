@@ -7,12 +7,13 @@
 package historyv1
 
 import (
-	v1 "github.com/ecbDeveloper/netflix-architecture/gen/go/common/v1"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	v1 "github.com/ecbDeveloper/netflix-architecture/gen/go/common/v1"
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -374,6 +375,66 @@ func (x *GetMostWatchedRequest) GetOffset() int32 {
 	return 0
 }
 
+type GetRecentlyWatchedRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProfileId     string                 `protobuf:"bytes,1,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset        int32                  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetRecentlyWatchedRequest) Reset() {
+	*x = GetRecentlyWatchedRequest{}
+	mi := &file_history_v1_history_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRecentlyWatchedRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRecentlyWatchedRequest) ProtoMessage() {}
+
+func (x *GetRecentlyWatchedRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_history_v1_history_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRecentlyWatchedRequest.ProtoReflect.Descriptor instead.
+func (*GetRecentlyWatchedRequest) Descriptor() ([]byte, []int) {
+	return file_history_v1_history_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetRecentlyWatchedRequest) GetProfileId() string {
+	if x != nil {
+		return x.ProfileId
+	}
+	return ""
+}
+
+func (x *GetRecentlyWatchedRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *GetRecentlyWatchedRequest) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
 type DeleteWatchHistoryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
@@ -383,7 +444,7 @@ type DeleteWatchHistoryResponse struct {
 
 func (x *DeleteWatchHistoryResponse) Reset() {
 	*x = DeleteWatchHistoryResponse{}
-	mi := &file_history_v1_history_proto_msgTypes[6]
+	mi := &file_history_v1_history_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -395,7 +456,7 @@ func (x *DeleteWatchHistoryResponse) String() string {
 func (*DeleteWatchHistoryResponse) ProtoMessage() {}
 
 func (x *DeleteWatchHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_history_v1_history_proto_msgTypes[6]
+	mi := &file_history_v1_history_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -408,7 +469,7 @@ func (x *DeleteWatchHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteWatchHistoryResponse.ProtoReflect.Descriptor instead.
 func (*DeleteWatchHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_history_v1_history_proto_rawDescGZIP(), []int{6}
+	return file_history_v1_history_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *DeleteWatchHistoryResponse) GetSuccess() bool {
@@ -434,7 +495,7 @@ type WatchHistory struct {
 
 func (x *WatchHistory) Reset() {
 	*x = WatchHistory{}
-	mi := &file_history_v1_history_proto_msgTypes[7]
+	mi := &file_history_v1_history_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -446,7 +507,7 @@ func (x *WatchHistory) String() string {
 func (*WatchHistory) ProtoMessage() {}
 
 func (x *WatchHistory) ProtoReflect() protoreflect.Message {
-	mi := &file_history_v1_history_proto_msgTypes[7]
+	mi := &file_history_v1_history_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -459,7 +520,7 @@ func (x *WatchHistory) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WatchHistory.ProtoReflect.Descriptor instead.
 func (*WatchHistory) Descriptor() ([]byte, []int) {
-	return file_history_v1_history_proto_rawDescGZIP(), []int{7}
+	return file_history_v1_history_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *WatchHistory) GetId() string {
@@ -527,7 +588,7 @@ type ListWatchHistoryResponse struct {
 
 func (x *ListWatchHistoryResponse) Reset() {
 	*x = ListWatchHistoryResponse{}
-	mi := &file_history_v1_history_proto_msgTypes[8]
+	mi := &file_history_v1_history_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -539,7 +600,7 @@ func (x *ListWatchHistoryResponse) String() string {
 func (*ListWatchHistoryResponse) ProtoMessage() {}
 
 func (x *ListWatchHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_history_v1_history_proto_msgTypes[8]
+	mi := &file_history_v1_history_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -552,7 +613,7 @@ func (x *ListWatchHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWatchHistoryResponse.ProtoReflect.Descriptor instead.
 func (*ListWatchHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_history_v1_history_proto_rawDescGZIP(), []int{8}
+	return file_history_v1_history_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ListWatchHistoryResponse) GetHistories() []*WatchHistory {
@@ -571,7 +632,7 @@ type GetRecentlyWatchedResponse struct {
 
 func (x *GetRecentlyWatchedResponse) Reset() {
 	*x = GetRecentlyWatchedResponse{}
-	mi := &file_history_v1_history_proto_msgTypes[9]
+	mi := &file_history_v1_history_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -583,7 +644,7 @@ func (x *GetRecentlyWatchedResponse) String() string {
 func (*GetRecentlyWatchedResponse) ProtoMessage() {}
 
 func (x *GetRecentlyWatchedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_history_v1_history_proto_msgTypes[9]
+	mi := &file_history_v1_history_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -596,7 +657,7 @@ func (x *GetRecentlyWatchedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRecentlyWatchedResponse.ProtoReflect.Descriptor instead.
 func (*GetRecentlyWatchedResponse) Descriptor() ([]byte, []int) {
-	return file_history_v1_history_proto_rawDescGZIP(), []int{9}
+	return file_history_v1_history_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetRecentlyWatchedResponse) GetHistories() []*WatchHistory {
@@ -607,22 +668,15 @@ func (x *GetRecentlyWatchedResponse) GetHistories() []*WatchHistory {
 }
 
 type RecordWatchHistoryResponse struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProfileId           string                 `protobuf:"bytes,2,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"`
-	MovieId             *string                `protobuf:"bytes,3,opt,name=movie_id,json=movieId,proto3,oneof" json:"movie_id,omitempty"`
-	EpisodeId           *string                `protobuf:"bytes,4,opt,name=episode_id,json=episodeId,proto3,oneof" json:"episode_id,omitempty"`
-	WatchedAt           string                 `protobuf:"bytes,5,opt,name=watched_at,json=watchedAt,proto3" json:"watched_at,omitempty"`
-	LastPositionSeconds int32                  `protobuf:"varint,6,opt,name=last_position_seconds,json=lastPositionSeconds,proto3" json:"last_position_seconds,omitempty"`
-	IsCompleted         bool                   `protobuf:"varint,7,opt,name=is_completed,json=isCompleted,proto3" json:"is_completed,omitempty"`
-	GenreId             int32                  `protobuf:"varint,8,opt,name=genre_id,json=genreId,proto3" json:"genre_id,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WatchHistory  *WatchHistory          `protobuf:"bytes,1,opt,name=watch_history,json=watchHistory,proto3" json:"watch_history,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RecordWatchHistoryResponse) Reset() {
 	*x = RecordWatchHistoryResponse{}
-	mi := &file_history_v1_history_proto_msgTypes[10]
+	mi := &file_history_v1_history_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -634,7 +688,7 @@ func (x *RecordWatchHistoryResponse) String() string {
 func (*RecordWatchHistoryResponse) ProtoMessage() {}
 
 func (x *RecordWatchHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_history_v1_history_proto_msgTypes[10]
+	mi := &file_history_v1_history_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -647,82 +701,26 @@ func (x *RecordWatchHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RecordWatchHistoryResponse.ProtoReflect.Descriptor instead.
 func (*RecordWatchHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_history_v1_history_proto_rawDescGZIP(), []int{10}
+	return file_history_v1_history_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *RecordWatchHistoryResponse) GetId() string {
+func (x *RecordWatchHistoryResponse) GetWatchHistory() *WatchHistory {
 	if x != nil {
-		return x.Id
+		return x.WatchHistory
 	}
-	return ""
-}
-
-func (x *RecordWatchHistoryResponse) GetProfileId() string {
-	if x != nil {
-		return x.ProfileId
-	}
-	return ""
-}
-
-func (x *RecordWatchHistoryResponse) GetMovieId() string {
-	if x != nil && x.MovieId != nil {
-		return *x.MovieId
-	}
-	return ""
-}
-
-func (x *RecordWatchHistoryResponse) GetEpisodeId() string {
-	if x != nil && x.EpisodeId != nil {
-		return *x.EpisodeId
-	}
-	return ""
-}
-
-func (x *RecordWatchHistoryResponse) GetWatchedAt() string {
-	if x != nil {
-		return x.WatchedAt
-	}
-	return ""
-}
-
-func (x *RecordWatchHistoryResponse) GetLastPositionSeconds() int32 {
-	if x != nil {
-		return x.LastPositionSeconds
-	}
-	return 0
-}
-
-func (x *RecordWatchHistoryResponse) GetIsCompleted() bool {
-	if x != nil {
-		return x.IsCompleted
-	}
-	return false
-}
-
-func (x *RecordWatchHistoryResponse) GetGenreId() int32 {
-	if x != nil {
-		return x.GenreId
-	}
-	return 0
+	return nil
 }
 
 type GetWatchHistoryResponse struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProfileId           string                 `protobuf:"bytes,2,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"`
-	MovieId             *string                `protobuf:"bytes,3,opt,name=movie_id,json=movieId,proto3,oneof" json:"movie_id,omitempty"`
-	EpisodeId           *string                `protobuf:"bytes,4,opt,name=episode_id,json=episodeId,proto3,oneof" json:"episode_id,omitempty"`
-	WatchedAt           string                 `protobuf:"bytes,5,opt,name=watched_at,json=watchedAt,proto3" json:"watched_at,omitempty"`
-	LastPositionSeconds int32                  `protobuf:"varint,6,opt,name=last_position_seconds,json=lastPositionSeconds,proto3" json:"last_position_seconds,omitempty"`
-	IsCompleted         bool                   `protobuf:"varint,7,opt,name=is_completed,json=isCompleted,proto3" json:"is_completed,omitempty"`
-	GenreId             int32                  `protobuf:"varint,8,opt,name=genre_id,json=genreId,proto3" json:"genre_id,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WatchHistory  *WatchHistory          `protobuf:"bytes,1,opt,name=watch_history,json=watchHistory,proto3" json:"watch_history,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetWatchHistoryResponse) Reset() {
 	*x = GetWatchHistoryResponse{}
-	mi := &file_history_v1_history_proto_msgTypes[11]
+	mi := &file_history_v1_history_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -734,7 +732,7 @@ func (x *GetWatchHistoryResponse) String() string {
 func (*GetWatchHistoryResponse) ProtoMessage() {}
 
 func (x *GetWatchHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_history_v1_history_proto_msgTypes[11]
+	mi := &file_history_v1_history_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -747,82 +745,26 @@ func (x *GetWatchHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetWatchHistoryResponse.ProtoReflect.Descriptor instead.
 func (*GetWatchHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_history_v1_history_proto_rawDescGZIP(), []int{11}
+	return file_history_v1_history_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *GetWatchHistoryResponse) GetId() string {
+func (x *GetWatchHistoryResponse) GetWatchHistory() *WatchHistory {
 	if x != nil {
-		return x.Id
+		return x.WatchHistory
 	}
-	return ""
-}
-
-func (x *GetWatchHistoryResponse) GetProfileId() string {
-	if x != nil {
-		return x.ProfileId
-	}
-	return ""
-}
-
-func (x *GetWatchHistoryResponse) GetMovieId() string {
-	if x != nil && x.MovieId != nil {
-		return *x.MovieId
-	}
-	return ""
-}
-
-func (x *GetWatchHistoryResponse) GetEpisodeId() string {
-	if x != nil && x.EpisodeId != nil {
-		return *x.EpisodeId
-	}
-	return ""
-}
-
-func (x *GetWatchHistoryResponse) GetWatchedAt() string {
-	if x != nil {
-		return x.WatchedAt
-	}
-	return ""
-}
-
-func (x *GetWatchHistoryResponse) GetLastPositionSeconds() int32 {
-	if x != nil {
-		return x.LastPositionSeconds
-	}
-	return 0
-}
-
-func (x *GetWatchHistoryResponse) GetIsCompleted() bool {
-	if x != nil {
-		return x.IsCompleted
-	}
-	return false
-}
-
-func (x *GetWatchHistoryResponse) GetGenreId() int32 {
-	if x != nil {
-		return x.GenreId
-	}
-	return 0
+	return nil
 }
 
 type UpdateWatchProgressResponse struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProfileId           string                 `protobuf:"bytes,2,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"`
-	MovieId             *string                `protobuf:"bytes,3,opt,name=movie_id,json=movieId,proto3,oneof" json:"movie_id,omitempty"`
-	EpisodeId           *string                `protobuf:"bytes,4,opt,name=episode_id,json=episodeId,proto3,oneof" json:"episode_id,omitempty"`
-	WatchedAt           string                 `protobuf:"bytes,5,opt,name=watched_at,json=watchedAt,proto3" json:"watched_at,omitempty"`
-	LastPositionSeconds int32                  `protobuf:"varint,6,opt,name=last_position_seconds,json=lastPositionSeconds,proto3" json:"last_position_seconds,omitempty"`
-	IsCompleted         bool                   `protobuf:"varint,7,opt,name=is_completed,json=isCompleted,proto3" json:"is_completed,omitempty"`
-	GenreId             int32                  `protobuf:"varint,8,opt,name=genre_id,json=genreId,proto3" json:"genre_id,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WatchHistory  *WatchHistory          `protobuf:"bytes,1,opt,name=watch_history,json=watchHistory,proto3" json:"watch_history,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateWatchProgressResponse) Reset() {
 	*x = UpdateWatchProgressResponse{}
-	mi := &file_history_v1_history_proto_msgTypes[12]
+	mi := &file_history_v1_history_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -834,7 +776,7 @@ func (x *UpdateWatchProgressResponse) String() string {
 func (*UpdateWatchProgressResponse) ProtoMessage() {}
 
 func (x *UpdateWatchProgressResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_history_v1_history_proto_msgTypes[12]
+	mi := &file_history_v1_history_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -847,63 +789,14 @@ func (x *UpdateWatchProgressResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWatchProgressResponse.ProtoReflect.Descriptor instead.
 func (*UpdateWatchProgressResponse) Descriptor() ([]byte, []int) {
-	return file_history_v1_history_proto_rawDescGZIP(), []int{12}
+	return file_history_v1_history_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *UpdateWatchProgressResponse) GetId() string {
+func (x *UpdateWatchProgressResponse) GetWatchHistory() *WatchHistory {
 	if x != nil {
-		return x.Id
+		return x.WatchHistory
 	}
-	return ""
-}
-
-func (x *UpdateWatchProgressResponse) GetProfileId() string {
-	if x != nil {
-		return x.ProfileId
-	}
-	return ""
-}
-
-func (x *UpdateWatchProgressResponse) GetMovieId() string {
-	if x != nil && x.MovieId != nil {
-		return *x.MovieId
-	}
-	return ""
-}
-
-func (x *UpdateWatchProgressResponse) GetEpisodeId() string {
-	if x != nil && x.EpisodeId != nil {
-		return *x.EpisodeId
-	}
-	return ""
-}
-
-func (x *UpdateWatchProgressResponse) GetWatchedAt() string {
-	if x != nil {
-		return x.WatchedAt
-	}
-	return ""
-}
-
-func (x *UpdateWatchProgressResponse) GetLastPositionSeconds() int32 {
-	if x != nil {
-		return x.LastPositionSeconds
-	}
-	return 0
-}
-
-func (x *UpdateWatchProgressResponse) GetIsCompleted() bool {
-	if x != nil {
-		return x.IsCompleted
-	}
-	return false
-}
-
-func (x *UpdateWatchProgressResponse) GetGenreId() int32 {
-	if x != nil {
-		return x.GenreId
-	}
-	return 0
+	return nil
 }
 
 type MostWatchedItem struct {
@@ -918,7 +811,7 @@ type MostWatchedItem struct {
 
 func (x *MostWatchedItem) Reset() {
 	*x = MostWatchedItem{}
-	mi := &file_history_v1_history_proto_msgTypes[13]
+	mi := &file_history_v1_history_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -930,7 +823,7 @@ func (x *MostWatchedItem) String() string {
 func (*MostWatchedItem) ProtoMessage() {}
 
 func (x *MostWatchedItem) ProtoReflect() protoreflect.Message {
-	mi := &file_history_v1_history_proto_msgTypes[13]
+	mi := &file_history_v1_history_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -943,7 +836,7 @@ func (x *MostWatchedItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MostWatchedItem.ProtoReflect.Descriptor instead.
 func (*MostWatchedItem) Descriptor() ([]byte, []int) {
-	return file_history_v1_history_proto_rawDescGZIP(), []int{13}
+	return file_history_v1_history_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *MostWatchedItem) GetContentId() string {
@@ -983,7 +876,7 @@ type GetMostWatchedResponse struct {
 
 func (x *GetMostWatchedResponse) Reset() {
 	*x = GetMostWatchedResponse{}
-	mi := &file_history_v1_history_proto_msgTypes[14]
+	mi := &file_history_v1_history_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -995,7 +888,7 @@ func (x *GetMostWatchedResponse) String() string {
 func (*GetMostWatchedResponse) ProtoMessage() {}
 
 func (x *GetMostWatchedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_history_v1_history_proto_msgTypes[14]
+	mi := &file_history_v1_history_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1008,7 +901,7 @@ func (x *GetMostWatchedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMostWatchedResponse.ProtoReflect.Descriptor instead.
 func (*GetMostWatchedResponse) Descriptor() ([]byte, []int) {
-	return file_history_v1_history_proto_rawDescGZIP(), []int{14}
+	return file_history_v1_history_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetMostWatchedResponse) GetItems() []*MostWatchedItem {
@@ -1016,66 +909,6 @@ func (x *GetMostWatchedResponse) GetItems() []*MostWatchedItem {
 		return x.Items
 	}
 	return nil
-}
-
-type GetRecentlyWatchedRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ProfileId     string                 `protobuf:"bytes,1,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"`
-	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset        int32                  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetRecentlyWatchedRequest) Reset() {
-	*x = GetRecentlyWatchedRequest{}
-	mi := &file_history_v1_history_proto_msgTypes[15]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetRecentlyWatchedRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetRecentlyWatchedRequest) ProtoMessage() {}
-
-func (x *GetRecentlyWatchedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_history_v1_history_proto_msgTypes[15]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetRecentlyWatchedRequest.ProtoReflect.Descriptor instead.
-func (*GetRecentlyWatchedRequest) Descriptor() ([]byte, []int) {
-	return file_history_v1_history_proto_rawDescGZIP(), []int{15}
-}
-
-func (x *GetRecentlyWatchedRequest) GetProfileId() string {
-	if x != nil {
-		return x.ProfileId
-	}
-	return ""
-}
-
-func (x *GetRecentlyWatchedRequest) GetLimit() int32 {
-	if x != nil {
-		return x.Limit
-	}
-	return 0
-}
-
-func (x *GetRecentlyWatchedRequest) GetOffset() int32 {
-	if x != nil {
-		return x.Offset
-	}
-	return 0
 }
 
 var File_history_v1_history_proto protoreflect.FileDescriptor
@@ -1118,7 +951,12 @@ const file_history_v1_history_proto_rawDesc = "" +
 	"profile_id\x18\x02 \x01(\tR\tprofileId\"E\n" +
 	"\x15GetMostWatchedRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x02 \x01(\x05R\x06offset\"6\n" +
+	"\x06offset\x18\x02 \x01(\x05R\x06offset\"h\n" +
+	"\x19GetRecentlyWatchedRequest\x12\x1d\n" +
+	"\n" +
+	"profile_id\x18\x01 \x01(\tR\tprofileId\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x03 \x01(\x05R\x06offset\"6\n" +
 	"\x1aDeleteWatchHistoryResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xae\x02\n" +
 	"\fWatchHistory\x12\x0e\n" +
@@ -1138,49 +976,13 @@ const file_history_v1_history_proto_rawDesc = "" +
 	"\x18ListWatchHistoryResponse\x126\n" +
 	"\thistories\x18\x01 \x03(\v2\x18.history.v1.WatchHistoryR\thistories\"T\n" +
 	"\x1aGetRecentlyWatchedResponse\x126\n" +
-	"\thistories\x18\x01 \x03(\v2\x18.history.v1.WatchHistoryR\thistories\"\xbc\x02\n" +
-	"\x1aRecordWatchHistoryResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
-	"\n" +
-	"profile_id\x18\x02 \x01(\tR\tprofileId\x12\x1e\n" +
-	"\bmovie_id\x18\x03 \x01(\tH\x00R\amovieId\x88\x01\x01\x12\"\n" +
-	"\n" +
-	"episode_id\x18\x04 \x01(\tH\x01R\tepisodeId\x88\x01\x01\x12\x1d\n" +
-	"\n" +
-	"watched_at\x18\x05 \x01(\tR\twatchedAt\x122\n" +
-	"\x15last_position_seconds\x18\x06 \x01(\x05R\x13lastPositionSeconds\x12!\n" +
-	"\fis_completed\x18\a \x01(\bR\visCompleted\x12\x19\n" +
-	"\bgenre_id\x18\b \x01(\x05R\agenreIdB\v\n" +
-	"\t_movie_idB\r\n" +
-	"\v_episode_id\"\xb9\x02\n" +
-	"\x17GetWatchHistoryResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
-	"\n" +
-	"profile_id\x18\x02 \x01(\tR\tprofileId\x12\x1e\n" +
-	"\bmovie_id\x18\x03 \x01(\tH\x00R\amovieId\x88\x01\x01\x12\"\n" +
-	"\n" +
-	"episode_id\x18\x04 \x01(\tH\x01R\tepisodeId\x88\x01\x01\x12\x1d\n" +
-	"\n" +
-	"watched_at\x18\x05 \x01(\tR\twatchedAt\x122\n" +
-	"\x15last_position_seconds\x18\x06 \x01(\x05R\x13lastPositionSeconds\x12!\n" +
-	"\fis_completed\x18\a \x01(\bR\visCompleted\x12\x19\n" +
-	"\bgenre_id\x18\b \x01(\x05R\agenreIdB\v\n" +
-	"\t_movie_idB\r\n" +
-	"\v_episode_id\"\xbd\x02\n" +
-	"\x1bUpdateWatchProgressResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
-	"\n" +
-	"profile_id\x18\x02 \x01(\tR\tprofileId\x12\x1e\n" +
-	"\bmovie_id\x18\x03 \x01(\tH\x00R\amovieId\x88\x01\x01\x12\"\n" +
-	"\n" +
-	"episode_id\x18\x04 \x01(\tH\x01R\tepisodeId\x88\x01\x01\x12\x1d\n" +
-	"\n" +
-	"watched_at\x18\x05 \x01(\tR\twatchedAt\x122\n" +
-	"\x15last_position_seconds\x18\x06 \x01(\x05R\x13lastPositionSeconds\x12!\n" +
-	"\fis_completed\x18\a \x01(\bR\visCompleted\x12\x19\n" +
-	"\bgenre_id\x18\b \x01(\x05R\agenreIdB\v\n" +
-	"\t_movie_idB\r\n" +
-	"\v_episode_id\"\xa7\x01\n" +
+	"\thistories\x18\x01 \x03(\v2\x18.history.v1.WatchHistoryR\thistories\"[\n" +
+	"\x1aRecordWatchHistoryResponse\x12=\n" +
+	"\rwatch_history\x18\x01 \x01(\v2\x18.history.v1.WatchHistoryR\fwatchHistory\"X\n" +
+	"\x17GetWatchHistoryResponse\x12=\n" +
+	"\rwatch_history\x18\x01 \x01(\v2\x18.history.v1.WatchHistoryR\fwatchHistory\"\\\n" +
+	"\x1bUpdateWatchProgressResponse\x12=\n" +
+	"\rwatch_history\x18\x01 \x01(\v2\x18.history.v1.WatchHistoryR\fwatchHistory\"\xa7\x01\n" +
 	"\x0fMostWatchedItem\x12\x1d\n" +
 	"\n" +
 	"content_id\x18\x01 \x01(\tR\tcontentId\x129\n" +
@@ -1189,12 +991,7 @@ const file_history_v1_history_proto_rawDesc = "" +
 	"\vwatch_count\x18\x04 \x01(\x03R\n" +
 	"watchCount\"K\n" +
 	"\x16GetMostWatchedResponse\x121\n" +
-	"\x05items\x18\x01 \x03(\v2\x1b.history.v1.MostWatchedItemR\x05items\"h\n" +
-	"\x19GetRecentlyWatchedRequest\x12\x1d\n" +
-	"\n" +
-	"profile_id\x18\x01 \x01(\tR\tprofileId\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x03 \x01(\x05R\x06offset2\xbb\x05\n" +
+	"\x05items\x18\x01 \x03(\v2\x1b.history.v1.MostWatchedItemR\x05items2\xbb\x05\n" +
 	"\x0eHistoryService\x12c\n" +
 	"\x12RecordWatchHistory\x12%.history.v1.RecordWatchHistoryRequest\x1a&.history.v1.RecordWatchHistoryResponse\x12Z\n" +
 	"\x0fGetWatchHistory\x12\".history.v1.GetWatchHistoryRequest\x1a#.history.v1.GetWatchHistoryResponse\x12W\n" +
@@ -1219,50 +1016,56 @@ func file_history_v1_history_proto_rawDescGZIP() []byte {
 	return file_history_v1_history_proto_rawDescData
 }
 
-var file_history_v1_history_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
-var file_history_v1_history_proto_goTypes = []any{
-	(*RecordWatchHistoryRequest)(nil),   // 0: history.v1.RecordWatchHistoryRequest
-	(*GetWatchHistoryRequest)(nil),      // 1: history.v1.GetWatchHistoryRequest
-	(*ListWatchHistoryRequest)(nil),     // 2: history.v1.ListWatchHistoryRequest
-	(*UpdateWatchProgressRequest)(nil),  // 3: history.v1.UpdateWatchProgressRequest
-	(*DeleteWatchHistoryRequest)(nil),   // 4: history.v1.DeleteWatchHistoryRequest
-	(*GetMostWatchedRequest)(nil),       // 5: history.v1.GetMostWatchedRequest
-	(*DeleteWatchHistoryResponse)(nil),  // 6: history.v1.DeleteWatchHistoryResponse
-	(*WatchHistory)(nil),                // 7: history.v1.WatchHistory
-	(*ListWatchHistoryResponse)(nil),    // 8: history.v1.ListWatchHistoryResponse
-	(*GetRecentlyWatchedResponse)(nil),  // 9: history.v1.GetRecentlyWatchedResponse
-	(*RecordWatchHistoryResponse)(nil),  // 10: history.v1.RecordWatchHistoryResponse
-	(*GetWatchHistoryResponse)(nil),     // 11: history.v1.GetWatchHistoryResponse
-	(*UpdateWatchProgressResponse)(nil), // 12: history.v1.UpdateWatchProgressResponse
-	(*MostWatchedItem)(nil),             // 13: history.v1.MostWatchedItem
-	(*GetMostWatchedResponse)(nil),      // 14: history.v1.GetMostWatchedResponse
-	(*GetRecentlyWatchedRequest)(nil),   // 15: history.v1.GetRecentlyWatchedRequest
-	(v1.ContentType)(0),                 // 16: common.v1.ContentType
-}
+var (
+	file_history_v1_history_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+	file_history_v1_history_proto_goTypes  = []any{
+		(*RecordWatchHistoryRequest)(nil),   // 0: history.v1.RecordWatchHistoryRequest
+		(*GetWatchHistoryRequest)(nil),      // 1: history.v1.GetWatchHistoryRequest
+		(*ListWatchHistoryRequest)(nil),     // 2: history.v1.ListWatchHistoryRequest
+		(*UpdateWatchProgressRequest)(nil),  // 3: history.v1.UpdateWatchProgressRequest
+		(*DeleteWatchHistoryRequest)(nil),   // 4: history.v1.DeleteWatchHistoryRequest
+		(*GetMostWatchedRequest)(nil),       // 5: history.v1.GetMostWatchedRequest
+		(*GetRecentlyWatchedRequest)(nil),   // 6: history.v1.GetRecentlyWatchedRequest
+		(*DeleteWatchHistoryResponse)(nil),  // 7: history.v1.DeleteWatchHistoryResponse
+		(*WatchHistory)(nil),                // 8: history.v1.WatchHistory
+		(*ListWatchHistoryResponse)(nil),    // 9: history.v1.ListWatchHistoryResponse
+		(*GetRecentlyWatchedResponse)(nil),  // 10: history.v1.GetRecentlyWatchedResponse
+		(*RecordWatchHistoryResponse)(nil),  // 11: history.v1.RecordWatchHistoryResponse
+		(*GetWatchHistoryResponse)(nil),     // 12: history.v1.GetWatchHistoryResponse
+		(*UpdateWatchProgressResponse)(nil), // 13: history.v1.UpdateWatchProgressResponse
+		(*MostWatchedItem)(nil),             // 14: history.v1.MostWatchedItem
+		(*GetMostWatchedResponse)(nil),      // 15: history.v1.GetMostWatchedResponse
+		v1.ContentType(0),                   // 16: common.v1.ContentType
+	}
+)
+
 var file_history_v1_history_proto_depIdxs = []int32{
-	7,  // 0: history.v1.ListWatchHistoryResponse.histories:type_name -> history.v1.WatchHistory
-	7,  // 1: history.v1.GetRecentlyWatchedResponse.histories:type_name -> history.v1.WatchHistory
-	16, // 2: history.v1.MostWatchedItem.content_type:type_name -> common.v1.ContentType
-	13, // 3: history.v1.GetMostWatchedResponse.items:type_name -> history.v1.MostWatchedItem
-	0,  // 4: history.v1.HistoryService.RecordWatchHistory:input_type -> history.v1.RecordWatchHistoryRequest
-	1,  // 5: history.v1.HistoryService.GetWatchHistory:input_type -> history.v1.GetWatchHistoryRequest
-	5,  // 6: history.v1.HistoryService.GetMostWatched:input_type -> history.v1.GetMostWatchedRequest
-	15, // 7: history.v1.HistoryService.GetRecentlyWatched:input_type -> history.v1.GetRecentlyWatchedRequest
-	2,  // 8: history.v1.HistoryService.ListWatchHistory:input_type -> history.v1.ListWatchHistoryRequest
-	3,  // 9: history.v1.HistoryService.UpdateWatchProgress:input_type -> history.v1.UpdateWatchProgressRequest
-	4,  // 10: history.v1.HistoryService.DeleteWatchHistory:input_type -> history.v1.DeleteWatchHistoryRequest
-	10, // 11: history.v1.HistoryService.RecordWatchHistory:output_type -> history.v1.RecordWatchHistoryResponse
-	11, // 12: history.v1.HistoryService.GetWatchHistory:output_type -> history.v1.GetWatchHistoryResponse
-	14, // 13: history.v1.HistoryService.GetMostWatched:output_type -> history.v1.GetMostWatchedResponse
-	9,  // 14: history.v1.HistoryService.GetRecentlyWatched:output_type -> history.v1.GetRecentlyWatchedResponse
-	8,  // 15: history.v1.HistoryService.ListWatchHistory:output_type -> history.v1.ListWatchHistoryResponse
-	12, // 16: history.v1.HistoryService.UpdateWatchProgress:output_type -> history.v1.UpdateWatchProgressResponse
-	6,  // 17: history.v1.HistoryService.DeleteWatchHistory:output_type -> history.v1.DeleteWatchHistoryResponse
-	11, // [11:18] is the sub-list for method output_type
-	4,  // [4:11] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	8,  // 0: history.v1.ListWatchHistoryResponse.histories:type_name -> history.v1.WatchHistory
+	8,  // 1: history.v1.GetRecentlyWatchedResponse.histories:type_name -> history.v1.WatchHistory
+	8,  // 2: history.v1.RecordWatchHistoryResponse.watch_history:type_name -> history.v1.WatchHistory
+	8,  // 3: history.v1.GetWatchHistoryResponse.watch_history:type_name -> history.v1.WatchHistory
+	8,  // 4: history.v1.UpdateWatchProgressResponse.watch_history:type_name -> history.v1.WatchHistory
+	16, // 5: history.v1.MostWatchedItem.content_type:type_name -> common.v1.ContentType
+	14, // 6: history.v1.GetMostWatchedResponse.items:type_name -> history.v1.MostWatchedItem
+	0,  // 7: history.v1.HistoryService.RecordWatchHistory:input_type -> history.v1.RecordWatchHistoryRequest
+	1,  // 8: history.v1.HistoryService.GetWatchHistory:input_type -> history.v1.GetWatchHistoryRequest
+	5,  // 9: history.v1.HistoryService.GetMostWatched:input_type -> history.v1.GetMostWatchedRequest
+	6,  // 10: history.v1.HistoryService.GetRecentlyWatched:input_type -> history.v1.GetRecentlyWatchedRequest
+	2,  // 11: history.v1.HistoryService.ListWatchHistory:input_type -> history.v1.ListWatchHistoryRequest
+	3,  // 12: history.v1.HistoryService.UpdateWatchProgress:input_type -> history.v1.UpdateWatchProgressRequest
+	4,  // 13: history.v1.HistoryService.DeleteWatchHistory:input_type -> history.v1.DeleteWatchHistoryRequest
+	11, // 14: history.v1.HistoryService.RecordWatchHistory:output_type -> history.v1.RecordWatchHistoryResponse
+	12, // 15: history.v1.HistoryService.GetWatchHistory:output_type -> history.v1.GetWatchHistoryResponse
+	15, // 16: history.v1.HistoryService.GetMostWatched:output_type -> history.v1.GetMostWatchedResponse
+	10, // 17: history.v1.HistoryService.GetRecentlyWatched:output_type -> history.v1.GetRecentlyWatchedResponse
+	9,  // 18: history.v1.HistoryService.ListWatchHistory:output_type -> history.v1.ListWatchHistoryResponse
+	13, // 19: history.v1.HistoryService.UpdateWatchProgress:output_type -> history.v1.UpdateWatchProgressResponse
+	7,  // 20: history.v1.HistoryService.DeleteWatchHistory:output_type -> history.v1.DeleteWatchHistoryResponse
+	14, // [14:21] is the sub-list for method output_type
+	7,  // [7:14] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_history_v1_history_proto_init() }
@@ -1272,10 +1075,7 @@ func file_history_v1_history_proto_init() {
 	}
 	file_history_v1_history_proto_msgTypes[0].OneofWrappers = []any{}
 	file_history_v1_history_proto_msgTypes[3].OneofWrappers = []any{}
-	file_history_v1_history_proto_msgTypes[7].OneofWrappers = []any{}
-	file_history_v1_history_proto_msgTypes[10].OneofWrappers = []any{}
-	file_history_v1_history_proto_msgTypes[11].OneofWrappers = []any{}
-	file_history_v1_history_proto_msgTypes[12].OneofWrappers = []any{}
+	file_history_v1_history_proto_msgTypes[8].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
