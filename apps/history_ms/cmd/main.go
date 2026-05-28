@@ -9,7 +9,7 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/history"
-	pb "github.com/ecbDeveloper/netflix-architecture/proto/history"
+	pb "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"

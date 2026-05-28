@@ -5,7 +5,8 @@ import (
 	"errors"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/database/sqlc"
-	pb "github.com/ecbDeveloper/netflix-architecture/proto/history"
+	commonpb "github.com/ecbDeveloper/netflix-architecture/gen/go/common/v1"
+	historypb "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -14,17 +15,17 @@ import (
 )
 
 type Server struct {
-	pb.UnimplementedHistoryServiceServer
+	historypb.UnimplementedHistoryServiceServer
 	queries *sqlc.Queries
 }
 
-func NewServer(queries *sqlc.Queries) pb.HistoryServiceServer {
+func NewServer(queries *sqlc.Queries) historypb.HistoryServiceServer {
 	return &Server{
 		queries: queries,
 	}
 }
 
-func (s *Server) RecordWatch(ctx context.Context, req *pb.RecordWatchHistoryRequest) (*pb.WatchHistoryResponse, error) {
+func (s *Server) RecordWatch(ctx context.Context, req *historypb.RecordWatchHistoryRequest) (*historypb.RecordWatchHistoryResponse, error) {
 	if req.MovieId == nil && req.EpisodeId == nil {
 		return nil, status.Error(codes.InvalidArgument, "movie_id or episode_id is required")
 	}
@@ -73,10 +74,12 @@ func (s *Server) RecordWatch(ctx context.Context, req *pb.RecordWatchHistoryRequ
 		return nil, status.Errorf(codes.Internal, "failed to insert watch history: %v", err)
 	}
 
-	return toProto(wh), nil
+	protoWH := toProto(wh)
+
+	return &historypb.RecordWatchHistoryResponse{WatchHistory: protoWH}, nil
 }
 
-func (s *Server) GetWatchHistory(ctx context.Context, req *pb.GetWatchHistoryRequest) (*pb.WatchHistoryResponse, error) {
+func (s *Server) GetWatchHistory(ctx context.Context, req *historypb.GetWatchHistoryRequest) (*historypb.GetWatchHistoryResponse, error) {
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid id")
@@ -99,10 +102,12 @@ func (s *Server) GetWatchHistory(ctx context.Context, req *pb.GetWatchHistoryReq
 		return nil, status.Error(codes.PermissionDenied, "you can't see watch history from others profiles")
 	}
 
-	return toProto(wh), nil
+	protoWH := toProto(wh)
+
+	return &historypb.GetWatchHistoryResponse{WatchHistory: protoWH}, nil
 }
 
-func (s *Server) ListWatchHistory(ctx context.Context, req *pb.ListWatchHistoryRequest) (*pb.ListWatchHistoryResponse, error) {
+func (s *Server) ListWatchHistory(ctx context.Context, req *historypb.ListWatchHistoryRequest) (*historypb.ListWatchHistoryResponse, error) {
 	profileID, err := uuid.Parse(req.ProfileId)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid profile_id")
@@ -113,15 +118,15 @@ func (s *Server) ListWatchHistory(ctx context.Context, req *pb.ListWatchHistoryR
 		return nil, status.Errorf(codes.Internal, "failed to list watch histories: %v", err)
 	}
 
-	result := make([]*pb.WatchHistoryResponse, len(histories))
+	result := make([]*historypb.WatchHistory, len(histories))
 	for i, wh := range histories {
 		result[i] = toProto(wh)
 	}
 
-	return &pb.ListWatchHistoryResponse{Histories: result}, nil
+	return &historypb.ListWatchHistoryResponse{Histories: result}, nil
 }
 
-func (s *Server) UpdateWatchProgress(ctx context.Context, req *pb.UpdateWatchProgressRequest) (*pb.WatchHistoryResponse, error) {
+func (s *Server) UpdateWatchProgress(ctx context.Context, req *historypb.UpdateWatchProgressRequest) (*historypb.UpdateWatchProgressResponse, error) {
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid id")
@@ -162,10 +167,12 @@ func (s *Server) UpdateWatchProgress(ctx context.Context, req *pb.UpdateWatchPro
 		return nil, status.Errorf(codes.Internal, "failed to update watch history: %v", err)
 	}
 
-	return toProto(wh), nil
+	protoWH := toProto(wh)
+
+	return &historypb.UpdateWatchProgressResponse{WatchHistory: protoWH}, nil
 }
 
-func (s *Server) DeleteWatchHistory(ctx context.Context, req *pb.DeleteWatchHistoryRequest) (*pb.DeleteWatchHistoryResponse, error) {
+func (s *Server) DeleteWatchHistory(ctx context.Context, req *historypb.DeleteWatchHistoryRequest) (*historypb.DeleteWatchHistoryResponse, error) {
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid id")
@@ -192,10 +199,10 @@ func (s *Server) DeleteWatchHistory(ctx context.Context, req *pb.DeleteWatchHist
 		return nil, status.Errorf(codes.Internal, "failed to delete watch history: %v", err)
 	}
 
-	return &pb.DeleteWatchHistoryResponse{Success: true}, nil
+	return &historypb.DeleteWatchHistoryResponse{Success: true}, nil
 }
 
-func (s *Server) GetMostWatched(ctx context.Context, req *pb.GetMostWatchedRequest) (*pb.MostWatchedResponse, error) {
+func (s *Server) GetMostWatched(ctx context.Context, req *historypb.GetMostWatchedRequest) (*historypb.GetMostWatchedResponse, error) {
 	limit := int(req.Limit)
 	if limit <= 0 {
 		limit = 10
@@ -211,14 +218,14 @@ func (s *Server) GetMostWatched(ctx context.Context, req *pb.GetMostWatchedReque
 		return nil, status.Errorf(codes.Internal, "failed to get most watched episodes: %v", err)
 	}
 
-	var items []*pb.MostWatchedItem
+	var items []*historypb.MostWatchedItem
 
 	for _, m := range movies {
 		if m.MovieID.Valid {
 			movieUUID, _ := uuid.FromBytes(m.MovieID.Bytes[:])
-			items = append(items, &pb.MostWatchedItem{
+			items = append(items, &historypb.MostWatchedItem{
 				ContentId:   movieUUID.String(),
-				ContentType: pb.ContentType_MOVIE,
+				ContentType: commonpb.ContentType_CONTENT_TYPE_MOVIE,
 				GenreId:     m.GenreID.Int32,
 				WatchCount:  m.WatchCount,
 			})
@@ -228,19 +235,19 @@ func (s *Server) GetMostWatched(ctx context.Context, req *pb.GetMostWatchedReque
 	for _, e := range episodes {
 		if e.EpisodeID.Valid {
 			episodeUUID, _ := uuid.FromBytes(e.EpisodeID.Bytes[:])
-			items = append(items, &pb.MostWatchedItem{
+			items = append(items, &historypb.MostWatchedItem{
 				ContentId:   episodeUUID.String(),
-				ContentType: pb.ContentType_SERIES,
+				ContentType: commonpb.ContentType_CONTENT_TYPE_SERIES,
 				GenreId:     e.GenreID.Int32,
 				WatchCount:  e.WatchCount,
 			})
 		}
 	}
 
-	return &pb.MostWatchedResponse{Items: items}, nil
+	return &historypb.GetMostWatchedResponse{Items: items}, nil
 }
 
-func (s *Server) GetRecentlyWatched(ctx context.Context, req *pb.GetRecentlyWatchedRequest) (*pb.ListWatchHistoryResponse, error) {
+func (s *Server) GetRecentlyWatched(ctx context.Context, req *historypb.GetRecentlyWatchedRequest) (*historypb.GetRecentlyWatchedResponse, error) {
 	profileID, err := uuid.Parse(req.ProfileId)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid profile_id")
@@ -259,16 +266,16 @@ func (s *Server) GetRecentlyWatched(ctx context.Context, req *pb.GetRecentlyWatc
 		return nil, status.Errorf(codes.Internal, "failed to get recently watched: %v", err)
 	}
 
-	result := make([]*pb.WatchHistoryResponse, len(histories))
+	result := make([]*historypb.WatchHistory, len(histories))
 	for i, wh := range histories {
 		result[i] = toProto(wh)
 	}
 
-	return &pb.ListWatchHistoryResponse{Histories: result}, nil
+	return &historypb.GetRecentlyWatchedResponse{Histories: result}, nil
 }
 
-func toProto(wh sqlc.WatchHistory) *pb.WatchHistoryResponse {
-	resp := &pb.WatchHistoryResponse{
+func toProto(wh sqlc.WatchHistory) *historypb.WatchHistory {
+	resp := &historypb.WatchHistory{
 		Id:                  wh.ID.String(),
 		ProfileId:           wh.ProfileID.String(),
 		LastPositionSeconds: wh.LastPositionSeconds.Int32,
