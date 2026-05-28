@@ -5,7 +5,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/ecbDeveloper/netflix-architecture/gen
+      value: github.com/ecbDeveloper/netflix-architecture/gen/go
 
 plugins:
   - remote: buf.build/protocolbuffers/go
