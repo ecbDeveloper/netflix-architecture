@@ -9,7 +9,7 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/history"
-	pb "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
+	historypb "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
@@ -48,7 +48,7 @@ func main() {
 	queries := sqlc.New(pool)
 	server := history.NewServer(queries)
 	grpcServer := grpc.NewServer()
-	pb.RegisterHistoryServiceServer(grpcServer, server)
+	historypb.RegisterHistoryServiceServer(grpcServer, server)
 
 	if os.Getenv("ENV") == "development" {
 		reflection.Register(grpcServer)
