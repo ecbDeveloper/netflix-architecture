@@ -20,10 +20,9 @@ from history.v1.history_pb2_grpc import HistoryServiceStub  # type: ignore
 
 from recommendation_service import get_recommendations  # type: ignore
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
+    format='{"time": "%(asctime)s", "level": "%(levelname)s", "msg": "%(message)s"}',
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger("recommendation_ms")
@@ -58,7 +57,7 @@ class RecommendationService(RecommendationServiceServicer):
                 recommendations=recommendations
             )
         except Exception as e:
-            logger.error(f"Error in GetRecommendations: {e}")
+            logger.error("failed to get recommendations", extra={"error": str(e)})
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return recommendation_pb2.GetRecommendationsResponse()
@@ -71,9 +70,6 @@ def initialize_database_connection():
     db_pass = os.getenv("DB_PASS")
     db_name = os.getenv("DB_NAME")
 
-    logger.info(
-        f"Connecting to database: host={db_host} port={db_port} user={db_user} dbname={db_name}"
-    )
     try:
         connection_pool = pool.SimpleConnectionPool(
             1,
@@ -84,15 +80,14 @@ def initialize_database_connection():
             password=db_pass,
             database=db_name,
         )
-        # Test connection
         conn = connection_pool.getconn()
         with conn.cursor() as cursor:
             cursor.execute("SELECT 1")
         connection_pool.putconn(conn)
-        logger.info("Successfully connected to database")
+        logger.info("successfully connected to database", extra={"host": db_host, "port": db_port, "dbname": db_name})
         return connection_pool
     except Exception as e:
-        logger.error(f"failed to initialize db pool: {e}")
+        logger.error("failed to initialize db pool", extra={"error": str(e)})
         sys.exit(1)
 
 
@@ -107,7 +102,6 @@ def main():
     history_port = os.getenv("HISTORY_GRPC_PORT", "50051")
     history_addr = f"{history_host}:{history_port}"
 
-    logger.info(f"Connecting to history service at {history_addr}")
     history_channel = grpc.insecure_channel(history_addr)
     history_client = HistoryServiceStub(history_channel)
 
@@ -126,16 +120,16 @@ def main():
             reflection.SERVICE_NAME,
         )
         reflection.enable_server_reflection(SERVICE_NAMES, server)
-        logger.info("gRPC reflection enabled")
+        logger.info("grpc reflection enabled")
 
     server.add_insecure_port(f"[::]:{grpc_port}")
-    logger.info(f"recommendation microservice started on port {grpc_port}")
+    logger.info("recommendation microservice started", extra={"port": grpc_port})
 
     try:
         server.start()
         server.wait_for_termination()
     except KeyboardInterrupt:
-        logger.info("Stopping recommendation microservice...")
+        logger.info("stopping recommendation microservice")
         server.stop(0)
         db_pool.closeall()
 
