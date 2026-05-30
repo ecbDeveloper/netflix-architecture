@@ -3,10 +3,11 @@ INSERT INTO contents (
   id, 
   title, 
   content_type, 
+  genre_id,
   description, 
   release_date, 
   maturity_rating
-) VALUES ($1, $2, $3, $4, $5, $6)
+) VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING *;
 
 -- name: ListContents :many

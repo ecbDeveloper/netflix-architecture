@@ -124,6 +124,7 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 		Description:    input.Description,
 		ReleaseDate:    date,
 		MaturityRating: graphQLToDBMaturityRating(input.MaturityRating),
+		GenreID:        input.GenreID,
 	}
 
 	err = qtx.CreateContent(ctx, createContentParams)

@@ -17,10 +17,11 @@ INSERT INTO contents (
   id, 
   title, 
   content_type, 
+  genre_id,
   description, 
   release_date, 
   maturity_rating
-) VALUES ($1, $2, $3, $4, $5, $6)
+) VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id
 `
 
@@ -28,6 +29,7 @@ type CreateContentParams struct {
 	ID             uuid.UUID      `json:"id"`
 	Title          string         `json:"title"`
 	ContentType    ContentType    `json:"content_type"`
+	GenreID        int32          `json:"genre_id"`
 	Description    string         `json:"description"`
 	ReleaseDate    time.Time      `json:"release_date"`
 	MaturityRating MaturityRating `json:"maturity_rating"`
@@ -38,6 +40,7 @@ func (q *Queries) CreateContent(ctx context.Context, arg CreateContentParams) er
 		arg.ID,
 		arg.Title,
 		arg.ContentType,
+		arg.GenreID,
 		arg.Description,
 		arg.ReleaseDate,
 		arg.MaturityRating,
