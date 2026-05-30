@@ -44,6 +44,19 @@ services:
     volumes:
       - redis-data:/data
 
+  minio:
+    container_name: minio
+    image: minio/minio
+    ports:
+      - ${MINIO_API_PORT}:9000
+      - ${MINIO_CONSOLE_PORT}:9001
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+      MINIO_DEFAULT_BUCKETS: contents
+    volumes:
+      - minio-data:/data
+
   api:
     container_name: api
     ports:
@@ -86,3 +99,4 @@ volumes:
   history-postgres-data:
   recommendation-postgres-data:
   redis-data:
+  minio-data:
