@@ -1,11 +1,11 @@
 -- Write your migrate up statements here
 CREATE TABLE content_genres (
-  id SERIAL PRIMARY KEY,
+  id          SERIAL       PRIMARY KEY,
   description VARCHAR(100) NOT NULL
 );
 
 INSERT INTO content_genres (description)
-VALUES 
+VALUES
   ('Action'),
   ('Comedy'),
   ('Drama'),

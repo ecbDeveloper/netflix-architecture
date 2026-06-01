@@ -1,0 +1,15 @@
+-- Write your migrate up statements here
+CREATE TABLE users (
+  id         UUID         PRIMARY KEY,
+  email      VARCHAR(320) NOT NULL UNIQUE,
+  name       VARCHAR(200) NOT NULL,
+  cpf        VARCHAR(11)  NOT NULL UNIQUE,
+  password   VARCHAR(255) NOT NULL,
+  role_id    INT          NOT NULL REFERENCES users_roles(id) ON UPDATE CASCADE,
+  created_at TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+---- create above / drop below ----
+DROP TABLE IF EXISTS users;
+-- Write your migrate down statements here. If this migration is irreversible
+-- Then delete the separator line above.

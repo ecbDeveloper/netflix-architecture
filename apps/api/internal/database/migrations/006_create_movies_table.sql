@@ -1,12 +1,10 @@
 -- Write your migrate up statements here
-CREATE TABLE users_roles (
-  id SERIAL PRIMARY KEY,
-  role VARCHAR(20) UNIQUE NOT NULL
+CREATE TABLE movies (
+  content_id       UUID PRIMARY KEY REFERENCES contents(id) ON DELETE CASCADE,
+  duration_minutes INT  NOT NULL,
+  content_url      TEXT NOT NULL
 );
-
-INSERT INTO users_roles (role)
-VALUES ('admin'), ('member');
 ---- create above / drop below ----
-DROP TABLE IF EXISTS  users_roles;
+DROP TABLE IF EXISTS movies;
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.
