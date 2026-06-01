@@ -44,8 +44,21 @@ services:
     volumes:
       - redis-data:/data
 
+  s3:
+    container_name: "rustfs"
+    image: rustfs/rustfs:latest
+    ports:
+      - ${RUSTFS_PORT}:${RUSTFS_PORT}
+      - ${RUSTFS_CONSOLE_PORT}:${RUSTFS_CONSOLE_PORT}
+    environment:
+      - RUSTFS_ADDRESS=0.0.0.0:${RUSTFS_PORT}
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:${RUSTFS_CONSOLE_PORT}
+    volumes:
+      - rustfs-data:/rustfs/data
+
 volumes:
   api-postgres-data:
   history-postgres-data:
   recommendation-postgres-data:
   redis-data:
+  rustfs-data:
