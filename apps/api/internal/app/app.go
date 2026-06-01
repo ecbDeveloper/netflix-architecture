@@ -126,7 +126,7 @@ func initializeDependencies(
 ) (*resolvers.Resolver, *scs.SessionManager) {
 	queries := sqlc.New(pool)
 
-	storageService := storage.NewService(cfg.UploadPath)
+	storageService := storage.NewService(s3Client, cfg.S3BucketName, cfg.S3EndPointURL)
 	userService := user.NewService(queries)
 	profileService := profile.NewService(queries)
 	authService := auth.NewService(queries, userService)
