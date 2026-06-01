@@ -19,6 +19,11 @@ type Config struct {
 	RedisHost              string
 	RedisPort              string
 	RedisPass              string
+	S3Region               string
+	S3AccessKeyID          string
+	S3SecretAccessKey      string
+	S3EndPointURL          string
+	S3BucketName           string
 }
 
 func (c *Config) DSN() string {
@@ -51,6 +56,11 @@ func Load() (*Config, error) {
 		RedisHost:              os.Getenv("REDIS_HOST"),
 		RedisPort:              os.Getenv("REDIS_PORT"),
 		RedisPass:              os.Getenv("REDIS_PASS"),
+		S3Region:               os.Getenv("S3_REGION"),
+		S3AccessKeyID:          os.Getenv("S3_ACCESS_KEY_ID"),
+		S3SecretAccessKey:      os.Getenv("S3_SECRET_ACCESS_KEY"),
+		S3EndPointURL:          os.Getenv("S3_ENDPOINT_URL"),
+		S3BucketName:           os.Getenv("S3_BUCKET_NAME"),
 	}
 
 	if err := cfg.validate(); err != nil {
@@ -62,19 +72,24 @@ func Load() (*Config, error) {
 
 func (c *Config) validate() error {
 	required := map[string]string{
-		"API_PORT":                c.APIPort,
-		"ENV":                     c.Env,
-		"UPLOAD_PATH":             c.UploadPath,
-		"HISTORY_GRPC_ADDR":       c.HistoryGRPCAddr,
+		"API_PORT":                 c.APIPort,
+		"ENV":                      c.Env,
+		"UPLOAD_PATH":              c.UploadPath,
+		"HISTORY_GRPC_ADDR":        c.HistoryGRPCAddr,
 		"RECOMMENDATION_GRPC_ADDR": c.RecommendationGRPCAddr,
-		"DB_HOST":                 c.DBHost,
-		"DB_PORT":                 c.DBPort,
-		"DB_USER":                 c.DBUser,
-		"DB_PASS":                 c.DBPass,
-		"DB_NAME":                 c.DBName,
-		"REDIS_HOST":              c.RedisHost,
-		"REDIS_PORT":              c.RedisPort,
-		"REDIS_PASS":              c.RedisPass,
+		"DB_HOST":                  c.DBHost,
+		"DB_PORT":                  c.DBPort,
+		"DB_USER":                  c.DBUser,
+		"DB_PASS":                  c.DBPass,
+		"DB_NAME":                  c.DBName,
+		"REDIS_HOST":               c.RedisHost,
+		"REDIS_PORT":               c.RedisPort,
+		"REDIS_PASS":               c.RedisPass,
+		"S3_REGION":                c.S3Region,
+		"S3_ACCESS_KEY_ID":         c.S3AccessKeyID,
+		"S3_SECRET_ACCESS_KEY":     c.S3SecretAccessKey,
+		"S3_ENDPOINT_URL":          c.S3EndPointURL,
+		"S3_BUCKET_NAME":           c.S3BucketName,
 	}
 
 	for key, val := range required {

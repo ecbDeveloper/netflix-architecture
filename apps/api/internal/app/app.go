@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/auth"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/config"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/content"
@@ -76,6 +77,10 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 	defer recConn.Close()
 	recClient := recommendationv1.NewRecommendationServiceClient(recConn)
 
+	s3Client, err := initializeS3Client(cfg)
+	if err != nil {
+		logger.Error("failed to initialize s3 client", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	resolver, session := initializeDependencies(
@@ -85,6 +90,7 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 		logger,
 		historyClient,
 		recClient,
+		s3Client,
 	)
 	resolver.Logger = logger
 
@@ -116,6 +122,7 @@ func initializeDependencies(
 	l *slog.Logger,
 	historyClient historyv1.HistoryServiceClient,
 	recommendationClient recommendationv1.RecommendationServiceClient,
+	s3Client *s3.Client,
 ) (*resolvers.Resolver, *scs.SessionManager) {
 	queries := sqlc.New(pool)
 

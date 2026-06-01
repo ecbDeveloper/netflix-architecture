@@ -49,3 +49,21 @@ func initializeRedis(cfg *config.Config) (*redis.Pool, error) {
 
 	return pool, nil
 }
+
+func initializeS3Client(cfg *config.Config) (*s3.Client, error) {
+	awsCfg, err := awsConfig.LoadDefaultConfig(
+		context.TODO(),
+		awsConfig.WithRegion(cfg.S3Region),
+		awsConfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(cfg.S3AccessKeyID, cfg.S3SecretAccessKey, "")),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to load SDK config, %w", err)
+	}
+
+	client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(cfg.S3EndPointURL)
+		o.UsePathStyle = true
+	})
+
+	return client, nil
+}
