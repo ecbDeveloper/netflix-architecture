@@ -30,7 +30,6 @@ func NewService(s3Client *s3.Client, bucketName string, endpointURL string) Serv
 	}
 }
 
-// Upload envia o arquivo para o bucket S3 e retorna a URL pública do objeto.
 func (s *ServiceImpl) Upload(ctx context.Context, fileName string, file io.Reader) (string, error) {
 	_, err := s.S3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(s.BucketName),
@@ -46,8 +45,6 @@ func (s *ServiceImpl) Upload(ctx context.Context, fileName string, file io.Reade
 	return objectURL, nil
 }
 
-// DeleteFile remove o objeto do bucket S3. Aceita tanto a URL pública completa
-// quanto apenas a chave (nome do arquivo) do objeto.
 func (s *ServiceImpl) DeleteFile(ctx context.Context, objectURL string) error {
 	key := s.extractKey(objectURL)
 
@@ -62,21 +59,16 @@ func (s *ServiceImpl) DeleteFile(ctx context.Context, objectURL string) error {
 	return nil
 }
 
-// extractKey extrai a chave do objeto a partir de uma URL pública completa ou
-// retorna o valor original caso já seja uma chave simples.
 func (s *ServiceImpl) extractKey(objectURL string) string {
 	parsed, err := url.Parse(objectURL)
 	if err != nil || parsed.Scheme == "" {
-		// Não é uma URL válida — assume que já é a chave.
 		return objectURL
 	}
 
-	// Caminho esperado: /<bucket>/<key>  (path-style)
 	prefix := "/" + s.BucketName + "/"
 	if strings.HasPrefix(parsed.Path, prefix) {
 		return strings.TrimPrefix(parsed.Path, prefix)
 	}
 
-	// Fallback: usa o path inteiro sem a barra inicial.
 	return strings.TrimPrefix(parsed.Path, "/")
 }
