@@ -6,15 +6,14 @@ type Content {
   maturityRating: MaturityRating!
   genreId: Int!
   contentType: ContentType!
+  createdAt: String!
+  updatedAt: String!
 
   contentUrl: String
   durationMinutes: Int
   reviews: [Review!]
 
   episodes: [Episode!]
-
-  createdAt: String!
-  updatedAt: String!
 }
 
 input CreateContentInput {
