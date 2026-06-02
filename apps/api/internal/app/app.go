@@ -100,7 +100,6 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 	router := chi.NewRouter()
 	router.Use(session.LoadAndSave, middleware.RequestLogger(logger))
 
-	router.Handle("/storage/*", http.StripPrefix("/storage/", http.FileServer(http.Dir(cfg.UploadPath))))
 	router.Handle("/query", graphServer)
 
 	if cfg.IsDevelopment() {

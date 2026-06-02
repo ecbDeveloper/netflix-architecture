@@ -8,7 +8,6 @@ import (
 type Config struct {
 	APIPort                string
 	Env                    string
-	UploadPath             string
 	HistoryGRPCAddr        string
 	RecommendationGRPCAddr string
 	DBHost                 string
@@ -45,7 +44,6 @@ func Load() (*Config, error) {
 	cfg := &Config{
 		APIPort:                os.Getenv("API_PORT"),
 		Env:                    os.Getenv("ENV"),
-		UploadPath:             os.Getenv("UPLOAD_PATH"),
 		HistoryGRPCAddr:        os.Getenv("HISTORY_GRPC_ADDR"),
 		RecommendationGRPCAddr: os.Getenv("RECOMMENDATION_GRPC_ADDR"),
 		DBHost:                 os.Getenv("DB_HOST"),
@@ -74,7 +72,6 @@ func (c *Config) validate() error {
 	required := map[string]string{
 		"API_PORT":                 c.APIPort,
 		"ENV":                      c.Env,
-		"UPLOAD_PATH":              c.UploadPath,
 		"HISTORY_GRPC_ADDR":        c.HistoryGRPCAddr,
 		"RECOMMENDATION_GRPC_ADDR": c.RecommendationGRPCAddr,
 		"DB_HOST":                  c.DBHost,
