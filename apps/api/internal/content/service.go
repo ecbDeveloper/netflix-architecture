@@ -133,6 +133,7 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 			field := apperror.UniqueViolationField(err)
 			return uuid.Nil, &apperror.ConflictError{Field: field}
 		}
+
 		return uuid.Nil, fmt.Errorf("failed to insert content on database: %w", err)
 	}
 
@@ -563,6 +564,8 @@ func toGraphQlModel(c sqlc.Content, contentURL *string, durationMinutes *int32) 
 		GenreID:         c.GenreID,
 		ContentURL:      contentURL,
 		DurationMinutes: durationMinutes,
+		CreatedAt:       c.CreatedAt.String(),
+		UpdatedAt:       c.UpdatedAt.String(),
 	}
 }
 

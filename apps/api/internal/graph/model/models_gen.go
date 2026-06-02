@@ -30,6 +30,8 @@ type Content struct {
 	ContentType     ContentType    `json:"contentType"`
 	ContentURL      *string        `json:"contentUrl,omitempty"`
 	DurationMinutes *int32         `json:"durationMinutes,omitempty"`
+	CreatedAt       string         `json:"createdAt"`
+	UpdatedAt       string         `json:"updatedAt"`
 }
 
 func (Content) IsWatchedContent() {}

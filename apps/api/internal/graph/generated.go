@@ -49,6 +49,7 @@ type ComplexityRoot struct {
 	Content struct {
 		ContentType     func(childComplexity int) int
 		ContentURL      func(childComplexity int) int
+		CreatedAt       func(childComplexity int) int
 		Description     func(childComplexity int) int
 		DurationMinutes func(childComplexity int) int
 		Episodes        func(childComplexity int) int
@@ -58,6 +59,7 @@ type ComplexityRoot struct {
 		ReleaseDate     func(childComplexity int) int
 		Reviews         func(childComplexity int) int
 		Title           func(childComplexity int) int
+		UpdatedAt       func(childComplexity int) int
 	}
 
 	ContentGenre struct {
@@ -260,6 +262,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Content.ContentURL(childComplexity), true
+	case "Content.createdAt":
+		if e.ComplexityRoot.Content.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Content.CreatedAt(childComplexity), true
 	case "Content.description":
 		if e.ComplexityRoot.Content.Description == nil {
 			break
@@ -314,6 +322,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Content.Title(childComplexity), true
+	case "Content.updatedAt":
+		if e.ComplexityRoot.Content.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Content.UpdatedAt(childComplexity), true
 
 	case "ContentGenre.description":
 		if e.ComplexityRoot.ContentGenre.Description == nil {
@@ -1896,6 +1910,64 @@ func (ec *executionContext) fieldContext_Content_episodes(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Content_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Content_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Content_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Content",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Content_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Content_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Content_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Content",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ContentGenre_id(ctx context.Context, field graphql.CollectedField, obj *model.ContentGenre) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2568,6 +2640,10 @@ func (ec *executionContext) fieldContext_Mutation_updateContent(ctx context.Cont
 				return ec.fieldContext_Content_reviews(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Content_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Content_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Content", field.Name)
 		},
@@ -4184,6 +4260,10 @@ func (ec *executionContext) fieldContext_Query_getContent(ctx context.Context, f
 				return ec.fieldContext_Content_reviews(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Content_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Content_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Content", field.Name)
 		},
@@ -4268,6 +4348,10 @@ func (ec *executionContext) fieldContext_Query_listContents(_ context.Context, f
 				return ec.fieldContext_Content_reviews(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Content_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Content_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Content", field.Name)
 		},
@@ -4342,6 +4426,10 @@ func (ec *executionContext) fieldContext_Query_listContentsByType(ctx context.Co
 				return ec.fieldContext_Content_reviews(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Content_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Content_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Content", field.Name)
 		},
@@ -4427,6 +4515,10 @@ func (ec *executionContext) fieldContext_Query_listContentsByGenre(ctx context.C
 				return ec.fieldContext_Content_reviews(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Content_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Content_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Content", field.Name)
 		},
@@ -8350,6 +8442,16 @@ func (ec *executionContext) _Content(ctx context.Context, sel ast.SelectionSet, 
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "createdAt":
+			out.Values[i] = ec._Content_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Content_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

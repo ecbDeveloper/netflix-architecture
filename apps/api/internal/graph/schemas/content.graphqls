@@ -12,6 +12,9 @@ type Content {
   reviews: [Review!]
 
   episodes: [Episode!]
+
+  createdAt: String!
+  updatedAt: String!
 }
 
 input CreateContentInput {
