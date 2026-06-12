@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/app"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/config"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/server"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 )
@@ -32,5 +32,5 @@ func main() {
 
 	ctx := context.Background()
 
-	app.Run(ctx, logger, cfg)
+	server.Run(ctx, logger, cfg)
 }

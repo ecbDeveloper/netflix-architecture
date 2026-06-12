@@ -1,4 +1,4 @@
-package app
+package server
 
 import (
 	"context"
@@ -18,6 +18,11 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+var userRoleOnDB = map[model.UserRole]int32{
+	model.UserRoleAdmin:  shared.DBRoleAdmin,
+	model.UserRoleMember: shared.DBRoleMember,
+}
 
 func buildGraphQLServer(cfg graph.Config, appCfg *config.Config) *handler.Server {
 	srv := handler.New(graph.NewExecutableSchema(cfg))
