@@ -206,8 +206,10 @@ func (s *ServiceImpl) DeleteReview(ctx context.Context, id uuid.UUID, profileID 
 
 func toGraphQLModel(r sqlc.Review) *model.Review {
 	m := &model.Review{
-		ID:     r.ID,
-		Rating: r.Rating,
+		ID:        r.ID,
+		Rating:    r.Rating,
+		CreatedAt: r.CreatedAt.String(),
+		UpdatedAt: r.UpdatedAt.String(),
 	}
 
 	if r.EpisodeID.Valid {
@@ -219,12 +221,6 @@ func toGraphQLModel(r sqlc.Review) *model.Review {
 
 	if r.Comment.Valid {
 		m.Comment = &r.Comment.String
-	}
-	if r.CreatedAt.Valid {
-		m.CreatedAt = r.CreatedAt.Time.String()
-	}
-	if r.UpdatedAt.Valid {
-		m.UpdatedAt = r.UpdatedAt.Time.String()
 	}
 
 	return m
