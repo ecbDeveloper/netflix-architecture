@@ -51,7 +51,7 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 		return nil, r.handleGRPCError(err)
 	}
 
-	return protoToWatchHistory(resp.WatchHistory), nil
+	return protoWatchHistoryToGraphQL(resp.WatchHistory), nil
 }
 
 // UpdateWatchHistory is the resolver for the updateWatchHistory field.
@@ -78,7 +78,7 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID,
 		return nil, r.handleGRPCError(err)
 	}
 
-	return protoToWatchHistory(resp.WatchHistory), nil
+	return protoWatchHistoryToGraphQL(resp.WatchHistory), nil
 }
 
 // DeleteWatchHistory is the resolver for the deleteWatchHistory field.
@@ -118,7 +118,7 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*mod
 		return nil, r.handleGRPCError(err)
 	}
 
-	return protoToWatchHistory(resp.WatchHistory), nil
+	return protoWatchHistoryToGraphQL(resp.WatchHistory), nil
 }
 
 // MostWatchedContents is the resolver for the mostWatchedContents field.
@@ -186,7 +186,7 @@ func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, input *mode
 
 	result := make([]*model.WatchHistory, len(resp.Histories))
 	for i, h := range resp.Histories {
-		result[i] = protoToWatchHistory(h)
+		result[i] = protoWatchHistoryToGraphQL(h)
 	}
 	return result, nil
 }

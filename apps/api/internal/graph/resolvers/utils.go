@@ -40,7 +40,7 @@ func (r *Resolver) getProfileIDFromSession(ctx context.Context) (uuid.UUID, erro
 	return profileID, nil
 }
 
-func protoToWatchHistory(resp *historyv1.WatchHistory) *model.WatchHistory {
+func protoWatchHistoryToGraphQL(resp *historyv1.WatchHistory) *model.WatchHistory {
 	wh := &model.WatchHistory{
 		WatchedAt: resp.WatchedAt,
 	}

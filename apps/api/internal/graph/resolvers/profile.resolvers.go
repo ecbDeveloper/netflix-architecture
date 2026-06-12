@@ -100,7 +100,7 @@ func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile
 
 	result := make([]*model.WatchHistory, len(resp.Histories))
 	for i, h := range resp.Histories {
-		result[i] = protoToWatchHistory(h)
+		result[i] = protoWatchHistoryToGraphQL(h)
 	}
 
 	return result, nil
