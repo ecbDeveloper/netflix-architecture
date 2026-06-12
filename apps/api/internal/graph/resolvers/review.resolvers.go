@@ -9,7 +9,7 @@ import (
 	"context"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/generated"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/google/uuid"
 )
@@ -122,7 +122,7 @@ func (r *reviewResolver) Content(ctx context.Context, obj *model.Review) (model.
 	return nil, r.handleError(&apperror.UnprocessableEntityError{Message: "it was not possible to find the reviewed content"})
 }
 
-// Review returns graph.ReviewResolver implementation.
-func (r *Resolver) Review() graph.ReviewResolver { return &reviewResolver{r} }
+// Review returns generated.ReviewResolver implementation.
+func (r *Resolver) Review() generated.ReviewResolver { return &reviewResolver{r} }
 
 type reviewResolver struct{ *Resolver }

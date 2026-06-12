@@ -8,7 +8,7 @@ package resolvers
 import (
 	"context"
 
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/generated"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/google/uuid"
 )
@@ -83,7 +83,7 @@ func (r *queryResolver) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Ep
 	return episode, nil
 }
 
-// Episode returns graph.EpisodeResolver implementation.
-func (r *Resolver) Episode() graph.EpisodeResolver { return &episodeResolver{r} }
+// Episode returns generated.EpisodeResolver implementation.
+func (r *Resolver) Episode() generated.EpisodeResolver { return &episodeResolver{r} }
 
 type episodeResolver struct{ *Resolver }

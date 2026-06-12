@@ -9,7 +9,7 @@ import (
 	"context"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/generated"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
@@ -111,7 +111,7 @@ func (r *userResolver) Profiles(ctx context.Context, obj *model.User) ([]*model.
 	return profiles, nil
 }
 
-// User returns graph.UserResolver implementation.
-func (r *Resolver) User() graph.UserResolver { return &userResolver{r} }
+// User returns generated.UserResolver implementation.
+func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
 type userResolver struct{ *Resolver }

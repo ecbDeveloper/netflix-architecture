@@ -9,7 +9,7 @@ import (
 	"context"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/generated"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	historyv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
 	recommendationv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/recommendation/v1"
@@ -259,7 +259,7 @@ func (r *watchHistoryResolver) Content(ctx context.Context, obj *model.WatchHist
 	return nil, r.handleError(&apperror.UnprocessableEntityError{Message: "it was not possible to find the watched content"})
 }
 
-// WatchHistory returns graph.WatchHistoryResolver implementation.
-func (r *Resolver) WatchHistory() graph.WatchHistoryResolver { return &watchHistoryResolver{r} }
+// WatchHistory returns generated.WatchHistoryResolver implementation.
+func (r *Resolver) WatchHistory() generated.WatchHistoryResolver { return &watchHistoryResolver{r} }
 
 type watchHistoryResolver struct{ *Resolver }

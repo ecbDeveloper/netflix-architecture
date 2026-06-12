@@ -8,7 +8,7 @@ package resolvers
 import (
 	"context"
 
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/generated"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/google/uuid"
 )
@@ -153,7 +153,7 @@ func (r *queryResolver) ListContentsByGenre(ctx context.Context, genreID int32) 
 	return contents, nil
 }
 
-// Content returns graph.ContentResolver implementation.
-func (r *Resolver) Content() graph.ContentResolver { return &contentResolver{r} }
+// Content returns generated.ContentResolver implementation.
+func (r *Resolver) Content() generated.ContentResolver { return &contentResolver{r} }
 
 type contentResolver struct{ *Resolver }

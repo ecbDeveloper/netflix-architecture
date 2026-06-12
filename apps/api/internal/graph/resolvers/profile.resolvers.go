@@ -8,7 +8,7 @@ package resolvers
 import (
 	"context"
 
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/generated"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	historyv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
@@ -136,7 +136,7 @@ func (r *queryResolver) ListProfiles(ctx context.Context) ([]*model.Profile, err
 	return profiles, nil
 }
 
-// Profile returns graph.ProfileResolver implementation.
-func (r *Resolver) Profile() graph.ProfileResolver { return &profileResolver{r} }
+// Profile returns generated.ProfileResolver implementation.
+func (r *Resolver) Profile() generated.ProfileResolver { return &profileResolver{r} }
 
 type profileResolver struct{ *Resolver }

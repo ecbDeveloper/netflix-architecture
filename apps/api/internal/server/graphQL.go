@@ -10,7 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/alexedwards/scs/v2"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/config"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/generated"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/resolvers"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
@@ -24,8 +24,8 @@ var userRoleOnDB = map[model.UserRole]int32{
 	model.UserRoleMember: shared.DBRoleMember,
 }
 
-func buildGraphQLServer(cfg graph.Config, appCfg *config.Config) *handler.Server {
-	srv := handler.New(graph.NewExecutableSchema(cfg))
+func buildGraphQLServer(cfg generated.Config, appCfg *config.Config) *handler.Server {
+	srv := handler.New(generated.NewExecutableSchema(cfg))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -45,8 +45,8 @@ func buildGraphQLServer(cfg graph.Config, appCfg *config.Config) *handler.Server
 	return srv
 }
 
-func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager) graph.Config {
-	graphConfig := graph.Config{Resolvers: resolver}
+func initializeGraphQLConfig(resolver *resolvers.Resolver, s *scs.SessionManager) generated.Config {
+	graphConfig := generated.Config{Resolvers: resolver}
 
 	graphConfig.Directives.Auth = func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 		if !s.Exists(ctx, shared.SessionUserIDKey) {

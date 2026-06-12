@@ -28,10 +28,10 @@ type Content struct {
 	MaturityRating  MaturityRating `json:"maturityRating"`
 	GenreID         int32          `json:"genreId"`
 	ContentType     ContentType    `json:"contentType"`
-	ContentURL      *string        `json:"contentUrl,omitempty"`
-	DurationMinutes *int32         `json:"durationMinutes,omitempty"`
 	CreatedAt       string         `json:"createdAt"`
 	UpdatedAt       string         `json:"updatedAt"`
+	ContentURL      *string        `json:"contentUrl,omitempty"`
+	DurationMinutes *int32         `json:"durationMinutes,omitempty"`
 }
 
 func (Content) IsWatchedContent() {}
