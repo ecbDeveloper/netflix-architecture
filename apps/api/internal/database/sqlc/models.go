@@ -105,12 +105,12 @@ type Content struct {
 	ID             uuid.UUID      `json:"id"`
 	Title          string         `json:"title"`
 	ContentType    ContentType    `json:"content_type"`
+	GenreID        int32          `json:"genre_id"`
 	Description    string         `json:"description"`
 	ReleaseDate    time.Time      `json:"release_date"`
 	MaturityRating MaturityRating `json:"maturity_rating"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
-	GenreID        int32          `json:"genre_id"`
 }
 
 type ContentGenre struct {
@@ -146,14 +146,14 @@ type Profile struct {
 }
 
 type Review struct {
-	ID        uuid.UUID        `json:"id"`
-	ProfileID uuid.UUID        `json:"profile_id"`
-	MovieID   pgtype.UUID      `json:"movie_id"`
-	EpisodeID pgtype.UUID      `json:"episode_id"`
-	Rating    int32            `json:"rating"`
-	Comment   pgtype.Text      `json:"comment"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID        uuid.UUID   `json:"id"`
+	ProfileID uuid.UUID   `json:"profile_id"`
+	MovieID   pgtype.UUID `json:"movie_id"`
+	EpisodeID pgtype.UUID `json:"episode_id"`
+	Rating    int32       `json:"rating"`
+	Comment   pgtype.Text `json:"comment"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
 }
 
 type Series struct {
@@ -166,9 +166,9 @@ type User struct {
 	Name      string    `json:"name"`
 	Cpf       string    `json:"cpf"`
 	Password  string    `json:"password"`
+	RoleID    int32     `json:"role_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	RoleID    int32     `json:"role_id"`
 }
 
 type UsersRole struct {

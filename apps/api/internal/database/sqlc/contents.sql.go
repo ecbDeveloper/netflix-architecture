@@ -22,7 +22,7 @@ INSERT INTO contents (
   release_date, 
   maturity_rating
 ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id
+RETURNING id, title, content_type, genre_id, description, release_date, maturity_rating, created_at, updated_at
 `
 
 type CreateContentParams struct {
@@ -59,7 +59,7 @@ func (q *Queries) DeleteContent(ctx context.Context, id uuid.UUID) error {
 }
 
 const getContent = `-- name: GetContent :one
-SELECT id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id
+SELECT id, title, content_type, genre_id, description, release_date, maturity_rating, created_at, updated_at
 FROM contents
 WHERE id = $1
 `
@@ -71,18 +71,18 @@ func (q *Queries) GetContent(ctx context.Context, id uuid.UUID) (Content, error)
 		&i.ID,
 		&i.Title,
 		&i.ContentType,
+		&i.GenreID,
 		&i.Description,
 		&i.ReleaseDate,
 		&i.MaturityRating,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.GenreID,
 	)
 	return i, err
 }
 
 const listContents = `-- name: ListContents :many
-SELECT id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id FROM contents
+SELECT id, title, content_type, genre_id, description, release_date, maturity_rating, created_at, updated_at FROM contents
 `
 
 func (q *Queries) ListContents(ctx context.Context) ([]Content, error) {
@@ -98,12 +98,12 @@ func (q *Queries) ListContents(ctx context.Context) ([]Content, error) {
 			&i.ID,
 			&i.Title,
 			&i.ContentType,
+			&i.GenreID,
 			&i.Description,
 			&i.ReleaseDate,
 			&i.MaturityRating,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.GenreID,
 		); err != nil {
 			return nil, err
 		}
@@ -116,7 +116,7 @@ func (q *Queries) ListContents(ctx context.Context) ([]Content, error) {
 }
 
 const listContentsByGenre = `-- name: ListContentsByGenre :many
-SELECT id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id FROM contents
+SELECT id, title, content_type, genre_id, description, release_date, maturity_rating, created_at, updated_at FROM contents
 WHERE genre_id = $1
 `
 
@@ -133,12 +133,12 @@ func (q *Queries) ListContentsByGenre(ctx context.Context, genreID int32) ([]Con
 			&i.ID,
 			&i.Title,
 			&i.ContentType,
+			&i.GenreID,
 			&i.Description,
 			&i.ReleaseDate,
 			&i.MaturityRating,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.GenreID,
 		); err != nil {
 			return nil, err
 		}
@@ -151,7 +151,7 @@ func (q *Queries) ListContentsByGenre(ctx context.Context, genreID int32) ([]Con
 }
 
 const listContentsByType = `-- name: ListContentsByType :many
-SELECT id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id FROM contents
+SELECT id, title, content_type, genre_id, description, release_date, maturity_rating, created_at, updated_at FROM contents
 WHERE content_type = $1
 `
 
@@ -168,12 +168,12 @@ func (q *Queries) ListContentsByType(ctx context.Context, contentType ContentTyp
 			&i.ID,
 			&i.Title,
 			&i.ContentType,
+			&i.GenreID,
 			&i.Description,
 			&i.ReleaseDate,
 			&i.MaturityRating,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.GenreID,
 		); err != nil {
 			return nil, err
 		}
@@ -186,7 +186,7 @@ func (q *Queries) ListContentsByType(ctx context.Context, contentType ContentTyp
 }
 
 const listKidsContents = `-- name: ListKidsContents :many
-SELECT id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id FROM contents
+SELECT id, title, content_type, genre_id, description, release_date, maturity_rating, created_at, updated_at FROM contents
 WHERE maturity_rating = 'L'
 `
 
@@ -203,12 +203,12 @@ func (q *Queries) ListKidsContents(ctx context.Context) ([]Content, error) {
 			&i.ID,
 			&i.Title,
 			&i.ContentType,
+			&i.GenreID,
 			&i.Description,
 			&i.ReleaseDate,
 			&i.MaturityRating,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.GenreID,
 		); err != nil {
 			return nil, err
 		}
@@ -221,7 +221,7 @@ func (q *Queries) ListKidsContents(ctx context.Context) ([]Content, error) {
 }
 
 const listKidsContentsByGenre = `-- name: ListKidsContentsByGenre :many
-SELECT id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id FROM contents
+SELECT id, title, content_type, genre_id, description, release_date, maturity_rating, created_at, updated_at FROM contents
 WHERE maturity_rating = 'L'
 AND genre_id = $1
 `
@@ -239,12 +239,12 @@ func (q *Queries) ListKidsContentsByGenre(ctx context.Context, genreID int32) ([
 			&i.ID,
 			&i.Title,
 			&i.ContentType,
+			&i.GenreID,
 			&i.Description,
 			&i.ReleaseDate,
 			&i.MaturityRating,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.GenreID,
 		); err != nil {
 			return nil, err
 		}
@@ -257,7 +257,7 @@ func (q *Queries) ListKidsContentsByGenre(ctx context.Context, genreID int32) ([
 }
 
 const listKidsContentsByType = `-- name: ListKidsContentsByType :many
-SELECT id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id FROM contents
+SELECT id, title, content_type, genre_id, description, release_date, maturity_rating, created_at, updated_at FROM contents
 WHERE maturity_rating = 'L'
 AND content_type = $1
 `
@@ -275,12 +275,12 @@ func (q *Queries) ListKidsContentsByType(ctx context.Context, contentType Conten
 			&i.ID,
 			&i.Title,
 			&i.ContentType,
+			&i.GenreID,
 			&i.Description,
 			&i.ReleaseDate,
 			&i.MaturityRating,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.GenreID,
 		); err != nil {
 			return nil, err
 		}
@@ -300,7 +300,7 @@ UPDATE contents SET
   release_date = $5, 
   maturity_rating = $6
 WHERE id = $1
-RETURNING id, title, content_type, description, release_date, maturity_rating, created_at, updated_at, genre_id
+RETURNING id, title, content_type, genre_id, description, release_date, maturity_rating, created_at, updated_at
 `
 
 type UpdateContentParams struct {
@@ -326,12 +326,12 @@ func (q *Queries) UpdateContent(ctx context.Context, arg UpdateContentParams) (C
 		&i.ID,
 		&i.Title,
 		&i.ContentType,
+		&i.GenreID,
 		&i.Description,
 		&i.ReleaseDate,
 		&i.MaturityRating,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.GenreID,
 	)
 	return i, err
 }
