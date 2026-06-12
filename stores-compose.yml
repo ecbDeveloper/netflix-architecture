@@ -45,7 +45,7 @@ services:
       - redis-data:/data
 
   s3:
-    container_name: "rustfs"
+    container_name: s3
     image: rustfs/rustfs:latest
     ports:
       - ${RUSTFS_PORT}:${RUSTFS_PORT}
