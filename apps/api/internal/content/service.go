@@ -29,6 +29,7 @@ type Service interface {
 }
 
 type ServiceImpl struct {
+	repo           Repository
 	queries        *sqlc.Queries
 	pool           *pgxpool.Pool
 	storage        storage.Service
@@ -37,6 +38,7 @@ type ServiceImpl struct {
 
 func NewService(queries *sqlc.Queries, pool *pgxpool.Pool, storage storage.Service, ps profile.Service) Service {
 	return &ServiceImpl{
+		repo:           queries,
 		queries:        queries,
 		pool:           pool,
 		storage:        storage,
@@ -81,7 +83,7 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 		}
 	}
 
-	genres, err := s.queries.ListContentGenres(ctx)
+	genres, err := s.repo.ListContentGenres(ctx)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("failed to get content genres list from database: %w", err)
 	}
@@ -176,7 +178,7 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 }
 
 func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input model.UpdateContentInput) (*model.Content, error) {
-	current, err := s.queries.GetContent(ctx, id)
+	current, err := s.repo.GetContent(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "content"}
@@ -215,7 +217,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 
 	if input.GenreID != nil {
 		genreWasFounded := false
-		genres, err := s.queries.ListContentGenres(ctx)
+		genres, err := s.repo.ListContentGenres(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get content genres list from database: %w", err)
 		}
@@ -281,7 +283,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 	var currentMovie sqlc.GetMovieRow
 	var oldURL, contentURL string
 	if current.ContentType == sqlc.ContentTypeMOVIE {
-		currentMovie, err = s.queries.GetMovie(ctx, id)
+		currentMovie, err = s.repo.GetMovie(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return nil, &apperror.NotFoundError{Entity: "movie"}
@@ -338,7 +340,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 }
 
 func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
-	content, err := s.queries.GetContent(ctx, id)
+	content, err := s.repo.GetContent(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "content"}
@@ -348,7 +350,7 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 
 	var movie sqlc.GetMovieRow
 	if content.ContentType == sqlc.ContentTypeMOVIE {
-		movie, err = s.queries.GetMovie(ctx, id)
+		movie, err = s.repo.GetMovie(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return &apperror.NotFoundError{Entity: "movie"}
@@ -359,7 +361,7 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 
 	var episodes []sqlc.Episode
 	if content.ContentType == sqlc.ContentTypeSERIES {
-		episodes, err = s.queries.ListEpisodesBySeries(ctx, id)
+		episodes, err = s.repo.ListEpisodesBySeries(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return &apperror.NotFoundError{Entity: "series"}
@@ -368,7 +370,7 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 		}
 	}
 
-	err = s.queries.DeleteContent(ctx, id)
+	err = s.repo.DeleteContent(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete content from database: %w", err)
 	}
@@ -398,12 +400,12 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, use
 
 	var contents []sqlc.Content
 	if profile.HasParentalControls {
-		contents, err = s.queries.ListKidsContents(ctx)
+		contents, err = s.repo.ListKidsContents(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to list contents from database: %w", err)
 		}
 	} else {
-		contents, err = s.queries.ListContents(ctx)
+		contents, err = s.repo.ListContents(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to list contents from database: %w", err)
 		}
@@ -412,7 +414,7 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, use
 	result := make([]*model.Content, len(contents))
 	for i, content := range contents {
 		if content.ContentType == sqlc.ContentTypeMOVIE {
-			movie, err := s.queries.GetMovie(ctx, content.ID)
+			movie, err := s.repo.GetMovie(ctx, content.ID)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
@@ -436,12 +438,12 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 
 	var contents []sqlc.Content
 	if profile.HasParentalControls {
-		contents, err = s.queries.ListKidsContentsByType(ctx, sqlc.ContentType(contentType))
+		contents, err = s.repo.ListKidsContentsByType(ctx, sqlc.ContentType(contentType))
 		if err != nil {
 			return nil, fmt.Errorf("failed to list contents by type from database: %w", err)
 		}
 	} else {
-		contents, err = s.queries.ListContentsByType(ctx, sqlc.ContentType(contentType))
+		contents, err = s.repo.ListContentsByType(ctx, sqlc.ContentType(contentType))
 		if err != nil {
 			return nil, fmt.Errorf("failed to list contents by type from database: %w", err)
 		}
@@ -450,7 +452,7 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 	result := make([]*model.Content, len(contents))
 	for i, content := range contents {
 		if content.ContentType == sqlc.ContentTypeMOVIE {
-			movie, err := s.queries.GetMovie(ctx, content.ID)
+			movie, err := s.repo.GetMovie(ctx, content.ID)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
@@ -467,7 +469,7 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 }
 
 func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UUID, userID uuid.UUID, genreID int32) ([]*model.Content, error) {
-	genres, err := s.queries.ListContentGenres(ctx)
+	genres, err := s.repo.ListContentGenres(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get content genres list from database: %w", err)
 	}
@@ -491,12 +493,12 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 
 	var contents []sqlc.Content
 	if profile.HasParentalControls {
-		contents, err = s.queries.ListKidsContentsByGenre(ctx, genreID)
+		contents, err = s.repo.ListKidsContentsByGenre(ctx, genreID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to list contents by type from database: %w", err)
 		}
 	} else {
-		contents, err = s.queries.ListContentsByGenre(ctx, genreID)
+		contents, err = s.repo.ListContentsByGenre(ctx, genreID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to list contents by type from database: %w", err)
 		}
@@ -505,7 +507,7 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 	result := make([]*model.Content, len(contents))
 	for i, content := range contents {
 		if content.ContentType == sqlc.ContentTypeMOVIE {
-			movie, err := s.queries.GetMovie(ctx, content.ID)
+			movie, err := s.repo.GetMovie(ctx, content.ID)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
@@ -527,7 +529,7 @@ func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, fmt.Errorf("failed to get profile %v: %w", profileID, err)
 	}
 
-	content, err := s.queries.GetContent(ctx, id)
+	content, err := s.repo.GetContent(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "content"}
@@ -540,7 +542,7 @@ func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uu
 	}
 
 	if content.ContentType == sqlc.ContentTypeMOVIE {
-		movie, err := s.queries.GetMovie(ctx, id)
+		movie, err := s.repo.GetMovie(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return nil, &apperror.NotFoundError{Entity: "movie"}

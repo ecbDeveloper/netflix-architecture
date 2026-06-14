@@ -22,12 +22,12 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	queries *sqlc.Queries
+	repo Repository
 }
 
-func NewService(queries *sqlc.Queries) Service {
+func NewService(repo Repository) Service {
 	return &ServiceImpl{
-		queries: queries,
+		repo: repo,
 	}
 }
 
@@ -43,7 +43,7 @@ func (s *ServiceImpl) CreateProfile(ctx context.Context, input model.CreateProfi
 		hasParentalControls = *input.HasParentalControls
 	}
 
-	p, err := s.queries.CreateProfile(ctx, sqlc.CreateProfileParams{
+	p, err := s.repo.CreateProfile(ctx, sqlc.CreateProfileParams{
 		ID:                  profileID,
 		UserID:              userID,
 		Name:                input.Name,
@@ -60,7 +60,7 @@ func (s *ServiceImpl) CreateProfile(ctx context.Context, input model.CreateProfi
 }
 
 func (s *ServiceImpl) GetProfile(ctx context.Context, id uuid.UUID, userID uuid.UUID) (*model.Profile, error) {
-	p, err := s.queries.GetProfile(ctx, id)
+	p, err := s.repo.GetProfile(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "profile"}
@@ -76,7 +76,7 @@ func (s *ServiceImpl) GetProfile(ctx context.Context, id uuid.UUID, userID uuid.
 }
 
 func (s *ServiceImpl) ListProfilesByUser(ctx context.Context, userID uuid.UUID) ([]*model.Profile, error) {
-	profiles, err := s.queries.ListProfilesByUser(ctx, userID)
+	profiles, err := s.repo.ListProfilesByUser(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all profiles from database: %w", err)
 	}
@@ -93,7 +93,7 @@ func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input mod
 		return nil, &apperror.ValidationError{Field: "name", Message: "profile name cannot be empty"}
 	}
 
-	current, err := s.queries.GetProfile(ctx, id)
+	current, err := s.repo.GetProfile(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "profile"}
@@ -118,7 +118,7 @@ func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input mod
 		params.HasParentalControls = *input.HasParentalControls
 	}
 
-	p, err := s.queries.UpdateProfile(ctx, params)
+	p, err := s.repo.UpdateProfile(ctx, params)
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
 			return nil, &apperror.ConflictError{Field: "name"}
@@ -130,7 +130,7 @@ func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input mod
 }
 
 func (s *ServiceImpl) DeleteProfile(ctx context.Context, id uuid.UUID, userID uuid.UUID) error {
-	current, err := s.queries.GetProfile(ctx, id)
+	current, err := s.repo.GetProfile(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "profile"}
@@ -142,7 +142,7 @@ func (s *ServiceImpl) DeleteProfile(ctx context.Context, id uuid.UUID, userID uu
 		return &apperror.ForbiddenError{Message: "you can't delete profiles that's not yours"}
 	}
 
-	if err := s.queries.DeleteProfile(ctx, id); err != nil {
+	if err := s.repo.DeleteProfile(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "profile"}
 		}

@@ -24,14 +24,14 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	queries        *sqlc.Queries
+	repo           Repository
 	storageService storage.Service
 	profileService profile.Service
 }
 
-func NewService(queries *sqlc.Queries, storageService storage.Service, ps profile.Service) Service {
+func NewService(repo Repository, storageService storage.Service, ps profile.Service) Service {
 	return &ServiceImpl{
-		queries:        queries,
+		repo:           repo,
 		storageService: storageService,
 		profileService: ps,
 	}
@@ -61,7 +61,7 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 		return nil, fmt.Errorf("failed to upload episode file: %w", err)
 	}
 
-	ep, err := s.queries.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
+	ep, err := s.repo.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
 		ID:              episodeID,
 		SeriesID:        input.SeriesID,
 		Season:          input.Season,
@@ -86,7 +86,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, fmt.Errorf("failed to get profile %v: %w", profileID, err)
 	}
 
-	ep, err := s.queries.GetEpisode(ctx, id)
+	ep, err := s.repo.GetEpisode(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "episode"}
@@ -94,7 +94,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, fmt.Errorf("failed to fetch episode %v from database: %w", id, err)
 	}
 
-	series, err := s.queries.GetSeries(ctx, ep.SeriesID)
+	series, err := s.repo.GetSeries(ctx, ep.SeriesID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "series"}
@@ -115,7 +115,7 @@ func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UU
 		return nil, fmt.Errorf("failed to get profile %v from database: %w", profileID, err)
 	}
 
-	series, err := s.queries.GetSeries(ctx, seriesID)
+	series, err := s.repo.GetSeries(ctx, seriesID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "series"}
@@ -127,7 +127,7 @@ func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UU
 		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
-	episodes, err := s.queries.ListEpisodesBySeries(ctx, seriesID)
+	episodes, err := s.repo.ListEpisodesBySeries(ctx, seriesID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all episodes from series %v from database: %w", seriesID, err)
 	}
@@ -153,7 +153,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: "duration must be greater than zero"}
 	}
 
-	current, err := s.queries.GetEpisode(ctx, id)
+	current, err := s.repo.GetEpisode(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "episode"}
@@ -194,7 +194,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		}
 	}
 
-	ep, err := s.queries.UpdateEpisode(ctx, params)
+	ep, err := s.repo.UpdateEpisode(ctx, params)
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
 			return nil, &apperror.ConflictError{Field: "episode (season + number)"}
@@ -206,7 +206,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 }
 
 func (s *ServiceImpl) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
-	if err := s.queries.DeleteEpisode(ctx, id); err != nil {
+	if err := s.repo.DeleteEpisode(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "episode"}
 		}

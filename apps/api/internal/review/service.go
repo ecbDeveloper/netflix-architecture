@@ -25,13 +25,13 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	queries        *sqlc.Queries
+	repo           Repository
 	episodeService episode.Service
 }
 
-func NewService(queries *sqlc.Queries, es episode.Service) Service {
+func NewService(repo Repository, es episode.Service) Service {
 	return &ServiceImpl{
-		queries:        queries,
+		repo:           repo,
 		episodeService: es,
 	}
 }
@@ -65,7 +65,7 @@ func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReview
 		params.Comment = pgtype.Text{String: *input.Comment, Valid: true}
 	}
 
-	r, err := s.queries.CreateReview(ctx, params)
+	r, err := s.repo.CreateReview(ctx, params)
 	if err != nil {
 		if apperror.IsUniqueViolation(err) {
 			return nil, &apperror.ConflictError{Field: "review + (episode or movie)"}
@@ -77,7 +77,7 @@ func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReview
 }
 
 func (s *ServiceImpl) GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error) {
-	r, err := s.queries.GetReview(ctx, id)
+	r, err := s.repo.GetReview(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "review"}
@@ -89,7 +89,7 @@ func (s *ServiceImpl) GetReview(ctx context.Context, id uuid.UUID) (*model.Revie
 }
 
 func (s *ServiceImpl) ListReviewsByProfile(ctx context.Context, profileID uuid.UUID) ([]*model.Review, error) {
-	reviews, err := s.queries.ListReviewsByProfile(ctx, profileID)
+	reviews, err := s.repo.ListReviewsByProfile(ctx, profileID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all reviews from database: %w", err)
 	}
@@ -108,7 +108,7 @@ func (s *ServiceImpl) ListReviewsByEpisode(ctx context.Context, episodeID uuid.U
 	}
 
 	episodeIDPG := pgtype.UUID{Bytes: episodeID, Valid: true}
-	reviews, err := s.queries.ListReviewsByEpisode(ctx, episodeIDPG)
+	reviews, err := s.repo.ListReviewsByEpisode(ctx, episodeIDPG)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all reviews from database: %w", err)
 	}
@@ -122,7 +122,7 @@ func (s *ServiceImpl) ListReviewsByEpisode(ctx context.Context, episodeID uuid.U
 }
 
 func (s *ServiceImpl) ListReviewsByMovie(ctx context.Context, movieID uuid.UUID) ([]*model.Review, error) {
-	_, err := s.queries.GetMovie(ctx, movieID)
+	_, err := s.repo.GetMovie(ctx, movieID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "movie"}
@@ -131,7 +131,7 @@ func (s *ServiceImpl) ListReviewsByMovie(ctx context.Context, movieID uuid.UUID)
 	}
 
 	movieIDPG := pgtype.UUID{Bytes: movieID, Valid: true}
-	reviews, err := s.queries.ListReviewsByMovie(ctx, movieIDPG)
+	reviews, err := s.repo.ListReviewsByMovie(ctx, movieIDPG)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all movie %v reviews from database: %w", movieID, err)
 	}
@@ -149,7 +149,7 @@ func (s *ServiceImpl) UpdateReview(ctx context.Context, id uuid.UUID, input mode
 		return nil, &apperror.ValidationError{Field: "rating", Message: "rating must be between 1 and 5"}
 	}
 
-	current, err := s.queries.GetReview(ctx, id)
+	current, err := s.repo.GetReview(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "review"}
@@ -174,7 +174,7 @@ func (s *ServiceImpl) UpdateReview(ctx context.Context, id uuid.UUID, input mode
 		params.Comment = pgtype.Text{String: *input.Comment, Valid: true}
 	}
 
-	r, err := s.queries.UpdateReview(ctx, params)
+	r, err := s.repo.UpdateReview(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update review %v from database: %w", id, err)
 	}
@@ -183,7 +183,7 @@ func (s *ServiceImpl) UpdateReview(ctx context.Context, id uuid.UUID, input mode
 }
 
 func (s *ServiceImpl) DeleteReview(ctx context.Context, id uuid.UUID, profileID uuid.UUID) error {
-	current, err := s.queries.GetReview(ctx, id)
+	current, err := s.repo.GetReview(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "review"}
@@ -195,7 +195,7 @@ func (s *ServiceImpl) DeleteReview(ctx context.Context, id uuid.UUID, profileID 
 		return &apperror.ForbiddenError{Message: "you can't delete reviews that's not yours"}
 	}
 
-	if err := s.queries.DeleteReview(ctx, id); err != nil {
+	if err := s.repo.DeleteReview(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "review"}
 		}

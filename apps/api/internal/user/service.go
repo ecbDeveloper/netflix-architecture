@@ -24,12 +24,12 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	queries *sqlc.Queries
+	repo Repository
 }
 
-func NewService(queries *sqlc.Queries) Service {
+func NewService(repo Repository) Service {
 	return &ServiceImpl{
-		queries: queries,
+		repo: repo,
 	}
 }
 
@@ -62,7 +62,7 @@ func (s *ServiceImpl) CreateUser(ctx context.Context, input model.CreateUserInpu
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	user, err := s.queries.CreateUser(ctx, sqlc.CreateUserParams{
+	user, err := s.repo.CreateUser(ctx, sqlc.CreateUserParams{
 		ID:       userID,
 		Email:    input.Email,
 		Name:     input.Name,
@@ -81,7 +81,7 @@ func (s *ServiceImpl) CreateUser(ctx context.Context, input model.CreateUserInpu
 }
 
 func (s *ServiceImpl) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
-	user, err := s.queries.GetUser(ctx, id)
+	user, err := s.repo.GetUser(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "user"}
@@ -93,7 +93,7 @@ func (s *ServiceImpl) GetUser(ctx context.Context, id uuid.UUID) (*model.User, e
 }
 
 func (s *ServiceImpl) ListUsers(ctx context.Context) ([]*model.User, error) {
-	users, err := s.queries.ListUsers(ctx)
+	users, err := s.repo.ListUsers(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all users from database: %w", err)
 	}
@@ -106,7 +106,7 @@ func (s *ServiceImpl) ListUsers(ctx context.Context) ([]*model.User, error) {
 }
 
 func (s *ServiceImpl) UpdateUser(ctx context.Context, id uuid.UUID, input model.UpdateUserInput) (*model.User, error) {
-	storedUser, err := s.queries.GetUser(ctx, id)
+	storedUser, err := s.repo.GetUser(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "user"}
@@ -144,7 +144,7 @@ func (s *ServiceImpl) UpdateUser(ctx context.Context, id uuid.UUID, input model.
 		updateParams.Password = string(hashedPassword)
 	}
 
-	user, err := s.queries.UpdateUser(ctx, updateParams)
+	user, err := s.repo.UpdateUser(ctx, updateParams)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "user"}
@@ -160,7 +160,7 @@ func (s *ServiceImpl) UpdateUser(ctx context.Context, id uuid.UUID, input model.
 }
 
 func (s *ServiceImpl) DeleteUser(ctx context.Context, id uuid.UUID) error {
-	if err := s.queries.DeleteUser(ctx, id); err != nil {
+	if err := s.repo.DeleteUser(ctx, id); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &apperror.NotFoundError{Entity: "user"}
 		}
@@ -171,7 +171,7 @@ func (s *ServiceImpl) DeleteUser(ctx context.Context, id uuid.UUID) error {
 }
 
 func (s *ServiceImpl) GetUserByEmail(ctx context.Context, email string) (*sqlc.User, error) {
-	user, err := s.queries.GetUserByEmail(ctx, email)
+	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &apperror.NotFoundError{Entity: "user"}
