@@ -9,9 +9,9 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/infra/storage"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -26,14 +26,14 @@ type Service interface {
 
 type ServiceImpl struct {
 	repo           Repository
-	storageService storage.Service
+	storage        storage.Service
 	profileService profile.Service
 }
 
 func NewService(repo Repository, storageService storage.Service, ps profile.Service) Service {
 	return &ServiceImpl{
 		repo:           repo,
-		storageService: storageService,
+		storage:        storageService,
 		profileService: ps,
 	}
 }
@@ -57,7 +57,7 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 
 	episodeID := uuid.New()
 
-	contentURL, err := s.storageService.Upload(ctx, input.EpisodeFile.Filename, input.EpisodeFile.File)
+	contentURL, err := s.storage.Upload(ctx, input.EpisodeFile.Filename, input.EpisodeFile.File)
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload episode file: %w", err)
 	}
@@ -203,7 +203,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 	}
 
 	if input.EpisodeFile.File != nil {
-		contentURL, err := s.storageService.Upload(ctx, input.EpisodeFile.Filename, input.EpisodeFile.File)
+		contentURL, err := s.storage.Upload(ctx, input.EpisodeFile.Filename, input.EpisodeFile.File)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update episode file content: %w", err)
 		}
