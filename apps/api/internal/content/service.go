@@ -11,7 +11,6 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -332,7 +331,8 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 		go s.storage.DeleteFile(context.Background(), oldURL)
 	}
 
-	if content.ContentType == sqlc.ContentTypeMOVIE {
+	entity := toContentEntity(content)
+	if entity.IsMovie() {
 		return toGraphQlModel(content, &currentMovie.ContentUrl, &currentMovie.DurationMinutes), nil
 	}
 
@@ -348,8 +348,10 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 		return fmt.Errorf("failed to get content from database: %w", err)
 	}
 
+	contentEntity := toContentEntity(content)
+
 	var movie sqlc.GetMovieRow
-	if content.ContentType == sqlc.ContentTypeMOVIE {
+	if contentEntity.IsMovie() {
 		movie, err = s.repo.GetMovie(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
@@ -360,7 +362,7 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 	}
 
 	var episodes []sqlc.Episode
-	if content.ContentType == sqlc.ContentTypeSERIES {
+	if contentEntity.IsSeries() {
 		episodes, err = s.repo.ListEpisodesBySeries(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
@@ -375,13 +377,13 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 		return fmt.Errorf("failed to delete content from database: %w", err)
 	}
 
-	if content.ContentType == sqlc.ContentTypeMOVIE {
+	if contentEntity.IsMovie() {
 		if movie.ContentUrl != "" {
 			go s.storage.DeleteFile(context.Background(), movie.ContentUrl)
 		}
 	}
 
-	if content.ContentType == sqlc.ContentTypeSERIES {
+	if contentEntity.IsSeries() {
 		for _, episode := range episodes {
 			if episode.ContentUrl != "" {
 				go s.storage.DeleteFile(context.Background(), episode.ContentUrl)
@@ -412,18 +414,17 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, use
 	}
 
 	result := make([]*model.Content, len(contents))
-	for i, content := range contents {
-		if content.ContentType == sqlc.ContentTypeMOVIE {
-			movie, err := s.repo.GetMovie(ctx, content.ID)
+	for i, c := range contents {
+		entity := toContentEntity(c)
+		if entity.IsMovie() {
+			movie, err := s.repo.GetMovie(ctx, c.ID)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
-
-			result[i] = toGraphQlModel(content, &movie.ContentUrl, &movie.DurationMinutes)
+			result[i] = toGraphQlModel(c, &movie.ContentUrl, &movie.DurationMinutes)
 		}
-
-		if content.ContentType == sqlc.ContentTypeSERIES {
-			result[i] = toGraphQlModel(content, nil, nil)
+		if entity.IsSeries() {
+			result[i] = toGraphQlModel(c, nil, nil)
 		}
 	}
 
@@ -450,18 +451,17 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 	}
 
 	result := make([]*model.Content, len(contents))
-	for i, content := range contents {
-		if content.ContentType == sqlc.ContentTypeMOVIE {
-			movie, err := s.repo.GetMovie(ctx, content.ID)
+	for i, c := range contents {
+		entity := toContentEntity(c)
+		if entity.IsMovie() {
+			movie, err := s.repo.GetMovie(ctx, c.ID)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
-
-			result[i] = toGraphQlModel(content, &movie.ContentUrl, &movie.DurationMinutes)
+			result[i] = toGraphQlModel(c, &movie.ContentUrl, &movie.DurationMinutes)
 		}
-
-		if content.ContentType == sqlc.ContentTypeSERIES {
-			result[i] = toGraphQlModel(content, nil, nil)
+		if entity.IsSeries() {
+			result[i] = toGraphQlModel(c, nil, nil)
 		}
 	}
 
@@ -505,18 +505,17 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 	}
 
 	result := make([]*model.Content, len(contents))
-	for i, content := range contents {
-		if content.ContentType == sqlc.ContentTypeMOVIE {
-			movie, err := s.repo.GetMovie(ctx, content.ID)
+	for i, c := range contents {
+		entity := toContentEntity(c)
+		if entity.IsMovie() {
+			movie, err := s.repo.GetMovie(ctx, c.ID)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
-
-			result[i] = toGraphQlModel(content, &movie.ContentUrl, &movie.DurationMinutes)
+			result[i] = toGraphQlModel(c, &movie.ContentUrl, &movie.DurationMinutes)
 		}
-
-		if content.ContentType == sqlc.ContentTypeSERIES {
-			result[i] = toGraphQlModel(content, nil, nil)
+		if entity.IsSeries() {
+			result[i] = toGraphQlModel(c, nil, nil)
 		}
 	}
 
@@ -537,11 +536,12 @@ func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, fmt.Errorf("failed to fetch content %v from database: %w", id, err)
 	}
 
-	if profile.HasParentalControls && content.MaturityRating != sqlc.MaturityRatingL {
+	contentEntity := toContentEntity(content)
+	if !contentEntity.IsAccessibleBy(profile.HasParentalControls) {
 		return nil, &apperror.ForbiddenError{Message: "you can't access this content, because your profile has parental control"}
 	}
 
-	if content.ContentType == sqlc.ContentTypeMOVIE {
+	if contentEntity.IsMovie() {
 		movie, err := s.repo.GetMovie(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
@@ -553,27 +553,4 @@ func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uu
 	}
 
 	return toGraphQlModel(content, nil, nil), nil
-}
-
-func toGraphQlModel(c sqlc.Content, contentURL *string, durationMinutes *int32) *model.Content {
-	return &model.Content{
-		ID:              c.ID,
-		Title:           c.Title,
-		Description:     c.Description,
-		MaturityRating:  model.MaturityRating(c.MaturityRating),
-		ContentType:     model.ContentType(c.ContentType),
-		ReleaseDate:     c.ReleaseDate.String(),
-		GenreID:         c.GenreID,
-		ContentURL:      contentURL,
-		DurationMinutes: durationMinutes,
-		CreatedAt:       c.CreatedAt.String(),
-		UpdatedAt:       c.UpdatedAt.String(),
-	}
-}
-
-func graphQLToDBMaturityRating(maturityRating model.MaturityRating) sqlc.MaturityRating {
-	prefix := shared.MaturityRatingPrefix
-	normalizedMaturityRating := strings.TrimPrefix(maturityRating.String(), prefix)
-
-	return sqlc.MaturityRating(normalizedMaturityRating)
 }

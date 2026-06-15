@@ -10,6 +10,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/storage"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -38,17 +39,17 @@ func NewService(repo Repository, storageService storage.Service, ps profile.Serv
 }
 
 func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error) {
-	if strings.TrimSpace(input.Title) == "" {
+	if input.Title == "" {
 		return nil, &apperror.ValidationError{Field: "title", Message: "title is required"}
 	}
-	if input.Season <= 0 {
-		return nil, &apperror.ValidationError{Field: "season", Message: "season must be greater than zero"}
+	if _, err := NewSeason(input.Season); err != nil {
+		return nil, &apperror.ValidationError{Field: "season", Message: err.Error()}
 	}
-	if input.EpisodeNumber <= 0 {
-		return nil, &apperror.ValidationError{Field: "episodeNumber", Message: "episode number must be greater than zero"}
+	if _, err := NewEpisodeNumber(input.EpisodeNumber); err != nil {
+		return nil, &apperror.ValidationError{Field: "episodeNumber", Message: err.Error()}
 	}
-	if input.DurationMinutes <= 0 {
-		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: "duration must be greater than zero"}
+	if _, err := NewDuration(input.DurationMinutes); err != nil {
+		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: err.Error()}
 	}
 	if input.EpisodeFile.File == nil {
 		return nil, &apperror.ValidationError{Field: "episodeFile", Message: "episode file is required"}
@@ -94,6 +95,8 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, fmt.Errorf("failed to fetch episode %v from database: %w", id, err)
 	}
 
+	episodeEntity := toEpisodeEntity(ep)
+
 	series, err := s.repo.GetSeries(ctx, ep.SeriesID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -102,7 +105,12 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, fmt.Errorf("failed to get series %v from database: %w", ep.SeriesID, err)
 	}
 
-	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
+	if !episodeEntity.BelongsToSeries(series.ID) {
+		return nil, &apperror.ForbiddenError{Message: "episode does not belong to the requested series"}
+	}
+
+	accessControl := shared.NewAccessControlService()
+	if !accessControl.CanAccess(profile.HasParentalControls, series.MaturityRating == sqlc.MaturityRatingL) {
 		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
@@ -123,7 +131,8 @@ func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UU
 		return nil, fmt.Errorf("failed to get series %v from database: %w", seriesID, err)
 	}
 
-	if series.MaturityRating != sqlc.MaturityRatingL && profile.HasParentalControls {
+	accessControl := shared.NewAccessControlService()
+	if !accessControl.CanAccess(profile.HasParentalControls, series.MaturityRating == sqlc.MaturityRatingL) {
 		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
@@ -134,7 +143,11 @@ func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UU
 
 	result := make([]*model.Episode, len(episodes))
 	for i, ep := range episodes {
-		result[i] = toGraphQLModel(ep)
+		entity := toEpisodeEntity(ep)
+		// Domain rule: every episode must belong to the requested series
+		if entity.BelongsToSeries(seriesID) {
+			result[i] = toGraphQLModel(ep)
+		}
 	}
 	return result, nil
 }
@@ -143,14 +156,20 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 	if input.Title != nil && strings.TrimSpace(*input.Title) == "" {
 		return nil, &apperror.ValidationError{Field: "title", Message: "title cannot be empty"}
 	}
-	if input.Season != nil && *input.Season <= 0 {
-		return nil, &apperror.ValidationError{Field: "season", Message: "season must be greater than zero"}
+	if input.Season != nil {
+		if _, err := NewSeason(*input.Season); err != nil {
+			return nil, &apperror.ValidationError{Field: "season", Message: err.Error()}
+		}
 	}
-	if input.EpisodeNumber != nil && *input.EpisodeNumber <= 0 {
-		return nil, &apperror.ValidationError{Field: "episodeNumber", Message: "episode number must be greater than zero"}
+	if input.EpisodeNumber != nil {
+		if _, err := NewEpisodeNumber(*input.EpisodeNumber); err != nil {
+			return nil, &apperror.ValidationError{Field: "episodeNumber", Message: err.Error()}
+		}
 	}
-	if input.DurationMinutes != nil && *input.DurationMinutes <= 0 {
-		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: "duration must be greater than zero"}
+	if input.DurationMinutes != nil {
+		if _, err := NewDuration(*input.DurationMinutes); err != nil {
+			return nil, &apperror.ValidationError{Field: "durationMinutes", Message: err.Error()}
+		}
 	}
 
 	current, err := s.repo.GetEpisode(ctx, id)
@@ -214,16 +233,4 @@ func (s *ServiceImpl) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
 	}
 
 	return nil
-}
-
-func toGraphQLModel(e sqlc.Episode) *model.Episode {
-	return &model.Episode{
-		ID:              e.ID,
-		SeriesID:        e.SeriesID,
-		Season:          e.Season,
-		EpisodeNumber:   e.EpisodeNumber,
-		Title:           e.Title,
-		DurationMinutes: e.DurationMinutes,
-		CreatedAt:       e.CreatedAt.String(),
-	}
 }

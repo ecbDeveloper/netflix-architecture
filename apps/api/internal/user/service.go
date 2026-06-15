@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
@@ -34,25 +33,17 @@ func NewService(repo Repository) Service {
 }
 
 func (s *ServiceImpl) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
-	if strings.TrimSpace(input.Email) == "" {
-		return nil, &apperror.ValidationError{Field: "email", Message: "email is required"}
+	if _, err := NewEmail(input.Email); err != nil {
+		return nil, &apperror.ValidationError{Field: "email", Message: err.Error()}
 	}
-	if strings.TrimSpace(input.Name) == "" {
+	if _, err := NewCPF(input.Cpf); err != nil {
+		return nil, &apperror.ValidationError{Field: "cpf", Message: err.Error()}
+	}
+	if _, err := NewRawPassword(input.Password); err != nil {
+		return nil, &apperror.ValidationError{Field: "password", Message: err.Error()}
+	}
+	if input.Name == "" {
 		return nil, &apperror.ValidationError{Field: "name", Message: "name is required"}
-	}
-	if len(input.Cpf) != 11 {
-		return nil, &apperror.ValidationError{Field: "cpf", Message: "cpf must have exactly 11 characters"}
-	}
-	if strings.TrimSpace(input.Password) == "" {
-		return nil, &apperror.ValidationError{Field: "password", Message: "password is required"}
-	}
-
-	if len(input.Password) < 8 {
-		return nil, &apperror.ValidationError{Field: "password", Message: "password must be at least 8 characters"}
-	}
-
-	if len(input.Password) > 72 {
-		return nil, &apperror.ValidationError{Field: "password", Message: "password must be at most 72 characters"}
 	}
 
 	userID := uuid.New()
@@ -99,8 +90,9 @@ func (s *ServiceImpl) ListUsers(ctx context.Context) ([]*model.User, error) {
 	}
 
 	modelUsers := make([]*model.User, len(users))
-	for i, user := range users {
-		modelUsers[i] = toGraphQLModel(user)
+	for i, u := range users {
+		_ = toUserEntity(u) // maps to domain entity; methods like IsAdmin() available for domain rules
+		modelUsers[i] = toGraphQLModel(u)
 	}
 	return modelUsers, nil
 }
@@ -114,12 +106,10 @@ func (s *ServiceImpl) UpdateUser(ctx context.Context, id uuid.UUID, input model.
 		return nil, fmt.Errorf("failed to fetch user %v from database: %w", id, err)
 	}
 
-	if input.Password != nil && len(*input.Password) < 8 {
-		return nil, &apperror.ValidationError{Field: "password", Message: "password must be at least 8 characters"}
-	}
-
-	if input.Password != nil && len(*input.Password) > 72 {
-		return nil, &apperror.ValidationError{Field: "password", Message: "password must be at most 72 characters"}
+	if input.Password != nil {
+		if _, err := NewRawPassword(*input.Password); err != nil {
+			return nil, &apperror.ValidationError{Field: "password", Message: err.Error()}
+		}
 	}
 
 	updateParams := sqlc.UpdateUserParams{
@@ -180,16 +170,4 @@ func (s *ServiceImpl) GetUserByEmail(ctx context.Context, email string) (*sqlc.U
 	}
 
 	return &user, nil
-}
-
-func toGraphQLModel(u sqlc.User) *model.User {
-	return &model.User{
-		ID:        u.ID,
-		Email:     u.Email,
-		Name:      u.Name,
-		Cpf:       u.Cpf,
-		RoleID:    u.RoleID,
-		CreatedAt: u.CreatedAt.String(),
-		UpdatedAt: u.UpdatedAt.String(),
-	}
 }

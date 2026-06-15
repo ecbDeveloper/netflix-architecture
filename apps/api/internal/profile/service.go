@@ -68,7 +68,8 @@ func (s *ServiceImpl) GetProfile(ctx context.Context, id uuid.UUID, userID uuid.
 		return nil, fmt.Errorf("failed to fetch profile %v from database: %w", id, err)
 	}
 
-	if p.UserID != userID {
+	entity := toEntity(p)
+	if !entity.BelongsTo(userID) {
 		return nil, &apperror.ForbiddenError{Message: "you can't see profiles that's not yours"}
 	}
 
@@ -101,7 +102,8 @@ func (s *ServiceImpl) UpdateProfile(ctx context.Context, id uuid.UUID, input mod
 		return nil, fmt.Errorf("failed to get profile %v to update from database: %w", id, err)
 	}
 
-	if current.UserID != userID {
+	entity := toEntity(current)
+	if !entity.BelongsTo(userID) {
 		return nil, &apperror.ForbiddenError{Message: "you can't update profiles that's not yours"}
 	}
 
@@ -138,7 +140,8 @@ func (s *ServiceImpl) DeleteProfile(ctx context.Context, id uuid.UUID, userID uu
 		return fmt.Errorf("failed to get profile %v to update from database: %w", id, err)
 	}
 
-	if current.UserID != userID {
+	entity := toEntity(current)
+	if !entity.BelongsTo(userID) {
 		return &apperror.ForbiddenError{Message: "you can't delete profiles that's not yours"}
 	}
 
@@ -149,15 +152,4 @@ func (s *ServiceImpl) DeleteProfile(ctx context.Context, id uuid.UUID, userID uu
 		return fmt.Errorf("failed to delete profile %v from database: %w", id, err)
 	}
 	return nil
-}
-
-func toGraphQLModel(p sqlc.Profile) *model.Profile {
-	return &model.Profile{
-		ID:                  p.ID,
-		UserID:              p.UserID,
-		Name:                p.Name,
-		HasParentalControls: p.HasParentalControls,
-		CreatedAt:           p.CreatedAt.String(),
-		UpdatedAt:           p.UpdatedAt.String(),
-	}
 }

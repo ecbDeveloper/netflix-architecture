@@ -37,8 +37,8 @@ func NewService(repo Repository, es episode.Service) Service {
 }
 
 func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReviewInput, profileID uuid.UUID) (*model.Review, error) {
-	if input.Rating < 1 || input.Rating > 5 {
-		return nil, &apperror.ValidationError{Field: "rating", Message: "rating must be between 1 and 5"}
+	if _, err := NewRating(input.Rating); err != nil {
+		return nil, &apperror.ValidationError{Field: "rating", Message: err.Error()}
 	}
 	if input.MovieID == nil && input.EpisodeID == nil {
 		return nil, &apperror.ValidationError{Field: "movieId/episodeId", Message: "movie or episode is required for the review"}
@@ -145,8 +145,10 @@ func (s *ServiceImpl) ListReviewsByMovie(ctx context.Context, movieID uuid.UUID)
 }
 
 func (s *ServiceImpl) UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput, profileID uuid.UUID) (*model.Review, error) {
-	if input.Rating != nil && (*input.Rating < 1 || *input.Rating > 5) {
-		return nil, &apperror.ValidationError{Field: "rating", Message: "rating must be between 1 and 5"}
+	if input.Rating != nil {
+		if _, err := NewRating(*input.Rating); err != nil {
+			return nil, &apperror.ValidationError{Field: "rating", Message: err.Error()}
+		}
 	}
 
 	current, err := s.repo.GetReview(ctx, id)
@@ -157,7 +159,8 @@ func (s *ServiceImpl) UpdateReview(ctx context.Context, id uuid.UUID, input mode
 		return nil, fmt.Errorf("failed to get review %v to update from database: %w", id, err)
 	}
 
-	if current.ProfileID != profileID {
+	entity := toEntity(current)
+	if !entity.BelongsTo(profileID) {
 		return nil, &apperror.ForbiddenError{Message: "you can't update reviews that's not yours"}
 	}
 
@@ -191,7 +194,8 @@ func (s *ServiceImpl) DeleteReview(ctx context.Context, id uuid.UUID, profileID 
 		return fmt.Errorf("failed to get review %v to update from database: %w", id, err)
 	}
 
-	if current.ProfileID != profileID {
+	entity := toEntity(current)
+	if !entity.BelongsTo(profileID) {
 		return &apperror.ForbiddenError{Message: "you can't delete reviews that's not yours"}
 	}
 
@@ -202,26 +206,4 @@ func (s *ServiceImpl) DeleteReview(ctx context.Context, id uuid.UUID, profileID 
 		return fmt.Errorf("failed to delete review %v from database: %w", id, err)
 	}
 	return nil
-}
-
-func toGraphQLModel(r sqlc.Review) *model.Review {
-	m := &model.Review{
-		ID:        r.ID,
-		Rating:    r.Rating,
-		CreatedAt: r.CreatedAt.String(),
-		UpdatedAt: r.UpdatedAt.String(),
-	}
-
-	if r.EpisodeID.Valid {
-		m.EpisodeID = r.EpisodeID.Bytes
-	}
-	if r.MovieID.Valid {
-		m.MovieID = r.MovieID.Bytes
-	}
-
-	if r.Comment.Valid {
-		m.Comment = &r.Comment.String
-	}
-
-	return m
 }
