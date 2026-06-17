@@ -1,10 +1,14 @@
 -- Write your migrate up statements here
+CREATE TYPE CONTENT_STATUS AS ENUM ('PENDING', 'PROCESSING', 'PROCESSED');
+
 CREATE TABLE movies (
   content_id       UUID PRIMARY KEY REFERENCES contents(id) ON DELETE CASCADE,
   duration_minutes INT  NOT NULL,
-  content_url      TEXT NOT NULL
+  content_url      TEXT,
+  status           CONTENT_STATUS NOT NULL DEFAULT 'PENDING'
 );
 ---- create above / drop below ----
 DROP TABLE IF EXISTS movies;
+DROP TYPE IF EXISTS CONTENT_STATUS;
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.

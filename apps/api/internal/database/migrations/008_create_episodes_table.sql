@@ -6,9 +6,10 @@ CREATE TABLE episodes (
   episode_number   INT          NOT NULL,
   title            VARCHAR(255) NOT NULL,
   duration_minutes INT          NOT NULL,
-  content_url      TEXT         NOT NULL,
+  content_url      TEXT,
   created_at       TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status           CONTENT_STATUS NOT NULL DEFAULT 'PENDING',
 
   UNIQUE (series_id, season, episode_number)
 );

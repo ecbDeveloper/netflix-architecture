@@ -5,7 +5,7 @@ type Episode {
   episodeNumber: Int!
   title: String!
   durationMinutes: Int!
-  contentURL: String!
+  contentURL: String
   createdAt: String!
   reviews: [Review!]!
 }
@@ -24,7 +24,7 @@ input UpdateEpisodeInput {
   episodeNumber: Int
   title: String
   durationMinutes: Int
-  episodeFile: Upload!
+  episodeFile: Upload
 }
 
 extend type Query {

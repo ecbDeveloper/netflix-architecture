@@ -3,9 +3,18 @@ package episode
 import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func toGraphQLModel(e sqlc.Episode) *model.Episode {
+func pgTextToStringPtr(t pgtype.Text) *string {
+	if !t.Valid {
+		return nil
+	}
+	s := t.String
+	return &s
+}
+
+func toGraphQLModel(e sqlc.Episode, contentURL *string) *model.Episode {
 	return &model.Episode{
 		ID:              e.ID,
 		SeriesID:        e.SeriesID,
@@ -13,6 +22,7 @@ func toGraphQLModel(e sqlc.Episode) *model.Episode {
 		EpisodeNumber:   e.EpisodeNumber,
 		Title:           e.Title,
 		DurationMinutes: e.DurationMinutes,
+		ContentURL:      contentURL,
 		CreatedAt:       e.CreatedAt.String(),
 	}
 }

@@ -138,9 +138,10 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 		return uuid.Nil, fmt.Errorf("failed to insert content on database: %w", err)
 	}
 
-	var contentURL string
+	var fileKey string
 	if input.ContentType == model.ContentTypeMovie {
-		contentURL, err = s.storage.Upload(ctx, input.ContentFile.Filename, input.ContentFile.File)
+		fileKey = fmt.Sprintf("raw/%s.mp4", contentID.String())
+		err = s.storage.Upload(ctx, contentID, input.ContentFile.File)
 		if err != nil {
 			return uuid.Nil, fmt.Errorf("failed to upload content file: %w", err)
 		}
@@ -148,12 +149,14 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 		createMovieParams := sqlc.CreateMovieParams{
 			ContentID:       contentID,
 			DurationMinutes: *input.DurationMinutes,
-			ContentUrl:      contentURL,
 		}
 
 		_, err = qtx.CreateMovie(ctx, createMovieParams)
 		if err != nil {
-			go s.storage.DeleteFile(context.Background(), contentURL)
+			if err := s.storage.DeleteFile(context.Background(), fileKey); err != nil {
+				return uuid.Nil, fmt.Errorf("failed to delete movie file: %w", err)
+			}
+
 			return uuid.Nil, fmt.Errorf("failed to insert movie on database: %w", err)
 		}
 	}
@@ -166,8 +169,10 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 	}
 
 	if err = tx.Commit(ctx); err != nil {
-		if contentURL != "" {
-			go s.storage.DeleteFile(context.Background(), contentURL)
+		if input.ContentType == model.ContentTypeMovie {
+			if err := s.storage.DeleteFile(context.Background(), fileKey); err != nil {
+				return uuid.Nil, fmt.Errorf("failed to delete movie file: %w", err)
+			}
 		}
 
 		return uuid.Nil, fmt.Errorf("failed to commit transaction: %w", err)
@@ -280,7 +285,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 	}
 
 	var currentMovie sqlc.GetMovieRow
-	var oldURL, contentURL string
+	var oldURL string
 	if current.ContentType == sqlc.ContentTypeMOVIE {
 		currentMovie, err = s.repo.GetMovie(ctx, id)
 		if err != nil {
@@ -294,15 +299,16 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 			ContentID:       id,
 			DurationMinutes: currentMovie.DurationMinutes,
 			ContentUrl:      currentMovie.ContentUrl,
+			Status:          currentMovie.Status,
 		}
 
 		if input.ContentFile.File != nil {
-			contentURL, err = s.storage.Upload(ctx, input.ContentFile.Filename, input.ContentFile.File)
+			err = s.storage.Upload(ctx, id, input.ContentFile.File)
 			if err != nil {
 				return nil, fmt.Errorf("failed to upload content file: %w", err)
 			}
-			oldURL = currentMovie.ContentUrl
-			updateMovieParams.ContentUrl = contentURL
+			oldURL = currentMovie.ContentUrl.String
+			updateMovieParams.Status = sqlc.ContentStatusPENDING
 		}
 
 		if input.DurationMinutes != nil {
@@ -311,8 +317,8 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 
 		_, err = qtx.UpdateMovie(ctx, updateMovieParams)
 		if err != nil {
-			if contentURL != "" {
-				go s.storage.DeleteFile(context.Background(), contentURL)
+			if input.ContentFile != nil && input.ContentFile.File != nil {
+				go s.storage.DeleteFile(context.Background(), oldURL)
 			}
 
 			return nil, fmt.Errorf("failed to update movie on database: %w", err)
@@ -320,20 +326,21 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 	}
 
 	if err = tx.Commit(ctx); err != nil {
-		if contentURL != "" {
-			go s.storage.DeleteFile(context.Background(), contentURL)
+		if current.ContentType == sqlc.ContentTypeMOVIE {
+			fileKey := fmt.Sprintf("raw/%s.mp4", id.String())
+			go s.storage.DeleteFile(context.Background(), fileKey)
 		}
 
 		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	if input.ContentFile.File != nil && oldURL != "" {
+	if input.ContentFile != nil && input.ContentFile.File != nil && oldURL != "" {
 		go s.storage.DeleteFile(context.Background(), oldURL)
 	}
 
 	entity := toContentEntity(content)
 	if entity.IsMovie() {
-		return toGraphQlModel(content, &currentMovie.ContentUrl, &currentMovie.DurationMinutes), nil
+		return toGraphQlModel(content, pgTextToStringPtr(currentMovie.ContentUrl), &currentMovie.DurationMinutes), nil
 	}
 
 	return toGraphQlModel(content, nil, nil), nil
@@ -378,15 +385,15 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 	}
 
 	if contentEntity.IsMovie() {
-		if movie.ContentUrl != "" {
-			go s.storage.DeleteFile(context.Background(), movie.ContentUrl)
+		if movie.ContentUrl.Valid && movie.ContentUrl.String != "" {
+			go s.storage.DeleteFile(context.Background(), movie.ContentUrl.String)
 		}
 	}
 
 	if contentEntity.IsSeries() {
 		for _, episode := range episodes {
-			if episode.ContentUrl != "" {
-				go s.storage.DeleteFile(context.Background(), episode.ContentUrl)
+			if episode.ContentUrl.Valid && episode.ContentUrl.String != "" {
+				go s.storage.DeleteFile(context.Background(), episode.ContentUrl.String)
 			}
 		}
 	}
@@ -421,7 +428,7 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, use
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
-			result[i] = toGraphQlModel(c, &movie.ContentUrl, &movie.DurationMinutes)
+			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes)
 		}
 		if entity.IsSeries() {
 			result[i] = toGraphQlModel(c, nil, nil)
@@ -458,7 +465,7 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
-			result[i] = toGraphQlModel(c, &movie.ContentUrl, &movie.DurationMinutes)
+			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes)
 		}
 		if entity.IsSeries() {
 			result[i] = toGraphQlModel(c, nil, nil)
@@ -512,7 +519,7 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
-			result[i] = toGraphQlModel(c, &movie.ContentUrl, &movie.DurationMinutes)
+			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes)
 		}
 		if entity.IsSeries() {
 			result[i] = toGraphQlModel(c, nil, nil)
@@ -549,7 +556,7 @@ func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uu
 			}
 			return nil, fmt.Errorf("failed to fetch movie %v from database: %w", id, err)
 		}
-		return toGraphQlModel(content, &movie.ContentUrl, &movie.DurationMinutes), nil
+		return toGraphQlModel(content, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes), nil
 	}
 
 	return toGraphQlModel(content, nil, nil), nil

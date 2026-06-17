@@ -1163,7 +1163,7 @@ extend type Mutation {
   episodeNumber: Int!
   title: String!
   durationMinutes: Int!
-  contentURL: String!
+  contentURL: String
   createdAt: String!
   reviews: [Review!]!
 }
@@ -1182,7 +1182,7 @@ input UpdateEpisodeInput {
   episodeNumber: Int
   title: String
   durationMinutes: Int
-  episodeFile: Upload!
+  episodeFile: Upload
 }
 
 extend type Query {
@@ -2485,9 +2485,9 @@ func (ec *executionContext) _Episode_contentURL(ctx context.Context, field graph
 			return obj.ContentURL, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalOString2ᚖstring,
 		true,
-		true,
+		false,
 	)
 }
 
@@ -8360,7 +8360,7 @@ func (ec *executionContext) unmarshalInputUpdateEpisodeInput(ctx context.Context
 			it.DurationMinutes = data
 		case "episodeFile":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("episodeFile"))
-			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+			data, err := ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8544,7 +8544,7 @@ func (ec *executionContext) unmarshalInputUpdateWatchHistoryInput(ctx context.Co
 // region    ************************** interface.gotpl ***************************
 
 func (ec *executionContext) _ReviewedContent(ctx context.Context, sel ast.SelectionSet, obj model.ReviewedContent) graphql.Marshaler {
-	switch obj := obj.(type) {
+	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
 	case model.Episode:
@@ -8571,7 +8571,7 @@ func (ec *executionContext) _ReviewedContent(ctx context.Context, sel ast.Select
 }
 
 func (ec *executionContext) _WatchedContent(ctx context.Context, sel ast.SelectionSet, obj model.WatchedContent) graphql.Marshaler {
-	switch obj := obj.(type) {
+	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
 	case model.Episode:
@@ -8837,9 +8837,6 @@ func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "contentURL":
 			out.Values[i] = ec._Episode_contentURL(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
 		case "createdAt":
 			out.Values[i] = ec._Episode_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -10999,7 +10996,7 @@ func (ec *executionContext) unmarshalOMaturityRating2ᚖgithubᚗcomᚋecbDevelo
 	if v == nil {
 		return nil, nil
 	}
-	res := new(model.MaturityRating)
+	var res = new(model.MaturityRating)
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

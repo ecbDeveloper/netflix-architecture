@@ -13,6 +13,49 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type ContentStatus string
+
+const (
+	ContentStatusPENDING    ContentStatus = "PENDING"
+	ContentStatusPROCESSING ContentStatus = "PROCESSING"
+	ContentStatusPROCESSED  ContentStatus = "PROCESSED"
+)
+
+func (e *ContentStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ContentStatus(s)
+	case string:
+		*e = ContentStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ContentStatus: %T", src)
+	}
+	return nil
+}
+
+type NullContentStatus struct {
+	ContentStatus ContentStatus `json:"content_status"`
+	Valid         bool          `json:"valid"` // Valid is true if ContentStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullContentStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ContentStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ContentStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullContentStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ContentStatus), nil
+}
+
 type ContentType string
 
 const (
@@ -119,21 +162,23 @@ type ContentGenre struct {
 }
 
 type Episode struct {
-	ID              uuid.UUID `json:"id"`
-	SeriesID        uuid.UUID `json:"series_id"`
-	Season          int32     `json:"season"`
-	EpisodeNumber   int32     `json:"episode_number"`
-	Title           string    `json:"title"`
-	DurationMinutes int32     `json:"duration_minutes"`
-	ContentUrl      string    `json:"content_url"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	ID              uuid.UUID     `json:"id"`
+	SeriesID        uuid.UUID     `json:"series_id"`
+	Season          int32         `json:"season"`
+	EpisodeNumber   int32         `json:"episode_number"`
+	Title           string        `json:"title"`
+	DurationMinutes int32         `json:"duration_minutes"`
+	ContentUrl      pgtype.Text   `json:"content_url"`
+	CreatedAt       time.Time     `json:"created_at"`
+	UpdatedAt       time.Time     `json:"updated_at"`
+	Status          ContentStatus `json:"status"`
 }
 
 type Movie struct {
-	ContentID       uuid.UUID `json:"content_id"`
-	DurationMinutes int32     `json:"duration_minutes"`
-	ContentUrl      string    `json:"content_url"`
+	ContentID       uuid.UUID     `json:"content_id"`
+	DurationMinutes int32         `json:"duration_minutes"`
+	ContentUrl      pgtype.Text   `json:"content_url"`
+	Status          ContentStatus `json:"status"`
 }
 
 type Profile struct {

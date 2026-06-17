@@ -165,7 +165,6 @@ func seedContents(ctx context.Context, queries *sqlc.Queries, profiles []sqlc.Pr
 	_, err = queries.CreateMovie(ctx, sqlc.CreateMovieParams{
 		ContentID:       movie1ID,
 		DurationMinutes: 169,
-		ContentUrl:      "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
 	})
 	if err != nil {
 		log.Fatalf("failed to create movie: %v", err)
@@ -188,7 +187,6 @@ func seedContents(ctx context.Context, queries *sqlc.Queries, profiles []sqlc.Pr
 	_, err = queries.CreateMovie(ctx, sqlc.CreateMovieParams{
 		ContentID:       movie2ID,
 		DurationMinutes: 180,
-		ContentUrl:      "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
 	})
 	if err != nil {
 		log.Fatalf("failed to create movie: %v", err)
@@ -231,7 +229,6 @@ func seedContents(ctx context.Context, queries *sqlc.Queries, profiles []sqlc.Pr
 			EpisodeNumber:   ep.ep,
 			Title:           ep.title,
 			DurationMinutes: ep.duration,
-			ContentUrl:      "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
 		})
 		if err != nil {
 			log.Fatalf("failed to create episode: %v", err)

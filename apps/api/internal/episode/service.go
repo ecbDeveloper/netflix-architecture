@@ -14,6 +14,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Service interface {
@@ -57,7 +58,7 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 
 	episodeID := uuid.New()
 
-	contentURL, err := s.storage.Upload(ctx, input.EpisodeFile.Filename, input.EpisodeFile.File)
+	err := s.storage.Upload(ctx, episodeID, input.EpisodeFile.File)
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload episode file: %w", err)
 	}
@@ -69,16 +70,21 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 		EpisodeNumber:   input.EpisodeNumber,
 		Title:           input.Title,
 		DurationMinutes: input.DurationMinutes,
-		ContentUrl:      contentURL,
 	})
 	if err != nil {
+		fileKey := fmt.Sprintf("raw/%s.mp4", episodeID.String())
+		fileErr := s.storage.DeleteFile(ctx, fileKey)
+		if fileErr != nil {
+			return nil, fmt.Errorf("failed to delete episode file: %w", err)
+		}
+
 		if apperror.IsUniqueViolation(err) {
 			return nil, &apperror.ConflictError{Field: "episode (season + number)"}
 		}
 		return nil, fmt.Errorf("failed to insert episode on database: %w", err)
 	}
 
-	return toGraphQLModel(ep), nil
+	return toGraphQLModel(ep, nil), nil
 }
 
 func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID, userID uuid.UUID) (*model.Episode, error) {
@@ -114,7 +120,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
-	return toGraphQLModel(ep), nil
+	return toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl)), nil
 }
 
 func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID, userID uuid.UUID) ([]*model.Episode, error) {
@@ -144,9 +150,8 @@ func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UU
 	result := make([]*model.Episode, len(episodes))
 	for i, ep := range episodes {
 		entity := toEpisodeEntity(ep)
-		// Domain rule: every episode must belong to the requested series
 		if entity.BelongsToSeries(seriesID) {
-			result[i] = toGraphQLModel(ep)
+			result[i] = toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl))
 		}
 	}
 	return result, nil
@@ -187,6 +192,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		Title:           current.Title,
 		DurationMinutes: current.DurationMinutes,
 		ContentUrl:      current.ContentUrl,
+		Status:          current.Status,
 	}
 
 	if input.Season != nil {
@@ -203,13 +209,18 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 	}
 
 	if input.EpisodeFile.File != nil {
-		contentURL, err := s.storage.Upload(ctx, input.EpisodeFile.Filename, input.EpisodeFile.File)
+		err := s.storage.Upload(ctx, id, input.EpisodeFile.File)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update episode file content: %w", err)
 		}
 
-		if strings.TrimSpace(contentURL) != "" {
-			params.ContentUrl = contentURL
+		params.ContentUrl = pgtype.Text{Valid: false}
+		params.Status = sqlc.ContentStatusPENDING
+
+		if current.ContentUrl.Valid && current.ContentUrl.String != "" {
+			if err = s.storage.DeleteFile(ctx, current.ContentUrl.String); err != nil {
+				return nil, fmt.Errorf("failed to delete old episode file content: %w", err)
+			}
 		}
 	}
 
@@ -221,7 +232,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		return nil, fmt.Errorf("failed to update episode %v from database: %w", id, err)
 	}
 
-	return toGraphQLModel(ep), nil
+	return toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl)), nil
 }
 
 func (s *ServiceImpl) DeleteEpisode(ctx context.Context, id uuid.UUID) error {

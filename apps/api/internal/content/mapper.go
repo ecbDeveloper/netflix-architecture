@@ -6,7 +6,16 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+func pgTextToStringPtr(t pgtype.Text) *string {
+	if !t.Valid {
+		return nil
+	}
+	s := t.String
+	return &s
+}
 
 func toGraphQlModel(c sqlc.Content, contentURL *string, durationMinutes *int32) *model.Content {
 	return &model.Content{

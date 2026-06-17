@@ -97,7 +97,7 @@ type Episode struct {
 	EpisodeNumber   int32     `json:"episodeNumber"`
 	Title           string    `json:"title"`
 	DurationMinutes int32     `json:"durationMinutes"`
-	ContentURL      string    `json:"contentURL"`
+	ContentURL      *string   `json:"contentURL,omitempty"`
 	CreatedAt       string    `json:"createdAt"`
 }
 
@@ -167,11 +167,11 @@ type UpdateContentInput struct {
 }
 
 type UpdateEpisodeInput struct {
-	Season          *int32         `json:"season,omitempty"`
-	EpisodeNumber   *int32         `json:"episodeNumber,omitempty"`
-	Title           *string        `json:"title,omitempty"`
-	DurationMinutes *int32         `json:"durationMinutes,omitempty"`
-	EpisodeFile     graphql.Upload `json:"episodeFile"`
+	Season          *int32          `json:"season,omitempty"`
+	EpisodeNumber   *int32          `json:"episodeNumber,omitempty"`
+	Title           *string         `json:"title,omitempty"`
+	DurationMinutes *int32          `json:"durationMinutes,omitempty"`
+	EpisodeFile     *graphql.Upload `json:"episodeFile,omitempty"`
 }
 
 type UpdateProfileInput struct {

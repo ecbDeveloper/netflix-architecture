@@ -9,11 +9,12 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/google/uuid"
 )
 
 type Service interface {
-	Upload(ctx context.Context, fileName string, file io.Reader) (string, error)
-	DeleteFile(ctx context.Context, objectURL string) error
+	Upload(ctx context.Context, contentID uuid.UUID, file io.Reader) error
+	DeleteFile(ctx context.Context, fileKey string) error
 }
 
 type ServiceImpl struct {
@@ -30,23 +31,22 @@ func NewService(s3Client *s3.Client, bucketName string, endpointURL string) Serv
 	}
 }
 
-func (s *ServiceImpl) Upload(ctx context.Context, fileName string, file io.Reader) (string, error) {
+func (s *ServiceImpl) Upload(ctx context.Context, contentID uuid.UUID, file io.Reader) error {
+	fileKey := fmt.Sprintf("raw/%s.mp4", contentID.String())
 	_, err := s.S3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(s.BucketName),
-		Key:    aws.String(fileName),
+		Key:    aws.String(fileKey),
 		Body:   file,
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to upload file to S3: %w", err)
+		return fmt.Errorf("failed to upload file to S3: %w", err)
 	}
 
-	objectURL := fmt.Sprintf("%s/%s/%s", s.EndpointURL, s.BucketName, fileName)
-
-	return objectURL, nil
+	return nil
 }
 
-func (s *ServiceImpl) DeleteFile(ctx context.Context, objectURL string) error {
-	key := s.extractKey(objectURL)
+func (s *ServiceImpl) DeleteFile(ctx context.Context, fileKey string) error {
+	key := s.extractKey(fileKey)
 
 	_, err := s.S3Client.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(s.BucketName),
