@@ -315,7 +315,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 			updateMovieParams.DurationMinutes = *input.DurationMinutes
 		}
 
-		_, err = qtx.UpdateMovie(ctx, updateMovieParams)
+		currentMovie, err = qtx.UpdateMovie(ctx, updateMovieParams)
 		if err != nil {
 			if input.ContentFile != nil && input.ContentFile.File != nil {
 				go s.storage.DeleteFile(context.Background(), oldURL)
@@ -340,10 +340,15 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 
 	entity := toContentEntity(content)
 	if entity.IsMovie() {
-		return toGraphQlModel(content, pgTextToStringPtr(currentMovie.ContentUrl), &currentMovie.DurationMinutes), nil
+		parsedStatus, err := parseContentStatus(currentMovie.Status)
+		if err != nil {
+			return nil, fmt.Errorf("faiiled to parse content status: %w", err)
+		}
+
+		return toGraphQlModel(content, pgTextToStringPtr(currentMovie.ContentUrl), &currentMovie.DurationMinutes, parsedStatus), nil
 	}
 
-	return toGraphQlModel(content, nil, nil), nil
+	return toGraphQlModel(content, nil, nil, nil), nil
 }
 
 func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
@@ -428,10 +433,16 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, use
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
-			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes)
+
+			parsedStatus, err := parseContentStatus(movie.Status)
+			if err != nil {
+				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
+			}
+
+			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes, parsedStatus)
 		}
 		if entity.IsSeries() {
-			result[i] = toGraphQlModel(c, nil, nil)
+			result[i] = toGraphQlModel(c, nil, nil, nil)
 		}
 	}
 
@@ -465,10 +476,16 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
-			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes)
+
+			parsedStatus, err := parseContentStatus(movie.Status)
+			if err != nil {
+				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
+			}
+
+			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes, parsedStatus)
 		}
 		if entity.IsSeries() {
-			result[i] = toGraphQlModel(c, nil, nil)
+			result[i] = toGraphQlModel(c, nil, nil, nil)
 		}
 	}
 
@@ -519,10 +536,16 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 			if err != nil {
 				return nil, fmt.Errorf("failed to get movie from database: %w", err)
 			}
-			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes)
+
+			parsedStatus, err := parseContentStatus(movie.Status)
+			if err != nil {
+				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
+			}
+
+			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes, parsedStatus)
 		}
 		if entity.IsSeries() {
-			result[i] = toGraphQlModel(c, nil, nil)
+			result[i] = toGraphQlModel(c, nil, nil, nil)
 		}
 	}
 
@@ -554,10 +577,13 @@ func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uu
 			if errors.Is(err, pgx.ErrNoRows) {
 				return nil, &apperror.NotFoundError{Entity: "movie"}
 			}
-			return nil, fmt.Errorf("failed to fetch movie %v from database: %w", id, err)
 		}
-		return toGraphQlModel(content, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes), nil
+		parsedStatus, err := parseContentStatus(movie.Status)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse content status: %w", err)
+		}
+		return toGraphQlModel(content, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes, parsedStatus), nil
 	}
 
-	return toGraphQlModel(content, nil, nil), nil
+	return toGraphQlModel(content, nil, nil, nil), nil
 }

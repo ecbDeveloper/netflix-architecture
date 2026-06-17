@@ -30,3 +30,8 @@ input PaginationInput {
 union WatchedContent = Content | Episode
 union ReviewedContent = Content | Episode
 
+enum ContentStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+}

@@ -8,6 +8,7 @@ type Episode {
   contentURL: String
   createdAt: String!
   reviews: [Review!]!
+  status: ContentStatus!
 }
 
 input CreateEpisodeInput {

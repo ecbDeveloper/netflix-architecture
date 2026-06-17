@@ -1,6 +1,7 @@
 package content
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
@@ -17,7 +18,18 @@ func pgTextToStringPtr(t pgtype.Text) *string {
 	return &s
 }
 
-func toGraphQlModel(c sqlc.Content, contentURL *string, durationMinutes *int32) *model.Content {
+func parseContentStatus(s sqlc.ContentStatus) (*model.ContentStatus, error) {
+	status := model.ContentStatus(s)
+
+	switch status {
+	case model.ContentStatusPending, model.ContentStatusProcessing, model.ContentStatusProcessed:
+		return &status, nil
+	default:
+		return nil, fmt.Errorf("invalid content status: %s", s)
+	}
+}
+
+func toGraphQlModel(c sqlc.Content, contentURL *string, durationMinutes *int32, status *model.ContentStatus) *model.Content {
 	return &model.Content{
 		ID:              c.ID,
 		Title:           c.Title,
@@ -28,6 +40,7 @@ func toGraphQlModel(c sqlc.Content, contentURL *string, durationMinutes *int32) 
 		GenreID:         c.GenreID,
 		ContentURL:      contentURL,
 		DurationMinutes: durationMinutes,
+		Status:          status,
 		CreatedAt:       c.CreatedAt.String(),
 		UpdatedAt:       c.UpdatedAt.String(),
 	}

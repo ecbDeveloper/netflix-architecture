@@ -12,6 +12,8 @@ type Content {
   contentUrl: String
   durationMinutes: Int
   reviews: [Review!]
+  status: ContentStatus
+
 
   episodes: [Episode!]
 }

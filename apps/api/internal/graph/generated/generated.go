@@ -57,6 +57,7 @@ type ComplexityRoot struct {
 		MaturityRating  func(childComplexity int) int
 		ReleaseDate     func(childComplexity int) int
 		Reviews         func(childComplexity int) int
+		Status          func(childComplexity int) int
 		Title           func(childComplexity int) int
 		UpdatedAt       func(childComplexity int) int
 	}
@@ -75,6 +76,7 @@ type ComplexityRoot struct {
 		Reviews         func(childComplexity int) int
 		Season          func(childComplexity int) int
 		SeriesID        func(childComplexity int) int
+		Status          func(childComplexity int) int
 		Title           func(childComplexity int) int
 	}
 
@@ -176,6 +178,7 @@ type ComplexityRoot struct {
 
 type ContentResolver interface {
 	Reviews(ctx context.Context, obj *model.Content) ([]*model.Review, error)
+
 	Episodes(ctx context.Context, obj *model.Content) ([]*model.Episode, error)
 }
 type EpisodeResolver interface {
@@ -315,6 +318,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Content.Reviews(childComplexity), true
+	case "Content.status":
+		if e.ComplexityRoot.Content.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Content.Status(childComplexity), true
 	case "Content.title":
 		if e.ComplexityRoot.Content.Title == nil {
 			break
@@ -389,6 +398,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Episode.SeriesID(childComplexity), true
+	case "Episode.status":
+		if e.ComplexityRoot.Episode.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Episode.Status(childComplexity), true
 	case "Episode.title":
 		if e.ComplexityRoot.Episode.Title == nil {
 			break
@@ -1116,6 +1131,8 @@ extend type Mutation {
   contentUrl: String
   durationMinutes: Int
   reviews: [Review!]
+  status: ContentStatus
+
 
   episodes: [Episode!]
 }
@@ -1166,6 +1183,7 @@ extend type Mutation {
   contentURL: String
   createdAt: String!
   reviews: [Review!]!
+  status: ContentStatus!
 }
 
 input CreateEpisodeInput {
@@ -1293,6 +1311,11 @@ input PaginationInput {
 union WatchedContent = Content | Episode
 union ReviewedContent = Content | Episode
 
+enum ContentStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+}
 `, BuiltIn: false},
 	{Name: "../schemas/user.graphqls", Input: `type User {
   id: ID!
@@ -2194,6 +2217,35 @@ func (ec *executionContext) fieldContext_Content_reviews(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Content_status(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Content_status,
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		ec.marshalOContentStatus2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentStatus,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Content_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Content",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ContentStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Content_episodes(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2236,6 +2288,8 @@ func (ec *executionContext) fieldContext_Content_episodes(_ context.Context, fie
 				return ec.fieldContext_Episode_createdAt(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Episode_reviews(ctx, field)
+			case "status":
+				return ec.fieldContext_Episode_status(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Episode", field.Name)
 		},
@@ -2573,6 +2627,35 @@ func (ec *executionContext) fieldContext_Episode_reviews(_ context.Context, fiel
 				return ec.fieldContext_Review_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Episode_status(ctx context.Context, field graphql.CollectedField, obj *model.Episode) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Episode_status,
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		ec.marshalNContentStatus2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Episode_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Episode",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ContentStatus does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2917,6 +3000,8 @@ func (ec *executionContext) fieldContext_Mutation_updateContent(ctx context.Cont
 				return ec.fieldContext_Content_durationMinutes(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Content_reviews(ctx, field)
+			case "status":
+				return ec.fieldContext_Content_status(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
 			}
@@ -3071,6 +3156,8 @@ func (ec *executionContext) fieldContext_Mutation_createEpisode(ctx context.Cont
 				return ec.fieldContext_Episode_createdAt(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Episode_reviews(ctx, field)
+			case "status":
+				return ec.fieldContext_Episode_status(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Episode", field.Name)
 		},
@@ -3157,6 +3244,8 @@ func (ec *executionContext) fieldContext_Mutation_updateEpisode(ctx context.Cont
 				return ec.fieldContext_Episode_createdAt(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Episode_reviews(ctx, field)
+			case "status":
+				return ec.fieldContext_Episode_status(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Episode", field.Name)
 		},
@@ -4537,6 +4626,8 @@ func (ec *executionContext) fieldContext_Query_getContent(ctx context.Context, f
 				return ec.fieldContext_Content_durationMinutes(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Content_reviews(ctx, field)
+			case "status":
+				return ec.fieldContext_Content_status(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
 			}
@@ -4625,6 +4716,8 @@ func (ec *executionContext) fieldContext_Query_listContents(_ context.Context, f
 				return ec.fieldContext_Content_durationMinutes(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Content_reviews(ctx, field)
+			case "status":
+				return ec.fieldContext_Content_status(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
 			}
@@ -4703,6 +4796,8 @@ func (ec *executionContext) fieldContext_Query_listContentsByType(ctx context.Co
 				return ec.fieldContext_Content_durationMinutes(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Content_reviews(ctx, field)
+			case "status":
+				return ec.fieldContext_Content_status(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
 			}
@@ -4792,6 +4887,8 @@ func (ec *executionContext) fieldContext_Query_listContentsByGenre(ctx context.C
 				return ec.fieldContext_Content_durationMinutes(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Content_reviews(ctx, field)
+			case "status":
+				return ec.fieldContext_Content_status(ctx, field)
 			case "episodes":
 				return ec.fieldContext_Content_episodes(ctx, field)
 			}
@@ -4875,6 +4972,8 @@ func (ec *executionContext) fieldContext_Query_getEpisode(ctx context.Context, f
 				return ec.fieldContext_Episode_createdAt(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Episode_reviews(ctx, field)
+			case "status":
+				return ec.fieldContext_Episode_status(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Episode", field.Name)
 		},
@@ -8694,6 +8793,8 @@ func (ec *executionContext) _Content(ctx context.Context, sel ast.SelectionSet, 
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "status":
+			out.Values[i] = ec._Content_status(ctx, field, obj)
 		case "episodes":
 			field := field
 
@@ -8878,6 +8979,11 @@ func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, 
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "status":
+			out.Values[i] = ec._Episode_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10375,6 +10481,16 @@ func (ec *executionContext) marshalNContent2ᚖgithubᚗcomᚋecbDeveloperᚋnet
 	return ec._Content(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNContentStatus2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentStatus(ctx context.Context, v any) (model.ContentStatus, error) {
+	var res model.ContentStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNContentStatus2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentStatus(ctx context.Context, sel ast.SelectionSet, v model.ContentStatus) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNContentType2githubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentType(ctx context.Context, v any) (model.ContentType, error) {
 	var res model.ContentType
 	err := res.UnmarshalGQL(v)
@@ -10920,6 +11036,22 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOContentStatus2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentStatus(ctx context.Context, v any) (*model.ContentStatus, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.ContentStatus)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOContentStatus2ᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐContentStatus(ctx context.Context, sel ast.SelectionSet, v *model.ContentStatus) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalOEpisode2ᚕᚖgithubᚗcomᚋecbDeveloperᚋnetflixᚑarchitectureᚋappsᚋapiᚋinternalᚋgraphᚋmodelᚐEpisodeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Episode) graphql.Marshaler {

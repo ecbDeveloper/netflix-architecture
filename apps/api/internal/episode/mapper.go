@@ -23,6 +23,7 @@ func toGraphQLModel(e sqlc.Episode, contentURL *string) *model.Episode {
 		Title:           e.Title,
 		DurationMinutes: e.DurationMinutes,
 		ContentURL:      contentURL,
+		Status:          model.ContentStatus(e.Status),
 		CreatedAt:       e.CreatedAt.String(),
 	}
 }

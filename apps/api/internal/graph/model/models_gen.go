@@ -32,6 +32,7 @@ type Content struct {
 	UpdatedAt       string         `json:"updatedAt"`
 	ContentURL      *string        `json:"contentUrl,omitempty"`
 	DurationMinutes *int32         `json:"durationMinutes,omitempty"`
+	Status          *ContentStatus `json:"status,omitempty"`
 }
 
 func (Content) IsWatchedContent() {}
@@ -91,14 +92,15 @@ type CreateWatchHistoryInput struct {
 }
 
 type Episode struct {
-	ID              uuid.UUID `json:"id"`
-	SeriesID        uuid.UUID `json:"seriesId"`
-	Season          int32     `json:"season"`
-	EpisodeNumber   int32     `json:"episodeNumber"`
-	Title           string    `json:"title"`
-	DurationMinutes int32     `json:"durationMinutes"`
-	ContentURL      *string   `json:"contentURL,omitempty"`
-	CreatedAt       string    `json:"createdAt"`
+	ID              uuid.UUID     `json:"id"`
+	SeriesID        uuid.UUID     `json:"seriesId"`
+	Season          int32         `json:"season"`
+	EpisodeNumber   int32         `json:"episodeNumber"`
+	Title           string        `json:"title"`
+	DurationMinutes int32         `json:"durationMinutes"`
+	ContentURL      *string       `json:"contentURL,omitempty"`
+	CreatedAt       string        `json:"createdAt"`
+	Status          ContentStatus `json:"status"`
 }
 
 func (Episode) IsWatchedContent() {}
@@ -216,6 +218,63 @@ type WatchHistory struct {
 	EpisodeID uuid.UUID `json:"-"`
 	// movie ID, used by content field resolver
 	MovieID uuid.UUID `json:"-"`
+}
+
+type ContentStatus string
+
+const (
+	ContentStatusPending    ContentStatus = "PENDING"
+	ContentStatusProcessing ContentStatus = "PROCESSING"
+	ContentStatusProcessed  ContentStatus = "PROCESSED"
+)
+
+var AllContentStatus = []ContentStatus{
+	ContentStatusPending,
+	ContentStatusProcessing,
+	ContentStatusProcessed,
+}
+
+func (e ContentStatus) IsValid() bool {
+	switch e {
+	case ContentStatusPending, ContentStatusProcessing, ContentStatusProcessed:
+		return true
+	}
+	return false
+}
+
+func (e ContentStatus) String() string {
+	return string(e)
+}
+
+func (e *ContentStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ContentStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ContentStatus", str)
+	}
+	return nil
+}
+
+func (e ContentStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ContentStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ContentStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type ContentType string
