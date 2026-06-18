@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 type Service interface {
@@ -29,13 +30,20 @@ type ServiceImpl struct {
 	repo           Repository
 	storage        storage.Service
 	profileService profile.Service
+	rabbitMQCh     *amqp091.Channel
 }
 
-func NewService(repo Repository, storageService storage.Service, ps profile.Service) Service {
+func NewService(
+	repo Repository,
+	storageService storage.Service,
+	ps profile.Service,
+	rabbitMQCh *amqp091.Channel,
+) Service {
 	return &ServiceImpl{
 		repo:           repo,
 		storage:        storageService,
 		profileService: ps,
+		rabbitMQCh:     rabbitMQCh,
 	}
 }
 

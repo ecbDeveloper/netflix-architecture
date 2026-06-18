@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 type Service interface {
@@ -33,15 +34,23 @@ type ServiceImpl struct {
 	pool           *pgxpool.Pool
 	storage        storage.Service
 	profileService profile.Service
+	rabbitMQCh     *amqp091.Channel
 }
 
-func NewService(queries *sqlc.Queries, pool *pgxpool.Pool, storage storage.Service, ps profile.Service) Service {
+func NewService(
+	queries *sqlc.Queries,
+	pool *pgxpool.Pool,
+	storage storage.Service,
+	ps profile.Service,
+	rabbitMQCh *amqp091.Channel,
+) Service {
 	return &ServiceImpl{
 		repo:           queries,
 		queries:        queries,
 		pool:           pool,
 		storage:        storage,
 		profileService: ps,
+		rabbitMQCh:     rabbitMQCh,
 	}
 }
 
@@ -159,6 +168,7 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 
 			return uuid.Nil, fmt.Errorf("failed to insert movie on database: %w", err)
 		}
+
 	}
 
 	if input.ContentType == model.ContentTypeSeries {
@@ -284,10 +294,10 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 		return nil, fmt.Errorf("failed to update content on database: %w", err)
 	}
 
-	var currentMovie sqlc.GetMovieRow
 	var oldURL string
+	var updatedMovie sqlc.Movie
 	if current.ContentType == sqlc.ContentTypeMOVIE {
-		currentMovie, err = s.repo.GetMovie(ctx, id)
+		currentMovie, err := s.repo.GetMovie(ctx, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return nil, &apperror.NotFoundError{Entity: "movie"}
@@ -315,7 +325,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 			updateMovieParams.DurationMinutes = *input.DurationMinutes
 		}
 
-		currentMovie, err = qtx.UpdateMovie(ctx, updateMovieParams)
+		updatedMovie, err = qtx.UpdateMovie(ctx, updateMovieParams)
 		if err != nil {
 			if input.ContentFile != nil && input.ContentFile.File != nil {
 				go s.storage.DeleteFile(context.Background(), oldURL)
@@ -340,12 +350,12 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 
 	entity := toContentEntity(content)
 	if entity.IsMovie() {
-		parsedStatus, err := parseContentStatus(currentMovie.Status)
+		parsedStatus, err := parseContentStatus(updatedMovie.Status)
 		if err != nil {
 			return nil, fmt.Errorf("faiiled to parse content status: %w", err)
 		}
 
-		return toGraphQlModel(content, pgTextToStringPtr(currentMovie.ContentUrl), &currentMovie.DurationMinutes, parsedStatus), nil
+		return toGraphQlModel(content, pgTextToStringPtr(updatedMovie.ContentUrl), &updatedMovie.DurationMinutes, parsedStatus), nil
 	}
 
 	return toGraphQlModel(content, nil, nil, nil), nil

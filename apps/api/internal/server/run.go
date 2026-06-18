@@ -28,6 +28,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/gomodule/redigo/redis"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
@@ -53,7 +54,26 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 
 	historyClient, recClient, err := infra.InitializeGRPC(cfg)
 	if err != nil {
-		logger.Error("failed to initialize grpc clients client", slog.Any("error", err))
+		logger.Error("failed to initialize grpc clients", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	rabbitMQConn, err := infra.InitializeRabbitMQ(cfg)
+	if err != nil {
+		logger.Error("failed to initialize rabbitMQ", slog.Any("error", err))
+		os.Exit(1)
+	}
+	defer rabbitMQConn.Close()
+
+	rabbitMQCh, err := rabbitMQConn.Channel()
+	if err != nil {
+		logger.Error("failed to get rabbitmq channel: %w", err)
+		os.Exit(1)
+	}
+	defer rabbitMQCh.Close()
+
+	if err := infra.DeclareContentQueue(cfg, rabbitMQCh); err != nil {
+		logger.Error("failed to declare content queue: %w", err)
 		os.Exit(1)
 	}
 
@@ -65,6 +85,7 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 		historyClient,
 		recClient,
 		s3Client,
+		rabbitMQCh,
 	)
 	resolver.Logger = logger
 
@@ -96,6 +117,7 @@ func initializeDependencies(
 	historyClient historyv1.HistoryServiceClient,
 	recommendationClient recommendationv1.RecommendationServiceClient,
 	s3Client *s3.Client,
+	rabbitMQCh *amqp091.Channel,
 ) (*resolvers.Resolver, *scs.SessionManager) {
 	queries := sqlc.New(pool)
 
@@ -103,8 +125,8 @@ func initializeDependencies(
 	userService := user.NewService(queries)
 	profileService := profile.NewService(queries)
 	authService := auth.NewService(queries, userService)
-	episodeService := episode.NewService(queries, storageService, profileService)
-	contentService := content.NewService(queries, pool, storageService, profileService)
+	episodeService := episode.NewService(queries, storageService, profileService, rabbitMQCh)
+	contentService := content.NewService(queries, pool, storageService, profileService, rabbitMQCh)
 	reviewService := review.NewService(queries, episodeService)
 
 	s := scs.New()

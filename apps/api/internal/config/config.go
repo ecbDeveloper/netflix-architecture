@@ -23,6 +23,11 @@ type Config struct {
 	S3SecretAccessKey      string
 	S3EndPointURL          string
 	S3BucketName           string
+	RabbitMQHost           string
+	RabbitMQPort           string
+	RabbitMQUser           string
+	RabbitMQPass           string
+	ContentQueueName       string
 }
 
 func (c *Config) DSN() string {
@@ -59,6 +64,11 @@ func Load() (*Config, error) {
 		S3SecretAccessKey:      os.Getenv("S3_SECRET_ACCESS_KEY"),
 		S3EndPointURL:          os.Getenv("S3_ENDPOINT_URL"),
 		S3BucketName:           os.Getenv("S3_BUCKET_NAME"),
+		RabbitMQHost:           os.Getenv("RABBITMQ_HOST"),
+		RabbitMQPort:           os.Getenv("RABBITMQ_PORT"),
+		RabbitMQUser:           os.Getenv("RABBITMQ_USER"),
+		RabbitMQPass:           os.Getenv("RABBITMQ_PASS"),
+		ContentQueueName:       os.Getenv("CONTENT_QUEUE_NAME"),
 	}
 
 	if err := cfg.validate(); err != nil {
@@ -87,6 +97,11 @@ func (c *Config) validate() error {
 		"S3_SECRET_ACCESS_KEY":     c.S3SecretAccessKey,
 		"S3_ENDPOINT_URL":          c.S3EndPointURL,
 		"S3_BUCKET_NAME":           c.S3BucketName,
+		"RABBITMQ_PORT":            c.RabbitMQPort,
+		"RABBITMQ_USER":            c.RabbitMQUser,
+		"RABBITMQ_PASS":            c.RabbitMQPass,
+		"RABBITMQ_HOST":            c.RabbitMQPass,
+		"CONTENT_QUEUE_NAME":       c.ContentQueueName,
 	}
 
 	for key, val := range required {
