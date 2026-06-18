@@ -340,7 +340,9 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 		updatedMovie, err = qtx.UpdateMovie(ctx, updateMovieParams)
 		if err != nil {
 			if input.ContentFile != nil && input.ContentFile.File != nil {
-				go s.storage.DeleteFile(context.Background(), oldURL)
+				if err := s.storage.DeleteFile(context.Background(), oldURL); err != nil {
+					return nil, fmt.Errorf("failed to delete movie file: %w", err)
+				}
 			}
 
 			return nil, fmt.Errorf("failed to update movie on database: %w", err)
@@ -350,14 +352,18 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 	if err = tx.Commit(ctx); err != nil {
 		if current.ContentType == sqlc.ContentTypeMOVIE {
 			fileKey := fmt.Sprintf("raw/%s.mp4", id.String())
-			go s.storage.DeleteFile(context.Background(), fileKey)
+			if err := s.storage.DeleteFile(context.Background(), fileKey); err != nil {
+				return nil, fmt.Errorf("failed to delete movie file: %w", err)
+			}
 		}
 
 		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	if input.ContentFile != nil && input.ContentFile.File != nil && oldURL != "" {
-		go s.storage.DeleteFile(context.Background(), oldURL)
+		if err := s.storage.DeleteFile(context.Background(), oldURL); err != nil {
+			return nil, fmt.Errorf("failed to delete movie file: %w", err)
+		}
 
 		if current.ContentType == sqlc.ContentTypeMOVIE {
 			payload := shared.ContentProcessingMessage{
@@ -424,14 +430,18 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 
 	if contentEntity.IsMovie() {
 		if movie.ContentUrl.Valid && movie.ContentUrl.String != "" {
-			go s.storage.DeleteFile(context.Background(), movie.ContentUrl.String)
+			if err := s.storage.DeleteFile(context.Background(), movie.ContentUrl.String); err != nil {
+				return fmt.Errorf("failed to delete movie file: %w", err)
+			}
 		}
 	}
 
 	if contentEntity.IsSeries() {
 		for _, episode := range episodes {
 			if episode.ContentUrl.Valid && episode.ContentUrl.String != "" {
-				go s.storage.DeleteFile(context.Background(), episode.ContentUrl.String)
+				if err := s.storage.DeleteFile(context.Background(), movie.ContentUrl.String); err != nil {
+					return fmt.Errorf("failed to delete movie file: %w", err)
+				}
 			}
 		}
 	}
