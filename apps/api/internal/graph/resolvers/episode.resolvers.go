@@ -17,17 +17,17 @@ import (
 func (r *episodeResolver) Reviews(ctx context.Context, obj *model.Episode) ([]*model.Review, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	reviews, err := r.ReviewService.ListReviewsByEpisode(ctx, obj.ID, profileID, userID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return reviews, nil
@@ -37,7 +37,7 @@ func (r *episodeResolver) Reviews(ctx context.Context, obj *model.Episode) ([]*m
 func (r *mutationResolver) CreateEpisode(ctx context.Context, input model.CreateEpisodeInput) (*model.Episode, error) {
 	episode, err := r.EpisodeService.CreateEpisode(ctx, input)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return episode, nil
@@ -47,7 +47,7 @@ func (r *mutationResolver) CreateEpisode(ctx context.Context, input model.Create
 func (r *mutationResolver) UpdateEpisode(ctx context.Context, id uuid.UUID, input model.UpdateEpisodeInput) (*model.Episode, error) {
 	episode, err := r.EpisodeService.UpdateEpisode(ctx, id, input)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return episode, nil
@@ -57,7 +57,7 @@ func (r *mutationResolver) UpdateEpisode(ctx context.Context, id uuid.UUID, inpu
 func (r *mutationResolver) DeleteEpisode(ctx context.Context, id uuid.UUID) (bool, error) {
 	err := r.EpisodeService.DeleteEpisode(ctx, id)
 	if err != nil {
-		return false, r.handleError(err)
+		return false, r.handleError(ctx, err)
 	}
 
 	return true, nil
@@ -67,17 +67,17 @@ func (r *mutationResolver) DeleteEpisode(ctx context.Context, id uuid.UUID) (boo
 func (r *queryResolver) GetEpisode(ctx context.Context, id uuid.UUID) (*model.Episode, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	episode, err := r.EpisodeService.GetEpisode(ctx, id, profileID, userID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return episode, nil

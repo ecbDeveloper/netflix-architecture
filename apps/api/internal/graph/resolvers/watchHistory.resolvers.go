@@ -20,7 +20,7 @@ import (
 func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.CreateWatchHistoryInput) (*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	reqBody := &historyv1.RecordWatchHistoryRequest{
@@ -48,7 +48,7 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 
 	resp, err := r.HistoryClient.RecordWatchHistory(ctx, reqBody)
 	if err != nil {
-		return nil, r.handleGRPCError(err)
+		return nil, r.handleGRPCError(ctx, err)
 	}
 
 	return protoWatchHistoryToGraphQL(resp.WatchHistory), nil
@@ -58,7 +58,7 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	reqBody := &historyv1.UpdateWatchProgressRequest{
@@ -75,7 +75,7 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID,
 
 	resp, err := r.HistoryClient.UpdateWatchProgress(ctx, reqBody)
 	if err != nil {
-		return nil, r.handleGRPCError(err)
+		return nil, r.handleGRPCError(ctx, err)
 	}
 
 	return protoWatchHistoryToGraphQL(resp.WatchHistory), nil
@@ -85,7 +85,7 @@ func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID,
 func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID) (bool, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return false, r.handleError(err)
+		return false, r.handleError(ctx, err)
 	}
 
 	reqBody := &historyv1.DeleteWatchHistoryRequest{
@@ -95,7 +95,7 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID)
 
 	_, err = r.HistoryClient.DeleteWatchHistory(ctx, reqBody)
 	if err != nil {
-		return false, r.handleGRPCError(err)
+		return false, r.handleGRPCError(ctx, err)
 	}
 
 	return true, nil
@@ -105,7 +105,7 @@ func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID)
 func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	reqBody := &historyv1.GetWatchHistoryRequest{
@@ -115,7 +115,7 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*mod
 
 	resp, err := r.HistoryClient.GetWatchHistory(ctx, reqBody)
 	if err != nil {
-		return nil, r.handleGRPCError(err)
+		return nil, r.handleGRPCError(ctx, err)
 	}
 
 	return protoWatchHistoryToGraphQL(resp.WatchHistory), nil
@@ -140,7 +140,7 @@ func (r *queryResolver) MostWatchedContents(ctx context.Context, input *model.Pa
 
 	resp, err := r.HistoryClient.GetMostWatched(ctx, reqBody)
 	if err != nil {
-		return nil, r.handleGRPCError(err)
+		return nil, r.handleGRPCError(ctx, err)
 	}
 
 	result := make([]*model.MostWatchedContent, len(resp.Items))
@@ -160,7 +160,7 @@ func (r *queryResolver) MostWatchedContents(ctx context.Context, input *model.Pa
 func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, input *model.PaginationInput) ([]*model.WatchHistory, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	var limit int32 = 10
@@ -181,7 +181,7 @@ func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, input *mode
 
 	resp, err := r.HistoryClient.GetRecentlyWatched(ctx, reqBody)
 	if err != nil {
-		return nil, r.handleGRPCError(err)
+		return nil, r.handleGRPCError(ctx, err)
 	}
 
 	result := make([]*model.WatchHistory, len(resp.Histories))
@@ -195,7 +195,7 @@ func (r *queryResolver) RecentlyWatchedContents(ctx context.Context, input *mode
 func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([]*model.RecommendedContent, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	var l int32 = 20
@@ -210,7 +210,7 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 
 	resp, err := r.RecommendationClient.GetRecommendations(ctx, reqBody)
 	if err != nil {
-		return nil, r.handleGRPCError(err)
+		return nil, r.handleGRPCError(ctx, err)
 	}
 
 	result := make([]*model.RecommendedContent, len(resp.Recommendations))
@@ -230,18 +230,18 @@ func (r *queryResolver) GetRecommendations(ctx context.Context, limit *int32) ([
 func (r *watchHistoryResolver) Content(ctx context.Context, obj *model.WatchHistory) (model.WatchedContent, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	if obj.EpisodeID != uuid.Nil {
 		episode, err := r.EpisodeService.GetEpisode(ctx, obj.EpisodeID, profileID, userID)
 		if err != nil {
-			return nil, r.handleError(err)
+			return nil, r.handleError(ctx, err)
 		}
 
 		return episode, nil
@@ -250,13 +250,13 @@ func (r *watchHistoryResolver) Content(ctx context.Context, obj *model.WatchHist
 	if obj.MovieID != uuid.Nil {
 		content, err := r.ContentService.GetContent(ctx, obj.MovieID, profileID, userID)
 		if err != nil {
-			return nil, r.handleError(err)
+			return nil, r.handleError(ctx, err)
 		}
 
 		return content, nil
 	}
 
-	return nil, r.handleError(&apperror.UnprocessableEntityError{Message: "it was not possible to find the watched content"})
+	return nil, r.handleError(ctx, &apperror.UnprocessableEntityError{Message: "it was not possible to find the watched content"})
 }
 
 // WatchHistory returns generated.WatchHistoryResolver implementation.

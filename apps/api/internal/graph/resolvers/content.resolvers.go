@@ -17,7 +17,7 @@ import (
 func (r *contentResolver) Reviews(ctx context.Context, obj *model.Content) ([]*model.Review, error) {
 	reviews, err := r.ReviewService.ListReviewsByMovie(ctx, obj.ID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return reviews, nil
@@ -27,17 +27,17 @@ func (r *contentResolver) Reviews(ctx context.Context, obj *model.Content) ([]*m
 func (r *contentResolver) Episodes(ctx context.Context, obj *model.Content) ([]*model.Episode, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	reviews, err := r.EpisodeService.ListEpisodesBySeries(ctx, obj.ID, profileID, userID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return reviews, nil
@@ -47,7 +47,7 @@ func (r *contentResolver) Episodes(ctx context.Context, obj *model.Content) ([]*
 func (r *mutationResolver) CreateContent(ctx context.Context, input model.CreateContentInput) (uuid.UUID, error) {
 	contentID, err := r.ContentService.CreateContent(ctx, input)
 	if err != nil {
-		return uuid.Nil, r.handleError(err)
+		return uuid.Nil, r.handleError(ctx, err)
 	}
 
 	return contentID, nil
@@ -57,7 +57,7 @@ func (r *mutationResolver) CreateContent(ctx context.Context, input model.Create
 func (r *mutationResolver) UpdateContent(ctx context.Context, id uuid.UUID, input model.UpdateContentInput) (*model.Content, error) {
 	updatedContent, err := r.ContentService.UpdateContent(ctx, id, input)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return updatedContent, nil
@@ -67,7 +67,7 @@ func (r *mutationResolver) UpdateContent(ctx context.Context, id uuid.UUID, inpu
 func (r *mutationResolver) DeleteContent(ctx context.Context, id uuid.UUID) (bool, error) {
 	err := r.ContentService.DeleteContent(ctx, id)
 	if err != nil {
-		return false, r.handleError(err)
+		return false, r.handleError(ctx, err)
 	}
 
 	return true, nil
@@ -77,17 +77,17 @@ func (r *mutationResolver) DeleteContent(ctx context.Context, id uuid.UUID) (boo
 func (r *queryResolver) GetContent(ctx context.Context, id uuid.UUID) (*model.Content, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	content, err := r.ContentService.GetContent(ctx, id, profileID, userID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return content, nil
@@ -97,17 +97,17 @@ func (r *queryResolver) GetContent(ctx context.Context, id uuid.UUID) (*model.Co
 func (r *queryResolver) ListContents(ctx context.Context) ([]*model.Content, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	contents, err := r.ContentService.ListContents(ctx, profileID, userID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return contents, nil
@@ -117,17 +117,17 @@ func (r *queryResolver) ListContents(ctx context.Context) ([]*model.Content, err
 func (r *queryResolver) ListContentsByType(ctx context.Context, contentType model.ContentType) ([]*model.Content, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	contents, err := r.ContentService.ListContentsByType(ctx, profileID, userID, contentType)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return contents, nil
@@ -137,17 +137,17 @@ func (r *queryResolver) ListContentsByType(ctx context.Context, contentType mode
 func (r *queryResolver) ListContentsByGenre(ctx context.Context, genreID int32) ([]*model.Content, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	contents, err := r.ContentService.ListContentsByGenre(ctx, profileID, userID, genreID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return contents, nil

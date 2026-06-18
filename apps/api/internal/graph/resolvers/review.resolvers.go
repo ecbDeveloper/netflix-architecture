@@ -18,12 +18,12 @@ import (
 func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateReviewInput) (*model.Review, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	review, err := r.ReviewService.CreateReview(ctx, input, profileID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return review, nil
@@ -33,12 +33,12 @@ func (r *mutationResolver) CreateReview(ctx context.Context, input model.CreateR
 func (r *mutationResolver) UpdateReview(ctx context.Context, id uuid.UUID, input model.UpdateReviewInput) (*model.Review, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	review, err := r.ReviewService.UpdateReview(ctx, id, input, profileID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return review, nil
@@ -48,12 +48,12 @@ func (r *mutationResolver) UpdateReview(ctx context.Context, id uuid.UUID, input
 func (r *mutationResolver) DeleteReview(ctx context.Context, id uuid.UUID) (bool, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return false, r.handleError(err)
+		return false, r.handleError(ctx, err)
 	}
 
 	err = r.ReviewService.DeleteReview(ctx, id, profileID)
 	if err != nil {
-		return false, r.handleError(err)
+		return false, r.handleError(ctx, err)
 	}
 
 	return true, nil
@@ -63,7 +63,7 @@ func (r *mutationResolver) DeleteReview(ctx context.Context, id uuid.UUID) (bool
 func (r *queryResolver) GetReview(ctx context.Context, id uuid.UUID) (*model.Review, error) {
 	review, err := r.ReviewService.GetReview(ctx, id)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return review, nil
@@ -73,17 +73,17 @@ func (r *queryResolver) GetReview(ctx context.Context, id uuid.UUID) (*model.Rev
 func (r *reviewResolver) Profile(ctx context.Context, obj *model.Review) (*model.Profile, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	profile, err := r.ProfileService.GetProfile(ctx, profileID, userID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return profile, nil
@@ -93,18 +93,18 @@ func (r *reviewResolver) Profile(ctx context.Context, obj *model.Review) (*model
 func (r *reviewResolver) Content(ctx context.Context, obj *model.Review) (model.ReviewedContent, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	if obj.EpisodeID != uuid.Nil {
 		episode, err := r.EpisodeService.GetEpisode(ctx, obj.EpisodeID, profileID, userID)
 		if err != nil {
-			return nil, r.handleError(err)
+			return nil, r.handleError(ctx, err)
 		}
 
 		return episode, nil
@@ -113,13 +113,13 @@ func (r *reviewResolver) Content(ctx context.Context, obj *model.Review) (model.
 	if obj.MovieID != uuid.Nil {
 		content, err := r.ContentService.GetContent(ctx, obj.MovieID, profileID, userID)
 		if err != nil {
-			return nil, r.handleError(err)
+			return nil, r.handleError(ctx, err)
 		}
 
 		return content, nil
 	}
 
-	return nil, r.handleError(&apperror.UnprocessableEntityError{Message: "it was not possible to find the reviewed content"})
+	return nil, r.handleError(ctx, &apperror.UnprocessableEntityError{Message: "it was not possible to find the reviewed content"})
 }
 
 // Review returns generated.ReviewResolver implementation.

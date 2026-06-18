@@ -19,12 +19,12 @@ import (
 func (r *mutationResolver) CreateProfile(ctx context.Context, input model.CreateProfileInput) (*model.Profile, error) {
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	profile, err := r.ProfileService.CreateProfile(ctx, input, userID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return profile, nil
@@ -34,12 +34,12 @@ func (r *mutationResolver) CreateProfile(ctx context.Context, input model.Create
 func (r *mutationResolver) UpdateProfile(ctx context.Context, id uuid.UUID, input model.UpdateProfileInput) (*model.Profile, error) {
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	profile, err := r.ProfileService.UpdateProfile(ctx, id, input, userID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return profile, nil
@@ -49,12 +49,12 @@ func (r *mutationResolver) UpdateProfile(ctx context.Context, id uuid.UUID, inpu
 func (r *mutationResolver) DeleteProfile(ctx context.Context, id uuid.UUID) (bool, error) {
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return false, r.handleError(err)
+		return false, r.handleError(ctx, err)
 	}
 
 	err = r.ProfileService.DeleteProfile(ctx, id, userID)
 	if err != nil {
-		return false, r.handleError(err)
+		return false, r.handleError(ctx, err)
 	}
 
 	r.Sessions.Remove(ctx, shared.SessionProfileIDKey)
@@ -66,12 +66,12 @@ func (r *mutationResolver) DeleteProfile(ctx context.Context, id uuid.UUID) (boo
 func (r *mutationResolver) SelectProfile(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return uuid.Nil, r.handleError(err)
+		return uuid.Nil, r.handleError(ctx, err)
 	}
 
 	profile, err := r.ProfileService.GetProfile(ctx, id, userID)
 	if err != nil {
-		return uuid.Nil, r.handleError(err)
+		return uuid.Nil, r.handleError(ctx, err)
 	}
 
 	r.Sessions.Put(ctx, shared.SessionProfileIDKey, id)
@@ -83,7 +83,7 @@ func (r *mutationResolver) SelectProfile(ctx context.Context, id uuid.UUID) (uui
 func (r *profileResolver) Reviews(ctx context.Context, obj *model.Profile) ([]*model.Review, error) {
 	reviews, err := r.ReviewService.ListReviewsByProfile(ctx, obj.ID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return reviews, nil
@@ -95,7 +95,7 @@ func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile
 		ProfileId: obj.ID.String(),
 	})
 	if err != nil {
-		return nil, r.handleGRPCError(err)
+		return nil, r.handleGRPCError(ctx, err)
 	}
 
 	result := make([]*model.WatchHistory, len(resp.Histories))
@@ -110,12 +110,12 @@ func (r *profileResolver) WatchHistories(ctx context.Context, obj *model.Profile
 func (r *queryResolver) GetProfile(ctx context.Context, id uuid.UUID) (*model.Profile, error) {
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	profile, err := r.ProfileService.GetProfile(ctx, id, userID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return profile, nil
@@ -125,12 +125,12 @@ func (r *queryResolver) GetProfile(ctx context.Context, id uuid.UUID) (*model.Pr
 func (r *queryResolver) ListProfiles(ctx context.Context) ([]*model.Profile, error) {
 	userID, err := r.getUserIDFromSession(ctx)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	profiles, err := r.ProfileService.ListProfilesByUser(ctx, userID)
 	if err != nil {
-		return nil, r.handleError(err)
+		return nil, r.handleError(ctx, err)
 	}
 
 	return profiles, nil

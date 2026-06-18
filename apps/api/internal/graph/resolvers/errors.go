@@ -1,6 +1,7 @@
 package resolvers
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -16,8 +17,8 @@ var (
 	ErrUserNotLoggedIn        = gqlerror.Errorf("user must be logged in")
 )
 
-func (r *Resolver) handleError(err error) *gqlerror.Error {
-	r.Logger.Error("resolver error", slog.Any("error", err))
+func (r *Resolver) handleError(ctx context.Context, err error) *gqlerror.Error {
+	r.Logger.ErrorContext(ctx, "resolver error", slog.Any("error", err))
 
 	var validationErr *apperror.ValidationError
 	if errors.As(err, &validationErr) {
@@ -87,13 +88,13 @@ func (r *Resolver) handleError(err error) *gqlerror.Error {
 	}
 }
 
-func (r *Resolver) handleGRPCError(err error) *gqlerror.Error {
+func (r *Resolver) handleGRPCError(ctx context.Context, err error) *gqlerror.Error {
 	st, ok := status.FromError(err)
 	if !ok {
-		return r.handleError(err)
+		return r.handleError(ctx, err)
 	}
 
-	r.Logger.Error("grpc error", slog.String("code", st.Code().String()), slog.String("message", st.Message()))
+	r.Logger.ErrorContext(ctx, "grpc error", slog.String("code", st.Code().String()), slog.String("message", st.Message()))
 
 	switch st.Code() {
 	case codes.InvalidArgument:

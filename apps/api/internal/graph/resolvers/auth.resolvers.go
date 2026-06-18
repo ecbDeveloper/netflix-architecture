@@ -21,7 +21,7 @@ func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (
 	if err != nil {
 		var validationErr *apperror.ValidationError
 		if errors.As(err, &validationErr) {
-			return uuid.Nil, r.handleError(err)
+			return uuid.Nil, r.handleError(ctx, err)
 		}
 
 		return uuid.Nil, ErrInvalidEmailOrPassword
@@ -29,7 +29,7 @@ func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (
 
 	err = r.Sessions.RenewToken(ctx)
 	if err != nil {
-		return uuid.Nil, r.handleError(err)
+		return uuid.Nil, r.handleError(ctx, err)
 	}
 
 	r.Sessions.Put(ctx, shared.SessionUserIDKey, user.ID)
@@ -45,7 +45,7 @@ func (r *mutationResolver) Logout(ctx context.Context) (string, error) {
 	}
 
 	if err := r.Sessions.Destroy(ctx); err != nil {
-		return "", r.handleError(err)
+		return "", r.handleError(ctx, err)
 	}
 
 	return "user successfully logged out", nil
