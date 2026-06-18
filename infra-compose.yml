@@ -56,9 +56,24 @@ services:
     volumes:
       - rustfs-data:/rustfs/data
 
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - ${RABBITMQ_PORT}:5672
+      - ${RABBITMQ_GUI_PORT}:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_log:/var/log/rabbitmq
+
 volumes:
   api-postgres-data:
   history-postgres-data:
   recommendation-postgres-data:
   redis-data:
   rustfs-data:
+  rabbitmq_data:
+  rabbitmq_log:
