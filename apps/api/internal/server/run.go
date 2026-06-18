@@ -125,8 +125,8 @@ func initializeDependencies(
 	userService := user.NewService(queries)
 	profileService := profile.NewService(queries)
 	authService := auth.NewService(queries, userService)
-	episodeService := episode.NewService(queries, storageService, profileService, rabbitMQCh)
-	contentService := content.NewService(queries, pool, storageService, profileService, rabbitMQCh)
+	episodeService := episode.NewService(queries, storageService, profileService, rabbitMQCh, cfg.ContentQueueName)
+	contentService := content.NewService(queries, pool, storageService, profileService, rabbitMQCh, cfg.ContentQueueName)
 	reviewService := review.NewService(queries, episodeService)
 
 	s := scs.New()

@@ -2,6 +2,7 @@ package content
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/infra/storage"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -35,6 +37,7 @@ type ServiceImpl struct {
 	storage        storage.Service
 	profileService profile.Service
 	rabbitMQCh     *amqp091.Channel
+	queueName      string
 }
 
 func NewService(
@@ -43,6 +46,7 @@ func NewService(
 	storage storage.Service,
 	ps profile.Service,
 	rabbitMQCh *amqp091.Channel,
+	queueName string,
 ) Service {
 	return &ServiceImpl{
 		repo:           queries,
@@ -51,6 +55,7 @@ func NewService(
 		storage:        storage,
 		profileService: ps,
 		rabbitMQCh:     rabbitMQCh,
+		queueName:      queueName,
 	}
 }
 
@@ -186,6 +191,27 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 		}
 
 		return uuid.Nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	if input.ContentType == model.ContentTypeMovie {
+		payload := shared.ContentProcessingMessage{
+			ContentID:   contentID,
+			ContentType: shared.ContentQueueTypeMovie,
+		}
+		body, _ := json.Marshal(payload)
+		err := s.rabbitMQCh.PublishWithContext(ctx,
+			"",          // exchange
+			s.queueName, // routing key
+			false,       // mandatory
+			false,       // immediate
+			amqp091.Publishing{
+				ContentType: "application/json",
+				Body:        body,
+			},
+		)
+		if err != nil {
+			return uuid.Nil, fmt.Errorf("content created but failed to publish to RabbitMQ: %w", err)
+		}
 	}
 
 	return contentID, nil
@@ -346,6 +372,28 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 
 	if input.ContentFile != nil && input.ContentFile.File != nil && oldURL != "" {
 		go s.storage.DeleteFile(context.Background(), oldURL)
+
+		if current.ContentType == sqlc.ContentTypeMOVIE {
+			payload := shared.ContentProcessingMessage{
+				ContentID:   id,
+				ContentType: shared.ContentQueueTypeMovie,
+			}
+			body, _ := json.Marshal(payload)
+			err := s.rabbitMQCh.PublishWithContext(
+				ctx,
+				"",
+				s.queueName,
+				false,
+				false,
+				amqp091.Publishing{
+					ContentType: "application/json",
+					Body:        body,
+				},
+			)
+			if err != nil {
+				return nil, fmt.Errorf("content updated but failed to publish to RabbitMQ: %w", err)
+			}
+		}
 	}
 
 	entity := toContentEntity(content)

@@ -2,6 +2,7 @@ package episode
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -31,6 +32,7 @@ type ServiceImpl struct {
 	storage        storage.Service
 	profileService profile.Service
 	rabbitMQCh     *amqp091.Channel
+	queueName      string
 }
 
 func NewService(
@@ -38,12 +40,14 @@ func NewService(
 	storageService storage.Service,
 	ps profile.Service,
 	rabbitMQCh *amqp091.Channel,
+	queueName string,
 ) Service {
 	return &ServiceImpl{
 		repo:           repo,
 		storage:        storageService,
 		profileService: ps,
 		rabbitMQCh:     rabbitMQCh,
+		queueName:      queueName,
 	}
 }
 
@@ -90,6 +94,26 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 			return nil, &apperror.ConflictError{Field: "episode (season + number)"}
 		}
 		return nil, fmt.Errorf("failed to insert episode on database: %w", err)
+	}
+
+	payload := shared.ContentProcessingMessage{
+		ContentID:   episodeID,
+		ContentType: shared.ContentQueueTypeEpisode,
+	}
+	body, _ := json.Marshal(payload)
+	err = s.rabbitMQCh.PublishWithContext(
+		ctx,
+		"",
+		s.queueName,
+		false,
+		false,
+		amqp091.Publishing{
+			ContentType: "application/json",
+			Body:        body,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("episode created but failed to publish to RabbitMQ: %w", err)
 	}
 
 	return toGraphQLModel(ep, nil), nil
@@ -238,6 +262,28 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 			return nil, &apperror.ConflictError{Field: "episode (season + number)"}
 		}
 		return nil, fmt.Errorf("failed to update episode %v from database: %w", id, err)
+	}
+
+	if input.EpisodeFile.File != nil {
+		payload := shared.ContentProcessingMessage{
+			ContentID:   id,
+			ContentType: shared.ContentQueueTypeEpisode,
+		}
+		body, _ := json.Marshal(payload)
+		err := s.rabbitMQCh.PublishWithContext(
+			ctx,
+			"",
+			s.queueName,
+			false,
+			false,
+			amqp091.Publishing{
+				ContentType: "application/json",
+				Body:        body,
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("episode updated but failed to publish to RabbitMQ: %w", err)
+		}
 	}
 
 	return toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl)), nil
