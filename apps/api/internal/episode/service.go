@@ -225,7 +225,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		params.DurationMinutes = *input.DurationMinutes
 	}
 
-	if input.EpisodeFile.File != nil {
+	if input.EpisodeFile != nil && input.EpisodeFile.File != nil {
 		err := s.storage.Upload(ctx, id, input.EpisodeFile.File)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update episode file content: %w", err)
@@ -249,7 +249,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		return nil, fmt.Errorf("failed to update episode %v from database: %w", id, err)
 	}
 
-	if input.EpisodeFile.File != nil {
+	if input.EpisodeFile != nil && input.EpisodeFile.File != nil {
 		payload := shared.ContentProcessingMessage{
 			ContentID:   id,
 			ContentType: shared.ContentQueueTypeEpisode,

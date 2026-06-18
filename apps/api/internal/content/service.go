@@ -324,7 +324,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 			Status:          currentMovie.Status,
 		}
 
-		if input.ContentFile.File != nil {
+		if input.ContentFile != nil && input.ContentFile.File != nil {
 			err = s.storage.Upload(ctx, id, input.ContentFile.File)
 			if err != nil {
 				return nil, fmt.Errorf("failed to upload content file: %w", err)
