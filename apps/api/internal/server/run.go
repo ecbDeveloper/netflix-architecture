@@ -18,6 +18,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/episode"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/resolvers"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/infra"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/infra/queue"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/infra/storage"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/middleware"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
@@ -125,8 +126,11 @@ func initializeDependencies(
 	userService := user.NewService(queries)
 	profileService := profile.NewService(queries)
 	authService := auth.NewService(queries, userService)
-	episodeService := episode.NewService(queries, storageService, profileService, rabbitMQCh, cfg.ContentQueueName)
-	contentService := content.NewService(queries, pool, storageService, profileService, rabbitMQCh, cfg.ContentQueueName)
+	
+	queuePublisher := queue.NewRabbitMQPublisher(rabbitMQCh, cfg.ContentQueueName)
+	
+	episodeService := episode.NewService(queries, storageService, profileService, queuePublisher)
+	contentService := content.NewService(queries, pool, storageService, profileService, queuePublisher)
 	reviewService := review.NewService(queries, episodeService)
 
 	s := scs.New()

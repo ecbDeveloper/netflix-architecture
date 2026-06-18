@@ -2,7 +2,6 @@ package content
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -11,13 +10,13 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/infra/queue"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/infra/storage"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/rabbitmq/amqp091-go"
 )
 
 type Service interface {
@@ -36,8 +35,7 @@ type ServiceImpl struct {
 	pool           *pgxpool.Pool
 	storage        storage.Service
 	profileService profile.Service
-	rabbitMQCh     *amqp091.Channel
-	queueName      string
+	publisher      queue.Publisher
 }
 
 func NewService(
@@ -45,8 +43,7 @@ func NewService(
 	pool *pgxpool.Pool,
 	storage storage.Service,
 	ps profile.Service,
-	rabbitMQCh *amqp091.Channel,
-	queueName string,
+	publisher queue.Publisher,
 ) Service {
 	return &ServiceImpl{
 		repo:           queries,
@@ -54,8 +51,7 @@ func NewService(
 		pool:           pool,
 		storage:        storage,
 		profileService: ps,
-		rabbitMQCh:     rabbitMQCh,
-		queueName:      queueName,
+		publisher:      publisher,
 	}
 }
 
@@ -198,17 +194,7 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 			ContentID:   contentID,
 			ContentType: shared.ContentQueueTypeMovie,
 		}
-		body, _ := json.Marshal(payload)
-		err := s.rabbitMQCh.PublishWithContext(ctx,
-			"",          // exchange
-			s.queueName, // routing key
-			false,       // mandatory
-			false,       // immediate
-			amqp091.Publishing{
-				ContentType: "application/json",
-				Body:        body,
-			},
-		)
+		err := s.publisher.Publish(ctx, payload)
 		if err != nil {
 			return uuid.Nil, fmt.Errorf("content created but failed to publish to RabbitMQ: %w", err)
 		}
@@ -378,18 +364,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 				ContentID:   id,
 				ContentType: shared.ContentQueueTypeMovie,
 			}
-			body, _ := json.Marshal(payload)
-			err := s.rabbitMQCh.PublishWithContext(
-				ctx,
-				"",
-				s.queueName,
-				false,
-				false,
-				amqp091.Publishing{
-					ContentType: "application/json",
-					Body:        body,
-				},
-			)
+			err := s.publisher.Publish(ctx, payload)
 			if err != nil {
 				return nil, fmt.Errorf("content updated but failed to publish to RabbitMQ: %w", err)
 			}
