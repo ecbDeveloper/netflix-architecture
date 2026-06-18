@@ -53,11 +53,12 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 		os.Exit(1)
 	}
 
-	historyClient, recClient, err := infra.InitializeGRPC(cfg)
+	historyClient, recClient, cleanup, err := infra.InitializeGRPC(cfg)
 	if err != nil {
 		logger.Error("failed to initialize grpc clients", slog.Any("error", err))
 		os.Exit(1)
 	}
+	defer cleanup()
 
 	rabbitMQConn, err := infra.InitializeRabbitMQ(cfg)
 	if err != nil {
@@ -126,9 +127,9 @@ func initializeDependencies(
 	userService := user.NewService(queries)
 	profileService := profile.NewService(queries)
 	authService := auth.NewService(queries, userService)
-	
+
 	queuePublisher := queue.NewRabbitMQPublisher(rabbitMQCh, cfg.ContentQueueName)
-	
+
 	episodeService := episode.NewService(queries, storageService, profileService, queuePublisher)
 	contentService := content.NewService(queries, pool, storageService, profileService, queuePublisher)
 	reviewService := review.NewService(queries, episodeService)
