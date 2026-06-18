@@ -22,7 +22,7 @@ func parseContentStatus(s sqlc.ContentStatus) (*model.ContentStatus, error) {
 	status := model.ContentStatus(s)
 
 	switch status {
-	case model.ContentStatusPending, model.ContentStatusProcessing, model.ContentStatusProcessed:
+	case model.ContentStatusPending, model.ContentStatusProcessed:
 		return &status, nil
 	default:
 		return nil, fmt.Errorf("invalid content status: %s", s)

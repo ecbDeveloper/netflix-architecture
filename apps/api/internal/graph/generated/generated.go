@@ -1313,7 +1313,6 @@ union ReviewedContent = Content | Episode
 
 enum ContentStatus {
   PENDING
-  PROCESSING
   PROCESSED
 }
 `, BuiltIn: false},

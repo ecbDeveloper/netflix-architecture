@@ -16,9 +16,8 @@ import (
 type ContentStatus string
 
 const (
-	ContentStatusPENDING    ContentStatus = "PENDING"
-	ContentStatusPROCESSING ContentStatus = "PROCESSING"
-	ContentStatusPROCESSED  ContentStatus = "PROCESSED"
+	ContentStatusPENDING   ContentStatus = "PENDING"
+	ContentStatusPROCESSED ContentStatus = "PROCESSED"
 )
 
 func (e *ContentStatus) Scan(src interface{}) error {

@@ -223,20 +223,18 @@ type WatchHistory struct {
 type ContentStatus string
 
 const (
-	ContentStatusPending    ContentStatus = "PENDING"
-	ContentStatusProcessing ContentStatus = "PROCESSING"
-	ContentStatusProcessed  ContentStatus = "PROCESSED"
+	ContentStatusPending   ContentStatus = "PENDING"
+	ContentStatusProcessed ContentStatus = "PROCESSED"
 )
 
 var AllContentStatus = []ContentStatus{
 	ContentStatusPending,
-	ContentStatusProcessing,
 	ContentStatusProcessed,
 }
 
 func (e ContentStatus) IsValid() bool {
 	switch e {
-	case ContentStatusPending, ContentStatusProcessing, ContentStatusProcessed:
+	case ContentStatusPending, ContentStatusProcessed:
 		return true
 	}
 	return false
