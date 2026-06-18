@@ -100,7 +100,7 @@ func (c *Config) validate() error {
 		"RABBITMQ_PORT":            c.RabbitMQPort,
 		"RABBITMQ_USER":            c.RabbitMQUser,
 		"RABBITMQ_PASS":            c.RabbitMQPass,
-		"RABBITMQ_HOST":            c.RabbitMQPass,
+		"RABBITMQ_HOST":            c.RabbitMQHost,
 		"CONTENT_QUEUE_NAME":       c.ContentQueueName,
 	}
 
