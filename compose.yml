@@ -37,4 +37,4 @@ services:
       - history_ms
 
 include:
-  - path: ./stores-compose.yml
+  - path: ./infra-compose.yml
