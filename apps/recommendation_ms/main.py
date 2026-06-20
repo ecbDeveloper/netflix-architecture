@@ -10,6 +10,9 @@ from dotenv import load_dotenv
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../../gen/python"))
 )
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "internal/recommendation"))
+)
 
 from recommendation.v1 import recommendation_pb2  # type: ignore
 from recommendation.v1.recommendation_pb2_grpc import (  # type: ignore
