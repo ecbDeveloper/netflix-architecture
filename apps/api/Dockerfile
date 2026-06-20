@@ -1,4 +1,4 @@
-FROM golang:1.25.3-alpine3.21 AS build
+FROM golang:tip-alpine3.24 AS build
 
 WORKDIR /
 
@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY apps/api/ ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server/server.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server/main.go
 
 FROM gcr.io/distroless/base-debian12:nonroot
 

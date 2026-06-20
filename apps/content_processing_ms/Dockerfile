@@ -1,18 +1,18 @@
-FROM golang:1.25.3-alpine3.21 AS build
+FROM golang:tip-alpine3.24 AS build
 
 WORKDIR /
 
 COPY gen/ gen/
-COPY apps/api/go.mod apps/api/go.sum apps/api/
+COPY apps/content_processing_ms/go.mod apps/content_processing_ms/go.sum apps/content_processing_ms/
 
-WORKDIR /apps/api
+WORKDIR /apps/content_processing_ms
 RUN go mod download
 
-COPY apps/api/ ./
+COPY apps/content_processing_ms/ ./
 
-RUN CGO_ENABLED=0 go build -o main ./cmd/server/server.go
+RUN CGO_ENABLED=0 go build -o main ./cmd/worker/main.go
 
-FROM alpine:latest
+FROM alpine:3.24.1
 
 WORKDIR /tmp
 
@@ -25,7 +25,7 @@ RUN addgroup -S nonroot && adduser -S nonroot -G nonroot
 
 WORKDIR /
 
-COPY --from=build /apps/api/main ./
+COPY --from=build /apps/content_processing_ms/main ./
 
 EXPOSE 8080
 
