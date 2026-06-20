@@ -12,6 +12,8 @@ services:
       - redis
       - history_ms
       - recommendation_ms
+      - rabbitmq
+      - s3
 
   history_ms:
     container_name: history_ms
@@ -35,6 +37,15 @@ services:
     depends_on:
       - recommendation_db
       - history_ms
+
+  content_processing_ms:
+    container_name: content_processing_ms
+    build:
+      context: .
+      dockerfile: apps/content_processing_ms/Dockerfile
+    env_file: ./apps/content_processing_ms/.env
+    depends_on:
+      - api
 
 include:
   - path: ./infra-compose.yml
