@@ -65,8 +65,9 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 	}
 
 	episodeID := uuid.New()
+	fileKey := fmt.Sprintf("raw/%s.mp4", episodeID.String())
 
-	err := s.storage.Upload(ctx, episodeID, input.EpisodeFile.File)
+	err := s.storage.Upload(ctx, fileKey, input.EpisodeFile.File)
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload episode file: %w", err)
 	}
@@ -80,7 +81,6 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 		DurationMinutes: input.DurationMinutes,
 	})
 	if err != nil {
-		fileKey := fmt.Sprintf("raw/%s.mp4", episodeID.String())
 		fileErr := s.storage.DeleteFile(ctx, fileKey)
 		if fileErr != nil {
 			return nil, fmt.Errorf("failed to delete episode file: %w", err)
@@ -225,8 +225,10 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		params.DurationMinutes = *input.DurationMinutes
 	}
 
+	var oldURL string
 	if input.EpisodeFile != nil && input.EpisodeFile.File != nil {
-		err := s.storage.Upload(ctx, id, input.EpisodeFile.File)
+		fileKey := fmt.Sprintf("raw/%s.mp4", id.String())
+		err := s.storage.Upload(ctx, fileKey, input.EpisodeFile.File)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update episode file content: %w", err)
 		}
@@ -235,9 +237,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		params.Status = sqlc.ContentStatusPENDING
 
 		if current.ContentUrl.Valid && current.ContentUrl.String != "" {
-			if err = s.storage.DeleteFile(ctx, current.ContentUrl.String); err != nil {
-				return nil, fmt.Errorf("failed to delete old episode file content: %w", err)
-			}
+			oldURL = current.ContentUrl.String
 		}
 	}
 
@@ -250,6 +250,12 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 	}
 
 	if input.EpisodeFile != nil && input.EpisodeFile.File != nil {
+		if oldURL != "" {
+			if err = s.storage.DeleteFile(context.Background(), oldURL); err != nil {
+				return nil, fmt.Errorf("failed to delete old episode file content: %w", err)
+			}
+		}
+
 		payload := shared.ContentProcessingMessage{
 			ContentID:   id,
 			ContentType: shared.ContentQueueTypeEpisode,

@@ -16,6 +16,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -151,7 +152,8 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 	var fileKey string
 	if input.ContentType == model.ContentTypeMovie {
 		fileKey = fmt.Sprintf("raw/%s.mp4", contentID.String())
-		err = s.storage.Upload(ctx, contentID, input.ContentFile.File)
+
+		err = s.storage.Upload(ctx, fileKey, input.ContentFile.File)
 		if err != nil {
 			return uuid.Nil, fmt.Errorf("failed to upload content file: %w", err)
 		}
@@ -325,12 +327,18 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 		}
 
 		if input.ContentFile != nil && input.ContentFile.File != nil {
-			err = s.storage.Upload(ctx, id, input.ContentFile.File)
+			fileKey := fmt.Sprintf("raw/%s.mp4", id.String())
+			err = s.storage.Upload(ctx, fileKey, input.ContentFile.File)
 			if err != nil {
 				return nil, fmt.Errorf("failed to upload content file: %w", err)
 			}
-			oldURL = currentMovie.ContentUrl.String
+
+			updateMovieParams.ContentUrl = pgtype.Text{Valid: false}
 			updateMovieParams.Status = sqlc.ContentStatusPENDING
+
+			if currentMovie.ContentUrl.Valid && currentMovie.ContentUrl.String != "" {
+				oldURL = currentMovie.ContentUrl.String
+			}
 		}
 
 		if input.DurationMinutes != nil {
@@ -339,30 +347,17 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 
 		updatedMovie, err = qtx.UpdateMovie(ctx, updateMovieParams)
 		if err != nil {
-			if input.ContentFile != nil && input.ContentFile.File != nil {
-				if err := s.storage.DeleteFile(context.Background(), oldURL); err != nil {
-					return nil, fmt.Errorf("failed to delete movie file: %w", err)
-				}
-			}
-
 			return nil, fmt.Errorf("failed to update movie on database: %w", err)
 		}
 	}
 
 	if err = tx.Commit(ctx); err != nil {
-		if current.ContentType == sqlc.ContentTypeMOVIE {
-			fileKey := fmt.Sprintf("raw/%s.mp4", id.String())
-			if err := s.storage.DeleteFile(context.Background(), fileKey); err != nil {
-				return nil, fmt.Errorf("failed to delete movie file: %w", err)
-			}
-		}
-
 		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	if input.ContentFile != nil && input.ContentFile.File != nil && oldURL != "" {
 		if err := s.storage.DeleteFile(context.Background(), oldURL); err != nil {
-			return nil, fmt.Errorf("failed to delete movie file: %w", err)
+			return nil, fmt.Errorf("failed to delete old movie file: %w", err)
 		}
 
 		if current.ContentType == sqlc.ContentTypeMOVIE {

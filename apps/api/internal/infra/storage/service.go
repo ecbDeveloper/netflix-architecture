@@ -9,11 +9,10 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/google/uuid"
 )
 
 type Service interface {
-	Upload(ctx context.Context, contentID uuid.UUID, file io.Reader) error
+	Upload(ctx context.Context, fileKey string, file io.Reader) error
 	DeleteFile(ctx context.Context, fileKey string) error
 }
 
@@ -31,8 +30,7 @@ func NewService(s3Client *s3.Client, bucketName string, endpointURL string) Serv
 	}
 }
 
-func (s *ServiceImpl) Upload(ctx context.Context, contentID uuid.UUID, file io.Reader) error {
-	fileKey := fmt.Sprintf("raw/%s.mp4", contentID.String())
+func (s *ServiceImpl) Upload(ctx context.Context, fileKey string, file io.Reader) error {
 	_, err := s.S3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(fileKey),
