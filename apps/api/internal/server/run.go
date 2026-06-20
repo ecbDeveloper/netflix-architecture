@@ -69,13 +69,13 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 
 	rabbitMQCh, err := rabbitMQConn.Channel()
 	if err != nil {
-		logger.Error("failed to get rabbitmq channel: %w", err)
+		logger.Error("failed to get rabbitmq channel", slog.Any("error", err))
 		os.Exit(1)
 	}
 	defer rabbitMQCh.Close()
 
 	if err := infra.DeclareContentQueue(cfg, rabbitMQCh); err != nil {
-		logger.Error("failed to declare content queue: %w", err)
+		logger.Error("failed to declare content queue", slog.Any("error", err))
 		os.Exit(1)
 	}
 
