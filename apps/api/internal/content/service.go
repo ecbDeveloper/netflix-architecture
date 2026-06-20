@@ -84,7 +84,7 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 	}
 
 	if input.ContentType == model.ContentTypeMovie {
-		if input.ContentFile.File == nil {
+		if input.ContentFile == nil || input.ContentFile.File == nil {
 			return uuid.Nil, &apperror.ValidationError{Field: "contentFile", Message: "contentFile is required to movies"}
 		}
 
