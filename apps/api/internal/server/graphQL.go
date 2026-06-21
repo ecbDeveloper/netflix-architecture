@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -24,7 +25,7 @@ var userRoleOnDB = map[model.UserRole]int32{
 	model.UserRoleMember: shared.DBRoleMember,
 }
 
-func buildGraphQLServer(cfg generated.Config, appCfg *config.Config) *handler.Server {
+func buildGraphQLServer(cfg generated.Config, appCfg *config.Config, logger *slog.Logger) *handler.Server {
 	srv := handler.New(generated.NewExecutableSchema(cfg))
 
 	srv.AddTransport(transport.Options{})
@@ -33,6 +34,16 @@ func buildGraphQLServer(cfg generated.Config, appCfg *config.Config) *handler.Se
 	srv.AddTransport(transport.MultipartForm{
 		MaxUploadSize: shared.MaxUploadSize,
 		MaxMemory:     shared.MaxMemory,
+	})
+
+	srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+		oc := graphql.GetOperationContext(ctx)
+		logger.InfoContext(
+			ctx,
+			"request started",
+			slog.String("operation", oc.OperationName),
+		)
+		return next(ctx)
 	})
 
 	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))

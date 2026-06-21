@@ -92,10 +92,10 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 	resolver.Logger = logger
 
 	graphConfig := initializeGraphQLConfig(resolver, session)
-	graphServer := buildGraphQLServer(graphConfig, cfg)
+	graphServer := buildGraphQLServer(graphConfig, cfg, logger)
 
 	router := chi.NewRouter()
-	router.Use(session.LoadAndSave, middleware.RequestLogger(logger))
+	router.Use(session.LoadAndSave, middleware.RequestID)
 
 	router.Handle("/query", graphServer)
 

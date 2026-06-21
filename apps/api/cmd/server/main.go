@@ -17,7 +17,8 @@ func init() {
 }
 
 func main() {
-	loggerHandler := slog.NewJSONHandler(os.Stdout, nil)
+	jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
+	loggerHandler := config.NewLogContextHandler(jsonHandler)
 	logger := slog.New(loggerHandler)
 
 	if err := godotenv.Load(); err != nil {
