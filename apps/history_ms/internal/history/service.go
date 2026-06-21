@@ -25,7 +25,7 @@ func NewServer(queries *sqlc.Queries) historypb.HistoryServiceServer {
 	}
 }
 
-func (s *Server) RecordWatch(ctx context.Context, req *historypb.RecordWatchHistoryRequest) (*historypb.RecordWatchHistoryResponse, error) {
+func (s *Server) RecordWatchHistory(ctx context.Context, req *historypb.RecordWatchHistoryRequest) (*historypb.RecordWatchHistoryResponse, error) {
 	if req.MovieId == nil && req.EpisodeId == nil {
 		return nil, status.Error(codes.InvalidArgument, "movie_id or episode_id is required")
 	}
