@@ -50,7 +50,7 @@ type ComplexityRoot struct {
 		ContentURL      func(childComplexity int) int
 		CreatedAt       func(childComplexity int) int
 		Description     func(childComplexity int) int
-		DurationMinutes func(childComplexity int) int
+		DurationSeconds func(childComplexity int) int
 		Episodes        func(childComplexity int) int
 		GenreID         func(childComplexity int) int
 		ID              func(childComplexity int) int
@@ -70,7 +70,7 @@ type ComplexityRoot struct {
 	Episode struct {
 		ContentURL      func(childComplexity int) int
 		CreatedAt       func(childComplexity int) int
-		DurationMinutes func(childComplexity int) int
+		DurationSeconds func(childComplexity int) int
 		EpisodeNumber   func(childComplexity int) int
 		ID              func(childComplexity int) int
 		Reviews         func(childComplexity int) int
@@ -274,12 +274,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Content.Description(childComplexity), true
-	case "Content.durationMinutes":
-		if e.ComplexityRoot.Content.DurationMinutes == nil {
+	case "Content.durationSeconds":
+		if e.ComplexityRoot.Content.DurationSeconds == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Content.DurationMinutes(childComplexity), true
+		return e.ComplexityRoot.Content.DurationSeconds(childComplexity), true
 	case "Content.episodes":
 		if e.ComplexityRoot.Content.Episodes == nil {
 			break
@@ -360,12 +360,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Episode.CreatedAt(childComplexity), true
-	case "Episode.durationMinutes":
-		if e.ComplexityRoot.Episode.DurationMinutes == nil {
+	case "Episode.durationSeconds":
+		if e.ComplexityRoot.Episode.DurationSeconds == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Episode.DurationMinutes(childComplexity), true
+		return e.ComplexityRoot.Episode.DurationSeconds(childComplexity), true
 	case "Episode.episodeNumber":
 		if e.ComplexityRoot.Episode.EpisodeNumber == nil {
 			break
@@ -1115,7 +1115,7 @@ extend type Mutation {
   updatedAt: String!
 
   contentUrl: String
-  durationMinutes: Int
+  durationSeconds: Int
   reviews: [Review!]
   status: ContentStatus
 
@@ -1132,7 +1132,6 @@ input CreateContentInput {
   contentType: ContentType!
 
   contentFile: Upload
-  durationMinutes: Int
 }
 
 input UpdateContentInput {
@@ -1143,7 +1142,6 @@ input UpdateContentInput {
   genreId: Int
 
   contentFile: Upload
-  durationMinutes: Int
 }
 
 extend type Query {
@@ -1165,7 +1163,7 @@ extend type Mutation {
   season: Int!
   episodeNumber: Int!
   title: String!
-  durationMinutes: Int!
+  durationSeconds: Int
   contentURL: String
   createdAt: String!
   reviews: [Review!]!
@@ -1177,7 +1175,6 @@ input CreateEpisodeInput {
   season: Int!
   episodeNumber: Int!
   title: String!
-  durationMinutes: Int!
   episodeFile: Upload!
 }
 
@@ -1185,7 +1182,6 @@ input UpdateEpisodeInput {
   season: Int
   episodeNumber: Int
   title: String
-  durationMinutes: Int
   episodeFile: Upload
 }
 
@@ -2105,14 +2101,14 @@ func (ec *executionContext) fieldContext_Content_contentUrl(_ context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Content_durationMinutes(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
+func (ec *executionContext) _Content_durationSeconds(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Content_durationMinutes,
+		ec.fieldContext_Content_durationSeconds,
 		func(ctx context.Context) (any, error) {
-			return obj.DurationMinutes, nil
+			return obj.DurationSeconds, nil
 		},
 		nil,
 		ec.marshalOInt2ᚖint32,
@@ -2121,7 +2117,7 @@ func (ec *executionContext) _Content_durationMinutes(ctx context.Context, field 
 	)
 }
 
-func (ec *executionContext) fieldContext_Content_durationMinutes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Content_durationSeconds(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Content",
 		Field:      field,
@@ -2242,8 +2238,8 @@ func (ec *executionContext) fieldContext_Content_episodes(_ context.Context, fie
 				return ec.fieldContext_Episode_episodeNumber(ctx, field)
 			case "title":
 				return ec.fieldContext_Episode_title(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Episode_durationMinutes(ctx, field)
+			case "durationSeconds":
+				return ec.fieldContext_Episode_durationSeconds(ctx, field)
 			case "contentURL":
 				return ec.fieldContext_Episode_contentURL(ctx, field)
 			case "createdAt":
@@ -2462,23 +2458,23 @@ func (ec *executionContext) fieldContext_Episode_title(_ context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Episode_durationMinutes(ctx context.Context, field graphql.CollectedField, obj *model.Episode) (ret graphql.Marshaler) {
+func (ec *executionContext) _Episode_durationSeconds(ctx context.Context, field graphql.CollectedField, obj *model.Episode) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Episode_durationMinutes,
+		ec.fieldContext_Episode_durationSeconds,
 		func(ctx context.Context) (any, error) {
-			return obj.DurationMinutes, nil
+			return obj.DurationSeconds, nil
 		},
 		nil,
-		ec.marshalNInt2int32,
+		ec.marshalOInt2ᚖint32,
 		true,
-		true,
+		false,
 	)
 }
 
-func (ec *executionContext) fieldContext_Episode_durationMinutes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Episode_durationSeconds(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Episode",
 		Field:      field,
@@ -2958,8 +2954,8 @@ func (ec *executionContext) fieldContext_Mutation_updateContent(ctx context.Cont
 				return ec.fieldContext_Content_updatedAt(ctx, field)
 			case "contentUrl":
 				return ec.fieldContext_Content_contentUrl(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Content_durationMinutes(ctx, field)
+			case "durationSeconds":
+				return ec.fieldContext_Content_durationSeconds(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Content_reviews(ctx, field)
 			case "status":
@@ -3110,8 +3106,8 @@ func (ec *executionContext) fieldContext_Mutation_createEpisode(ctx context.Cont
 				return ec.fieldContext_Episode_episodeNumber(ctx, field)
 			case "title":
 				return ec.fieldContext_Episode_title(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Episode_durationMinutes(ctx, field)
+			case "durationSeconds":
+				return ec.fieldContext_Episode_durationSeconds(ctx, field)
 			case "contentURL":
 				return ec.fieldContext_Episode_contentURL(ctx, field)
 			case "createdAt":
@@ -3198,8 +3194,8 @@ func (ec *executionContext) fieldContext_Mutation_updateEpisode(ctx context.Cont
 				return ec.fieldContext_Episode_episodeNumber(ctx, field)
 			case "title":
 				return ec.fieldContext_Episode_title(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Episode_durationMinutes(ctx, field)
+			case "durationSeconds":
+				return ec.fieldContext_Episode_durationSeconds(ctx, field)
 			case "contentURL":
 				return ec.fieldContext_Episode_contentURL(ctx, field)
 			case "createdAt":
@@ -4499,8 +4495,8 @@ func (ec *executionContext) fieldContext_Query_getContent(ctx context.Context, f
 				return ec.fieldContext_Content_updatedAt(ctx, field)
 			case "contentUrl":
 				return ec.fieldContext_Content_contentUrl(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Content_durationMinutes(ctx, field)
+			case "durationSeconds":
+				return ec.fieldContext_Content_durationSeconds(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Content_reviews(ctx, field)
 			case "status":
@@ -4589,8 +4585,8 @@ func (ec *executionContext) fieldContext_Query_listContents(_ context.Context, f
 				return ec.fieldContext_Content_updatedAt(ctx, field)
 			case "contentUrl":
 				return ec.fieldContext_Content_contentUrl(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Content_durationMinutes(ctx, field)
+			case "durationSeconds":
+				return ec.fieldContext_Content_durationSeconds(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Content_reviews(ctx, field)
 			case "status":
@@ -4669,8 +4665,8 @@ func (ec *executionContext) fieldContext_Query_listContentsByType(ctx context.Co
 				return ec.fieldContext_Content_updatedAt(ctx, field)
 			case "contentUrl":
 				return ec.fieldContext_Content_contentUrl(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Content_durationMinutes(ctx, field)
+			case "durationSeconds":
+				return ec.fieldContext_Content_durationSeconds(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Content_reviews(ctx, field)
 			case "status":
@@ -4760,8 +4756,8 @@ func (ec *executionContext) fieldContext_Query_listContentsByGenre(ctx context.C
 				return ec.fieldContext_Content_updatedAt(ctx, field)
 			case "contentUrl":
 				return ec.fieldContext_Content_contentUrl(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Content_durationMinutes(ctx, field)
+			case "durationSeconds":
+				return ec.fieldContext_Content_durationSeconds(ctx, field)
 			case "reviews":
 				return ec.fieldContext_Content_reviews(ctx, field)
 			case "status":
@@ -4841,8 +4837,8 @@ func (ec *executionContext) fieldContext_Query_getEpisode(ctx context.Context, f
 				return ec.fieldContext_Episode_episodeNumber(ctx, field)
 			case "title":
 				return ec.fieldContext_Episode_title(ctx, field)
-			case "durationMinutes":
-				return ec.fieldContext_Episode_durationMinutes(ctx, field)
+			case "durationSeconds":
+				return ec.fieldContext_Episode_durationSeconds(ctx, field)
 			case "contentURL":
 				return ec.fieldContext_Episode_contentURL(ctx, field)
 			case "createdAt":
@@ -7812,7 +7808,7 @@ func (ec *executionContext) unmarshalInputCreateContentInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating", "genreId", "contentType", "contentFile", "durationMinutes"}
+	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating", "genreId", "contentType", "contentFile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7868,13 +7864,6 @@ func (ec *executionContext) unmarshalInputCreateContentInput(ctx context.Context
 				return it, err
 			}
 			it.ContentFile = data
-		case "durationMinutes":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationMinutes"))
-			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.DurationMinutes = data
 		}
 	}
 	return it, nil
@@ -7891,7 +7880,7 @@ func (ec *executionContext) unmarshalInputCreateEpisodeInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"seriesId", "season", "episodeNumber", "title", "durationMinutes", "episodeFile"}
+	fieldsInOrder := [...]string{"seriesId", "season", "episodeNumber", "title", "episodeFile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7926,13 +7915,6 @@ func (ec *executionContext) unmarshalInputCreateEpisodeInput(ctx context.Context
 				return it, err
 			}
 			it.Title = data
-		case "durationMinutes":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationMinutes"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.DurationMinutes = data
 		case "episodeFile":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("episodeFile"))
 			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
@@ -8227,7 +8209,7 @@ func (ec *executionContext) unmarshalInputUpdateContentInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating", "genreId", "contentFile", "durationMinutes"}
+	fieldsInOrder := [...]string{"title", "description", "releaseDate", "maturityRating", "genreId", "contentFile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8276,13 +8258,6 @@ func (ec *executionContext) unmarshalInputUpdateContentInput(ctx context.Context
 				return it, err
 			}
 			it.ContentFile = data
-		case "durationMinutes":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationMinutes"))
-			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.DurationMinutes = data
 		}
 	}
 	return it, nil
@@ -8299,7 +8274,7 @@ func (ec *executionContext) unmarshalInputUpdateEpisodeInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"season", "episodeNumber", "title", "durationMinutes", "episodeFile"}
+	fieldsInOrder := [...]string{"season", "episodeNumber", "title", "episodeFile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8327,13 +8302,6 @@ func (ec *executionContext) unmarshalInputUpdateEpisodeInput(ctx context.Context
 				return it, err
 			}
 			it.Title = data
-		case "durationMinutes":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationMinutes"))
-			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.DurationMinutes = data
 		case "episodeFile":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("episodeFile"))
 			data, err := ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
@@ -8591,8 +8559,8 @@ func (ec *executionContext) _Content(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "contentUrl":
 			out.Values[i] = ec._Content_contentUrl(ctx, field, obj)
-		case "durationMinutes":
-			out.Values[i] = ec._Content_durationMinutes(ctx, field, obj)
+		case "durationSeconds":
+			out.Values[i] = ec._Content_durationSeconds(ctx, field, obj)
 		case "reviews":
 			field := field
 
@@ -8764,11 +8732,8 @@ func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "durationMinutes":
-			out.Values[i] = ec._Episode_durationMinutes(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
+		case "durationSeconds":
+			out.Values[i] = ec._Episode_durationSeconds(ctx, field, obj)
 		case "contentURL":
 			out.Values[i] = ec._Episode_contentURL(ctx, field, obj)
 		case "createdAt":

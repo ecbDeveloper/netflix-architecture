@@ -10,7 +10,7 @@ type Content {
   updatedAt: String!
 
   contentUrl: String
-  durationMinutes: Int
+  durationSeconds: Int
   reviews: [Review!]
   status: ContentStatus
 
@@ -27,7 +27,6 @@ input CreateContentInput {
   contentType: ContentType!
 
   contentFile: Upload
-  durationMinutes: Int
 }
 
 input UpdateContentInput {
@@ -38,7 +37,6 @@ input UpdateContentInput {
   genreId: Int
 
   contentFile: Upload
-  durationMinutes: Int
 }
 
 extend type Query {

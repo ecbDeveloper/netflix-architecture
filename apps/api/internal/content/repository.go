@@ -19,7 +19,7 @@ type Repository interface {
 	UpdateContent(ctx context.Context, params sqlc.UpdateContentParams) (sqlc.Content, error)
 	DeleteContent(ctx context.Context, id uuid.UUID) error
 
-	CreateMovie(ctx context.Context, params sqlc.CreateMovieParams) (sqlc.Movie, error)
+	CreateMovie(ctx context.Context, contentID uuid.UUID) (sqlc.Movie, error)
 	GetMovie(ctx context.Context, contentID uuid.UUID) (sqlc.GetMovieRow, error)
 	UpdateMovie(ctx context.Context, params sqlc.UpdateMovieParams) (sqlc.Movie, error)
 

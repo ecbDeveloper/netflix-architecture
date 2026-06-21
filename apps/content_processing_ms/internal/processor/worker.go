@@ -169,6 +169,13 @@ func (w *Worker) doProcess(ctx context.Context, content *database.PendingContent
 		return fmt.Errorf("download failed: %w", err)
 	}
 
+	w.logger.Info("Extracting video duration", "ID", idStr)
+	durationSeconds, err := w.transcoder.GetVideoDuration(rawLocalPath)
+	if err != nil {
+		return fmt.Errorf("failed to get video duration: %w", err)
+	}
+	w.logger.Info("Video duration extracted", "ID", idStr, "DurationSeconds", durationSeconds)
+
 	w.logger.Info("Transcoding to DASH", "ID", idStr)
 	if err := w.transcoder.ProcessVideoToDASH(rawLocalPath, outLocalDir); err != nil {
 		return fmt.Errorf("transcode failed: %w", err)
@@ -181,7 +188,7 @@ func (w *Worker) doProcess(ctx context.Context, content *database.PendingContent
 
 	masterURL := fmt.Sprintf("%s/master.mpd", processedPrefix)
 	w.logger.Info("Updating database with status PROCESSED", "ID", idStr)
-	if err := w.repo.UpdateContentStatusAndURL(ctx, content.ID, content.Type, "PROCESSED", &masterURL); err != nil {
+	if err := w.repo.UpdateContent(ctx, content.ID, content.Type, "PROCESSED", &masterURL, durationSeconds); err != nil {
 		return fmt.Errorf("database update failed: %w", err)
 	}
 

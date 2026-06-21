@@ -2,9 +2,12 @@ package transcoder
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 type Transcoder struct{}
@@ -48,4 +51,27 @@ func (t *Transcoder) ProcessVideoToDASH(inputPath string, outputDir string) erro
 	}
 
 	return nil
+}
+
+func (t *Transcoder) GetVideoDuration(inputPath string) (int, error) {
+	cmd := exec.Command(
+		"ffprobe",
+		"-v", "error",
+		"-show_entries", "format=duration",
+		"-of", "default=noprint_wrappers=1:nokey=1",
+		inputPath,
+	)
+
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, fmt.Errorf("ffprobe failed: %w, output: %s", err, string(output))
+	}
+
+	trimmedOutput := strings.TrimSpace(string(output))
+	durationFloat, err := strconv.ParseFloat(trimmedOutput, 64)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse duration '%s': %w", trimmedOutput, err)
+	}
+
+	return int(math.Round(durationFloat)), nil
 }

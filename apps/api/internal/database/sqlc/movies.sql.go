@@ -15,32 +15,28 @@ import (
 
 const createMovie = `-- name: CreateMovie :one
 INSERT INTO movies (
-  content_id, 
-  duration_minutes
-) VALUES ($1, $2)
-RETURNING content_id, duration_minutes, content_url, status
+  content_id
+) VALUES ($1)
+RETURNING content_id, duration_seconds, content_url, status, created_at, updated_at
 `
 
-type CreateMovieParams struct {
-	ContentID       uuid.UUID `json:"content_id"`
-	DurationMinutes int32     `json:"duration_minutes"`
-}
-
-func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Movie, error) {
-	row := q.db.QueryRow(ctx, createMovie, arg.ContentID, arg.DurationMinutes)
+func (q *Queries) CreateMovie(ctx context.Context, contentID uuid.UUID) (Movie, error) {
+	row := q.db.QueryRow(ctx, createMovie, contentID)
 	var i Movie
 	err := row.Scan(
 		&i.ContentID,
-		&i.DurationMinutes,
+		&i.DurationSeconds,
 		&i.ContentUrl,
 		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getMovie = `-- name: GetMovie :one
 SELECT
-  c.id, c.title, c.description, m.duration_minutes, c.release_date,
+  c.id, c.title, c.description, m.duration_seconds, c.release_date,
   m.content_url, c.created_at, c.updated_at, c.maturity_rating, c.genre_id, m.status
 FROM contents c
 JOIN movies m ON m.content_id = c.id
@@ -51,7 +47,7 @@ type GetMovieRow struct {
 	ID              uuid.UUID      `json:"id"`
 	Title           string         `json:"title"`
 	Description     string         `json:"description"`
-	DurationMinutes int32          `json:"duration_minutes"`
+	DurationSeconds pgtype.Int4    `json:"duration_seconds"`
 	ReleaseDate     time.Time      `json:"release_date"`
 	ContentUrl      pgtype.Text    `json:"content_url"`
 	CreatedAt       time.Time      `json:"created_at"`
@@ -68,7 +64,7 @@ func (q *Queries) GetMovie(ctx context.Context, id uuid.UUID) (GetMovieRow, erro
 		&i.ID,
 		&i.Title,
 		&i.Description,
-		&i.DurationMinutes,
+		&i.DurationSeconds,
 		&i.ReleaseDate,
 		&i.ContentUrl,
 		&i.CreatedAt,
@@ -82,14 +78,14 @@ func (q *Queries) GetMovie(ctx context.Context, id uuid.UUID) (GetMovieRow, erro
 
 const updateMovie = `-- name: UpdateMovie :one
 UPDATE movies
-SET duration_minutes = $2, content_url = $3, status = $4
+SET duration_seconds = $2, content_url = $3, status = $4
 WHERE content_id = $1
-RETURNING content_id, duration_minutes, content_url, status
+RETURNING content_id, duration_seconds, content_url, status, created_at, updated_at
 `
 
 type UpdateMovieParams struct {
 	ContentID       uuid.UUID     `json:"content_id"`
-	DurationMinutes int32         `json:"duration_minutes"`
+	DurationSeconds pgtype.Int4   `json:"duration_seconds"`
 	ContentUrl      pgtype.Text   `json:"content_url"`
 	Status          ContentStatus `json:"status"`
 }
@@ -97,16 +93,18 @@ type UpdateMovieParams struct {
 func (q *Queries) UpdateMovie(ctx context.Context, arg UpdateMovieParams) (Movie, error) {
 	row := q.db.QueryRow(ctx, updateMovie,
 		arg.ContentID,
-		arg.DurationMinutes,
+		arg.DurationSeconds,
 		arg.ContentUrl,
 		arg.Status,
 	)
 	var i Movie
 	err := row.Scan(
 		&i.ContentID,
-		&i.DurationMinutes,
+		&i.DurationSeconds,
 		&i.ContentUrl,
 		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

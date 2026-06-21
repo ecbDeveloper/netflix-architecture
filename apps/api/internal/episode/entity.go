@@ -8,7 +8,7 @@ type Episode struct {
 	Season          Season
 	EpisodeNumber   EpisodeNumber
 	Title           string
-	DurationMinutes Duration
+	DurationSeconds Duration
 	ContentURL      string
 }
 

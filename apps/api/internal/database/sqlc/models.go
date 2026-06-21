@@ -166,7 +166,7 @@ type Episode struct {
 	Season          int32         `json:"season"`
 	EpisodeNumber   int32         `json:"episode_number"`
 	Title           string        `json:"title"`
-	DurationMinutes int32         `json:"duration_minutes"`
+	DurationSeconds pgtype.Int4   `json:"duration_seconds"`
 	ContentUrl      pgtype.Text   `json:"content_url"`
 	CreatedAt       time.Time     `json:"created_at"`
 	UpdatedAt       time.Time     `json:"updated_at"`
@@ -175,9 +175,11 @@ type Episode struct {
 
 type Movie struct {
 	ContentID       uuid.UUID     `json:"content_id"`
-	DurationMinutes int32         `json:"duration_minutes"`
+	DurationSeconds pgtype.Int4   `json:"duration_seconds"`
 	ContentUrl      pgtype.Text   `json:"content_url"`
 	Status          ContentStatus `json:"status"`
+	CreatedAt       time.Time     `json:"created_at"`
+	UpdatedAt       time.Time     `json:"updated_at"`
 }
 
 type Profile struct {

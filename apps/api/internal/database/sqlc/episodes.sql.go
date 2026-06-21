@@ -13,18 +13,17 @@ import (
 )
 
 const createEpisode = `-- name: CreateEpisode :one
-INSERT INTO episodes (id, series_id, season, episode_number, title, duration_minutes)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, series_id, season, episode_number, title, duration_minutes, content_url, created_at, updated_at, status
+INSERT INTO episodes (id, series_id, season, episode_number, title)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, series_id, season, episode_number, title, duration_seconds, content_url, created_at, updated_at, status
 `
 
 type CreateEpisodeParams struct {
-	ID              uuid.UUID `json:"id"`
-	SeriesID        uuid.UUID `json:"series_id"`
-	Season          int32     `json:"season"`
-	EpisodeNumber   int32     `json:"episode_number"`
-	Title           string    `json:"title"`
-	DurationMinutes int32     `json:"duration_minutes"`
+	ID            uuid.UUID `json:"id"`
+	SeriesID      uuid.UUID `json:"series_id"`
+	Season        int32     `json:"season"`
+	EpisodeNumber int32     `json:"episode_number"`
+	Title         string    `json:"title"`
 }
 
 func (q *Queries) CreateEpisode(ctx context.Context, arg CreateEpisodeParams) (Episode, error) {
@@ -34,7 +33,6 @@ func (q *Queries) CreateEpisode(ctx context.Context, arg CreateEpisodeParams) (E
 		arg.Season,
 		arg.EpisodeNumber,
 		arg.Title,
-		arg.DurationMinutes,
 	)
 	var i Episode
 	err := row.Scan(
@@ -43,7 +41,7 @@ func (q *Queries) CreateEpisode(ctx context.Context, arg CreateEpisodeParams) (E
 		&i.Season,
 		&i.EpisodeNumber,
 		&i.Title,
-		&i.DurationMinutes,
+		&i.DurationSeconds,
 		&i.ContentUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -62,7 +60,7 @@ func (q *Queries) DeleteEpisode(ctx context.Context, id uuid.UUID) error {
 }
 
 const getEpisode = `-- name: GetEpisode :one
-SELECT id, series_id, season, episode_number, title, duration_minutes, content_url, created_at, updated_at, status FROM episodes WHERE id = $1
+SELECT id, series_id, season, episode_number, title, duration_seconds, content_url, created_at, updated_at, status FROM episodes WHERE id = $1
 `
 
 func (q *Queries) GetEpisode(ctx context.Context, id uuid.UUID) (Episode, error) {
@@ -74,7 +72,7 @@ func (q *Queries) GetEpisode(ctx context.Context, id uuid.UUID) (Episode, error)
 		&i.Season,
 		&i.EpisodeNumber,
 		&i.Title,
-		&i.DurationMinutes,
+		&i.DurationSeconds,
 		&i.ContentUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -84,7 +82,7 @@ func (q *Queries) GetEpisode(ctx context.Context, id uuid.UUID) (Episode, error)
 }
 
 const listEpisodesBySeries = `-- name: ListEpisodesBySeries :many
-SELECT id, series_id, season, episode_number, title, duration_minutes, content_url, created_at, updated_at, status FROM episodes WHERE series_id = $1 ORDER BY season, episode_number
+SELECT id, series_id, season, episode_number, title, duration_seconds, content_url, created_at, updated_at, status FROM episodes WHERE series_id = $1 ORDER BY season, episode_number
 `
 
 func (q *Queries) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID) ([]Episode, error) {
@@ -102,7 +100,7 @@ func (q *Queries) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID) 
 			&i.Season,
 			&i.EpisodeNumber,
 			&i.Title,
-			&i.DurationMinutes,
+			&i.DurationSeconds,
 			&i.ContentUrl,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -120,9 +118,9 @@ func (q *Queries) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID) 
 
 const updateEpisode = `-- name: UpdateEpisode :one
 UPDATE episodes
-SET season = $2, episode_number = $3, title = $4, duration_minutes = $5, content_url = $6, status = $7
+SET season = $2, episode_number = $3, title = $4, duration_seconds = $5, content_url = $6, status = $7
 WHERE id = $1
-RETURNING id, series_id, season, episode_number, title, duration_minutes, content_url, created_at, updated_at, status
+RETURNING id, series_id, season, episode_number, title, duration_seconds, content_url, created_at, updated_at, status
 `
 
 type UpdateEpisodeParams struct {
@@ -130,7 +128,7 @@ type UpdateEpisodeParams struct {
 	Season          int32         `json:"season"`
 	EpisodeNumber   int32         `json:"episode_number"`
 	Title           string        `json:"title"`
-	DurationMinutes int32         `json:"duration_minutes"`
+	DurationSeconds pgtype.Int4   `json:"duration_seconds"`
 	ContentUrl      pgtype.Text   `json:"content_url"`
 	Status          ContentStatus `json:"status"`
 }
@@ -141,7 +139,7 @@ func (q *Queries) UpdateEpisode(ctx context.Context, arg UpdateEpisodeParams) (E
 		arg.Season,
 		arg.EpisodeNumber,
 		arg.Title,
-		arg.DurationMinutes,
+		arg.DurationSeconds,
 		arg.ContentUrl,
 		arg.Status,
 	)
@@ -152,7 +150,7 @@ func (q *Queries) UpdateEpisode(ctx context.Context, arg UpdateEpisodeParams) (E
 		&i.Season,
 		&i.EpisodeNumber,
 		&i.Title,
-		&i.DurationMinutes,
+		&i.DurationSeconds,
 		&i.ContentUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,

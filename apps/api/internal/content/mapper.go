@@ -18,6 +18,14 @@ func pgTextToStringPtr(t pgtype.Text) *string {
 	return &s
 }
 
+func pgInt4ToInt32Ptr(t pgtype.Int4) *int32 {
+	if !t.Valid {
+		return nil
+	}
+	i := t.Int32
+	return &i
+}
+
 func parseContentStatus(s sqlc.ContentStatus) (*model.ContentStatus, error) {
 	status := model.ContentStatus(s)
 
@@ -29,7 +37,7 @@ func parseContentStatus(s sqlc.ContentStatus) (*model.ContentStatus, error) {
 	}
 }
 
-func toGraphQlModel(c sqlc.Content, contentURL *string, durationMinutes *int32, status *model.ContentStatus) *model.Content {
+func toGraphQlModel(c sqlc.Content, contentURL *string, durationSeconds *int32, status *model.ContentStatus) *model.Content {
 	return &model.Content{
 		ID:              c.ID,
 		Title:           c.Title,
@@ -39,7 +47,7 @@ func toGraphQlModel(c sqlc.Content, contentURL *string, durationMinutes *int32, 
 		ReleaseDate:     c.ReleaseDate.String(),
 		GenreID:         c.GenreID,
 		ContentURL:      contentURL,
-		DurationMinutes: durationMinutes,
+		DurationSeconds: durationSeconds,
 		Status:          status,
 		CreatedAt:       c.CreatedAt.String(),
 		UpdatedAt:       c.UpdatedAt.String(),

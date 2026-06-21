@@ -4,7 +4,7 @@ type Episode {
   season: Int!
   episodeNumber: Int!
   title: String!
-  durationMinutes: Int!
+  durationSeconds: Int
   contentURL: String
   createdAt: String!
   reviews: [Review!]!
@@ -16,7 +16,6 @@ input CreateEpisodeInput {
   season: Int!
   episodeNumber: Int!
   title: String!
-  durationMinutes: Int!
   episodeFile: Upload!
 }
 
@@ -24,7 +23,6 @@ input UpdateEpisodeInput {
   season: Int
   episodeNumber: Int
   title: String
-  durationMinutes: Int
   episodeFile: Upload
 }
 

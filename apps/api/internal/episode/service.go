@@ -57,9 +57,6 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 	if _, err := NewEpisodeNumber(input.EpisodeNumber); err != nil {
 		return nil, &apperror.ValidationError{Field: "episodeNumber", Message: err.Error()}
 	}
-	if _, err := NewDuration(input.DurationMinutes); err != nil {
-		return nil, &apperror.ValidationError{Field: "durationMinutes", Message: err.Error()}
-	}
 	if input.EpisodeFile.File == nil {
 		return nil, &apperror.ValidationError{Field: "episodeFile", Message: "episode file is required"}
 	}
@@ -73,12 +70,11 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 	}
 
 	ep, err := s.repo.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
-		ID:              episodeID,
-		SeriesID:        input.SeriesID,
-		Season:          input.Season,
-		EpisodeNumber:   input.EpisodeNumber,
-		Title:           input.Title,
-		DurationMinutes: input.DurationMinutes,
+		ID:            episodeID,
+		SeriesID:      input.SeriesID,
+		Season:        input.Season,
+		EpisodeNumber: input.EpisodeNumber,
+		Title:         input.Title,
 	})
 	if err != nil {
 		fileErr := s.storage.DeleteFile(ctx, fileKey)
@@ -101,7 +97,7 @@ func (s *ServiceImpl) CreateEpisode(ctx context.Context, input model.CreateEpiso
 		return nil, fmt.Errorf("episode created but failed to publish to RabbitMQ: %w", err)
 	}
 
-	return toGraphQLModel(ep, nil), nil
+	return toGraphQLModel(ep, nil, nil), nil
 }
 
 func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uuid.UUID, userID uuid.UUID) (*model.Episode, error) {
@@ -137,7 +133,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
-	return toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl)), nil
+	return toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl), pgInt4ToInt32Ptr(ep.DurationSeconds)), nil
 }
 
 func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID, userID uuid.UUID) ([]*model.Episode, error) {
@@ -168,7 +164,7 @@ func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UU
 	for i, ep := range episodes {
 		entity := toEpisodeEntity(ep)
 		if entity.BelongsToSeries(seriesID) {
-			result[i] = toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl))
+			result[i] = toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl), pgInt4ToInt32Ptr(ep.DurationSeconds))
 		}
 	}
 	return result, nil
@@ -188,11 +184,6 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 			return nil, &apperror.ValidationError{Field: "episodeNumber", Message: err.Error()}
 		}
 	}
-	if input.DurationMinutes != nil {
-		if _, err := NewDuration(*input.DurationMinutes); err != nil {
-			return nil, &apperror.ValidationError{Field: "durationMinutes", Message: err.Error()}
-		}
-	}
 
 	current, err := s.repo.GetEpisode(ctx, id)
 	if err != nil {
@@ -207,7 +198,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		Season:          current.Season,
 		EpisodeNumber:   current.EpisodeNumber,
 		Title:           current.Title,
-		DurationMinutes: current.DurationMinutes,
+		DurationSeconds: current.DurationSeconds,
 		ContentUrl:      current.ContentUrl,
 		Status:          current.Status,
 	}
@@ -221,9 +212,6 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 	if input.Title != nil {
 		params.Title = *input.Title
 	}
-	if input.DurationMinutes != nil {
-		params.DurationMinutes = *input.DurationMinutes
-	}
 
 	var oldURL string
 	if input.EpisodeFile != nil && input.EpisodeFile.File != nil {
@@ -235,6 +223,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 
 		params.ContentUrl = pgtype.Text{Valid: false}
 		params.Status = sqlc.ContentStatusPENDING
+		params.DurationSeconds = pgtype.Int4{Valid: false}
 
 		if current.ContentUrl.Valid && current.ContentUrl.String != "" {
 			oldURL = current.ContentUrl.String
@@ -266,7 +255,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		}
 	}
 
-	return toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl)), nil
+	return toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl), pgInt4ToInt32Ptr(ep.DurationSeconds)), nil
 }
 
 func (s *ServiceImpl) DeleteEpisode(ctx context.Context, id uuid.UUID) error {

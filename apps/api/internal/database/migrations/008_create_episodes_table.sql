@@ -5,7 +5,7 @@ CREATE TABLE episodes (
   season           INT          NOT NULL,
   episode_number   INT          NOT NULL,
   title            VARCHAR(255) NOT NULL,
-  duration_minutes INT          NOT NULL,
+  duration_seconds INT,
   content_url      TEXT,
   created_at       TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,

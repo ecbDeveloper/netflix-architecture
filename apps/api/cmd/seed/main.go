@@ -162,10 +162,7 @@ func seedContents(ctx context.Context, queries *sqlc.Queries, profiles []sqlc.Pr
 	if err != nil {
 		log.Fatalf("failed to create content: %v", err)
 	}
-	_, err = queries.CreateMovie(ctx, sqlc.CreateMovieParams{
-		ContentID:       movie1ID,
-		DurationMinutes: 169,
-	})
+	_, err = queries.CreateMovie(ctx, movie1ID)
 	if err != nil {
 		log.Fatalf("failed to create movie: %v", err)
 	}
@@ -184,10 +181,7 @@ func seedContents(ctx context.Context, queries *sqlc.Queries, profiles []sqlc.Pr
 		log.Fatalf("failed to create content: %v", err)
 	}
 
-	_, err = queries.CreateMovie(ctx, sqlc.CreateMovieParams{
-		ContentID:       movie2ID,
-		DurationMinutes: 180,
-	})
+	_, err = queries.CreateMovie(ctx, movie2ID)
 	if err != nil {
 		log.Fatalf("failed to create movie: %v", err)
 	}
@@ -223,12 +217,11 @@ func seedContents(ctx context.Context, queries *sqlc.Queries, profiles []sqlc.Pr
 
 	for _, ep := range episodesData {
 		_, err = queries.CreateEpisode(ctx, sqlc.CreateEpisodeParams{
-			ID:              uuid.New(),
-			SeriesID:        series1ID,
-			Season:          ep.season,
-			EpisodeNumber:   ep.ep,
-			Title:           ep.title,
-			DurationMinutes: ep.duration,
+			ID:            uuid.New(),
+			SeriesID:      series1ID,
+			Season:        ep.season,
+			EpisodeNumber: ep.ep,
+			Title:         ep.title,
 		})
 		if err != nil {
 			log.Fatalf("failed to create episode: %v", err)

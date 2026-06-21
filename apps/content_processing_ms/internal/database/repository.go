@@ -68,27 +68,27 @@ func (r *Repository) GetNextPendingContent(ctx context.Context) (*PendingContent
 	return nil, nil
 }
 
-func (r *Repository) UpdateContentStatusAndURL(ctx context.Context, id uuid.UUID, contentType ContentType, status string, url *string) error {
+func (r *Repository) UpdateContent(ctx context.Context, id uuid.UUID, contentType ContentType, status string, url *string, durationSeconds int) error {
 	var query string
 
 	switch contentType {
 	case TypeMovie:
 		query = `
 			UPDATE movies 
-			SET status = $1, content_url = $2, updated_at = NOW() 
-			WHERE content_id = $3;
+			SET status = $1, content_url = $2, duration_seconds = $3, updated_at = NOW() 
+			WHERE content_id = $4;
 		`
 	case TypeEpisode:
 		query = `
 			UPDATE episodes 
-			SET status = $1, content_url = $2, updated_at = NOW() 
-			WHERE id = $3;
+			SET status = $1, content_url = $2, duration_seconds = $3, updated_at = NOW() 
+			WHERE id = $4;
 		`
 	default:
 		return fmt.Errorf("invalid content type")
 	}
 
-	_, err := r.pool.Exec(ctx, query, status, url, id)
+	_, err := r.pool.Exec(ctx, query, status, url, durationSeconds, id)
 	return err
 }
 

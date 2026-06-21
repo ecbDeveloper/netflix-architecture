@@ -87,10 +87,6 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 		if input.ContentFile == nil || input.ContentFile.File == nil {
 			return uuid.Nil, &apperror.ValidationError{Field: "contentFile", Message: "contentFile is required to movies"}
 		}
-
-		if input.DurationMinutes == nil {
-			return uuid.Nil, &apperror.ValidationError{Field: "durationMinutes", Message: "durationMinutes is required to movies"}
-		}
 	}
 
 	genres, err := s.repo.ListContentGenres(ctx)
@@ -158,12 +154,7 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 			return uuid.Nil, fmt.Errorf("failed to upload content file: %w", err)
 		}
 
-		createMovieParams := sqlc.CreateMovieParams{
-			ContentID:       contentID,
-			DurationMinutes: *input.DurationMinutes,
-		}
-
-		_, err = qtx.CreateMovie(ctx, createMovieParams)
+		_, err = qtx.CreateMovie(ctx, contentID)
 		if err != nil {
 			if err := s.storage.DeleteFile(context.Background(), fileKey); err != nil {
 				return uuid.Nil, fmt.Errorf("failed to delete movie file: %w", err)
@@ -321,7 +312,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 
 		updateMovieParams := sqlc.UpdateMovieParams{
 			ContentID:       id,
-			DurationMinutes: currentMovie.DurationMinutes,
+			DurationSeconds: currentMovie.DurationSeconds,
 			ContentUrl:      currentMovie.ContentUrl,
 			Status:          currentMovie.Status,
 		}
@@ -335,14 +326,11 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 
 			updateMovieParams.ContentUrl = pgtype.Text{Valid: false}
 			updateMovieParams.Status = sqlc.ContentStatusPENDING
+			updateMovieParams.DurationSeconds = pgtype.Int4{Valid: true, Int32: 0}
 
 			if currentMovie.ContentUrl.Valid && currentMovie.ContentUrl.String != "" {
 				oldURL = currentMovie.ContentUrl.String
 			}
-		}
-
-		if input.DurationMinutes != nil {
-			updateMovieParams.DurationMinutes = *input.DurationMinutes
 		}
 
 		updatedMovie, err = qtx.UpdateMovie(ctx, updateMovieParams)
@@ -379,7 +367,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 			return nil, fmt.Errorf("faiiled to parse content status: %w", err)
 		}
 
-		return toGraphQlModel(content, pgTextToStringPtr(updatedMovie.ContentUrl), &updatedMovie.DurationMinutes, parsedStatus), nil
+		return toGraphQlModel(content, pgTextToStringPtr(updatedMovie.ContentUrl), pgInt4ToInt32Ptr(updatedMovie.DurationSeconds), parsedStatus), nil
 	}
 
 	return toGraphQlModel(content, nil, nil, nil), nil
@@ -477,7 +465,7 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, use
 				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
 			}
 
-			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes, parsedStatus)
+			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), pgInt4ToInt32Ptr(movie.DurationSeconds), parsedStatus)
 		}
 		if entity.IsSeries() {
 			result[i] = toGraphQlModel(c, nil, nil, nil)
@@ -520,7 +508,7 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
 			}
 
-			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes, parsedStatus)
+			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), pgInt4ToInt32Ptr(movie.DurationSeconds), parsedStatus)
 		}
 		if entity.IsSeries() {
 			result[i] = toGraphQlModel(c, nil, nil, nil)
@@ -580,7 +568,7 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
 			}
 
-			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes, parsedStatus)
+			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), pgInt4ToInt32Ptr(movie.DurationSeconds), parsedStatus)
 		}
 		if entity.IsSeries() {
 			result[i] = toGraphQlModel(c, nil, nil, nil)
@@ -620,7 +608,7 @@ func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uu
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse content status: %w", err)
 		}
-		return toGraphQlModel(content, pgTextToStringPtr(movie.ContentUrl), &movie.DurationMinutes, parsedStatus), nil
+		return toGraphQlModel(content, pgTextToStringPtr(movie.ContentUrl), pgInt4ToInt32Ptr(movie.DurationSeconds), parsedStatus), nil
 	}
 
 	return toGraphQlModel(content, nil, nil, nil), nil
