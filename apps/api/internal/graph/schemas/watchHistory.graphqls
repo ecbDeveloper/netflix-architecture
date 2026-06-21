@@ -28,12 +28,6 @@ input CreateWatchHistoryInput {
   genreId: Int
 }
 
-input UpdateWatchHistoryInput {
-  id: ID!
-  lastPositionSeconds: Int
-  isCompleted: Boolean
-}
-
 extend type Query {
   getWatchHistory(id: ID!): WatchHistory @profileSelectionIsRequired @auth
   mostWatchedContents(input: PaginationInput): [MostWatchedContent!]! @auth
@@ -43,6 +37,5 @@ extend type Query {
 
 extend type Mutation {
   recordWatchHistory(input: CreateWatchHistoryInput!): WatchHistory! @profileSelectionIsRequired @hasRole(role: MEMBER) @auth
-  updateWatchHistory(id: ID!, input: UpdateWatchHistoryInput!): WatchHistory! @profileSelectionIsRequired @hasRole(role: MEMBER) @auth
   deleteWatchHistory(id: ID!): Boolean! @profileSelectionIsRequired @hasRole(role: MEMBER) @auth
 }

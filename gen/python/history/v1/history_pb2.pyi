@@ -37,18 +37,6 @@ class ListWatchHistoryRequest(_message.Message):
     profile_id: str
     def __init__(self, profile_id: _Optional[str] = ...) -> None: ...
 
-class UpdateWatchProgressRequest(_message.Message):
-    __slots__ = ("id", "profile_id", "last_position_seconds", "is_completed")
-    ID_FIELD_NUMBER: _ClassVar[int]
-    PROFILE_ID_FIELD_NUMBER: _ClassVar[int]
-    LAST_POSITION_SECONDS_FIELD_NUMBER: _ClassVar[int]
-    IS_COMPLETED_FIELD_NUMBER: _ClassVar[int]
-    id: str
-    profile_id: str
-    last_position_seconds: int
-    is_completed: bool
-    def __init__(self, id: _Optional[str] = ..., profile_id: _Optional[str] = ..., last_position_seconds: _Optional[int] = ..., is_completed: _Optional[bool] = ...) -> None: ...
-
 class DeleteWatchHistoryRequest(_message.Message):
     __slots__ = ("id", "profile_id")
     ID_FIELD_NUMBER: _ClassVar[int]
@@ -120,12 +108,6 @@ class RecordWatchHistoryResponse(_message.Message):
     def __init__(self, watch_history: _Optional[_Union[WatchHistory, _Mapping]] = ...) -> None: ...
 
 class GetWatchHistoryResponse(_message.Message):
-    __slots__ = ("watch_history",)
-    WATCH_HISTORY_FIELD_NUMBER: _ClassVar[int]
-    watch_history: WatchHistory
-    def __init__(self, watch_history: _Optional[_Union[WatchHistory, _Mapping]] = ...) -> None: ...
-
-class UpdateWatchProgressResponse(_message.Message):
     __slots__ = ("watch_history",)
     WATCH_HISTORY_FIELD_NUMBER: _ClassVar[int]
     watch_history: WatchHistory

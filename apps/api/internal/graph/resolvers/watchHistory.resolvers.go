@@ -54,33 +54,6 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 	return protoWatchHistoryToGraphQL(resp.WatchHistory), nil
 }
 
-// UpdateWatchHistory is the resolver for the updateWatchHistory field.
-func (r *mutationResolver) UpdateWatchHistory(ctx context.Context, id uuid.UUID, input model.UpdateWatchHistoryInput) (*model.WatchHistory, error) {
-	profileID, err := r.getProfileIDFromSession(ctx)
-	if err != nil {
-		return nil, r.handleError(ctx, err)
-	}
-
-	reqBody := &historyv1.UpdateWatchProgressRequest{
-		Id:        id.String(),
-		ProfileId: profileID.String(),
-	}
-
-	if input.LastPositionSeconds != nil {
-		reqBody.LastPositionSeconds = input.LastPositionSeconds
-	}
-	if input.IsCompleted != nil {
-		reqBody.IsCompleted = input.IsCompleted
-	}
-
-	resp, err := r.HistoryClient.UpdateWatchProgress(ctx, reqBody)
-	if err != nil {
-		return nil, r.handleGRPCError(ctx, err)
-	}
-
-	return protoWatchHistoryToGraphQL(resp.WatchHistory), nil
-}
-
 // DeleteWatchHistory is the resolver for the deleteWatchHistory field.
 func (r *mutationResolver) DeleteWatchHistory(ctx context.Context, id uuid.UUID) (bool, error) {
 	profileID, err := r.getProfileIDFromSession(ctx)

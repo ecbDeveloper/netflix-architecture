@@ -39,11 +39,6 @@ class HistoryServiceStub(object):
                 request_serializer=history_dot_v1_dot_history__pb2.ListWatchHistoryRequest.SerializeToString,
                 response_deserializer=history_dot_v1_dot_history__pb2.ListWatchHistoryResponse.FromString,
                 _registered_method=True)
-        self.UpdateWatchProgress = channel.unary_unary(
-                '/history.v1.HistoryService/UpdateWatchProgress',
-                request_serializer=history_dot_v1_dot_history__pb2.UpdateWatchProgressRequest.SerializeToString,
-                response_deserializer=history_dot_v1_dot_history__pb2.UpdateWatchProgressResponse.FromString,
-                _registered_method=True)
         self.DeleteWatchHistory = channel.unary_unary(
                 '/history.v1.HistoryService/DeleteWatchHistory',
                 request_serializer=history_dot_v1_dot_history__pb2.DeleteWatchHistoryRequest.SerializeToString,
@@ -84,12 +79,6 @@ class HistoryServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def UpdateWatchProgress(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def DeleteWatchHistory(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -123,11 +112,6 @@ def add_HistoryServiceServicer_to_server(servicer, server):
                     servicer.ListWatchHistory,
                     request_deserializer=history_dot_v1_dot_history__pb2.ListWatchHistoryRequest.FromString,
                     response_serializer=history_dot_v1_dot_history__pb2.ListWatchHistoryResponse.SerializeToString,
-            ),
-            'UpdateWatchProgress': grpc.unary_unary_rpc_method_handler(
-                    servicer.UpdateWatchProgress,
-                    request_deserializer=history_dot_v1_dot_history__pb2.UpdateWatchProgressRequest.FromString,
-                    response_serializer=history_dot_v1_dot_history__pb2.UpdateWatchProgressResponse.SerializeToString,
             ),
             'DeleteWatchHistory': grpc.unary_unary_rpc_method_handler(
                     servicer.DeleteWatchHistory,
@@ -270,33 +254,6 @@ class HistoryService(object):
             '/history.v1.HistoryService/ListWatchHistory',
             history_dot_v1_dot_history__pb2.ListWatchHistoryRequest.SerializeToString,
             history_dot_v1_dot_history__pb2.ListWatchHistoryResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def UpdateWatchProgress(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/history.v1.HistoryService/UpdateWatchProgress',
-            history_dot_v1_dot_history__pb2.UpdateWatchProgressRequest.SerializeToString,
-            history_dot_v1_dot_history__pb2.UpdateWatchProgressResponse.FromString,
             options,
             channel_credentials,
             insecure,

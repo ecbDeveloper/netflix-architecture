@@ -40,17 +40,37 @@ func (s *Server) RecordWatch(ctx context.Context, req *historypb.RecordWatchHist
 
 	whID := uuid.New()
 
-	params := sqlc.CreateWatchHistoryParams{
-		ID:        whID,
-		ProfileID: profileID,
+	var lastPosition pgtype.Int4
+	if req.LastPositionSeconds != nil {
+		lastPosition = pgtype.Int4{Int32: *req.LastPositionSeconds, Valid: true}
 	}
+
+	var isCompleted pgtype.Bool
+	if req.IsCompleted != nil {
+		isCompleted = pgtype.Bool{Bool: *req.IsCompleted, Valid: true}
+	}
+
+	var wh sqlc.WatchHistory
 
 	if req.MovieId != nil {
 		movieID, err := uuid.Parse(*req.MovieId)
 		if err != nil {
 			return nil, status.Error(codes.InvalidArgument, "invalid movie_id")
 		}
-		params.MovieID = pgtype.UUID{Bytes: movieID, Valid: true}
+
+		params := sqlc.UpsertMovieWatchHistoryParams{
+			ID:                  whID,
+			ProfileID:           profileID,
+			MovieID:             pgtype.UUID{Bytes: movieID, Valid: true},
+			GenreID:             pgtype.Int4{Int32: req.GenreId, Valid: true},
+			LastPositionSeconds: lastPosition,
+			IsCompleted:         isCompleted,
+		}
+
+		wh, err = s.queries.UpsertMovieWatchHistory(ctx, params)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to upsert movie watch history: %v", err)
+		}
 	}
 
 	if req.EpisodeId != nil {
@@ -58,20 +78,20 @@ func (s *Server) RecordWatch(ctx context.Context, req *historypb.RecordWatchHist
 		if err != nil {
 			return nil, status.Error(codes.InvalidArgument, "invalid episode_id")
 		}
-		params.EpisodeID = pgtype.UUID{Bytes: episodeID, Valid: true}
-	}
 
-	if req.LastPositionSeconds != nil {
-		params.LastPositionSeconds = pgtype.Int4{Int32: *req.LastPositionSeconds, Valid: true}
-	}
+		params := sqlc.UpsertEpisodeWatchHistoryParams{
+			ID:                  whID,
+			ProfileID:           profileID,
+			EpisodeID:           pgtype.UUID{Bytes: episodeID, Valid: true},
+			GenreID:             pgtype.Int4{Int32: req.GenreId, Valid: true},
+			LastPositionSeconds: lastPosition,
+			IsCompleted:         isCompleted,
+		}
 
-	if req.IsCompleted != nil {
-		params.IsCompleted = pgtype.Bool{Bool: *req.IsCompleted, Valid: true}
-	}
-
-	wh, err := s.queries.CreateWatchHistory(ctx, params)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to insert watch history: %v", err)
+		wh, err = s.queries.UpsertEpisodeWatchHistory(ctx, params)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to upsert episode watch history: %v", err)
+		}
 	}
 
 	protoWH := toProto(wh)
@@ -124,52 +144,6 @@ func (s *Server) ListWatchHistory(ctx context.Context, req *historypb.ListWatchH
 	}
 
 	return &historypb.ListWatchHistoryResponse{Histories: result}, nil
-}
-
-func (s *Server) UpdateWatchProgress(ctx context.Context, req *historypb.UpdateWatchProgressRequest) (*historypb.UpdateWatchProgressResponse, error) {
-	id, err := uuid.Parse(req.Id)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid id")
-	}
-
-	profileID, err := uuid.Parse(req.ProfileId)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid profile_id")
-	}
-
-	current, err := s.queries.GetWatchHistory(ctx, id)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, status.Error(codes.NotFound, "watch history not found")
-		}
-		return nil, status.Errorf(codes.Internal, "failed to get watch history: %v", err)
-	}
-
-	if current.ProfileID != profileID {
-		return nil, status.Error(codes.PermissionDenied, "you can't see watch history from others profiles")
-	}
-
-	params := sqlc.UpdateWatchProgressParams{
-		ID:                  id,
-		LastPositionSeconds: current.LastPositionSeconds,
-		IsCompleted:         current.IsCompleted,
-	}
-
-	if req.LastPositionSeconds != nil {
-		params.LastPositionSeconds = pgtype.Int4{Int32: *req.LastPositionSeconds, Valid: true}
-	}
-	if req.IsCompleted != nil {
-		params.IsCompleted = pgtype.Bool{Bool: *req.IsCompleted, Valid: true}
-	}
-
-	wh, err := s.queries.UpdateWatchProgress(ctx, params)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to update watch history: %v", err)
-	}
-
-	protoWH := toProto(wh)
-
-	return &historypb.UpdateWatchProgressResponse{WatchHistory: protoWH}, nil
 }
 
 func (s *Server) DeleteWatchHistory(ctx context.Context, req *historypb.DeleteWatchHistoryRequest) (*historypb.DeleteWatchHistoryResponse, error) {

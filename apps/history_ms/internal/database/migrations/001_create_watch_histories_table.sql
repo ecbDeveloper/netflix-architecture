@@ -7,7 +7,10 @@ CREATE TABLE watch_histories (
   genre_id INT DEFAULT 0,
   watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   last_position_seconds INT DEFAULT 0,
-  is_completed BOOLEAN DEFAULT FALSE
+  is_completed BOOLEAN DEFAULT FALSE,
+
+  UNIQUE (profile_id, movie_id),
+  UNIQUE (profile_id, episode_id)
 );
 ---- create above / drop below ----
 DROP TABLE IF EXISTS watch_histories;

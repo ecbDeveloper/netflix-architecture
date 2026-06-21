@@ -12,7 +12,6 @@ service HistoryService {
   rpc GetMostWatched(GetMostWatchedRequest) returns (GetMostWatchedResponse);
   rpc GetRecentlyWatched(GetRecentlyWatchedRequest) returns (GetRecentlyWatchedResponse);
   rpc ListWatchHistory(ListWatchHistoryRequest) returns (ListWatchHistoryResponse);
-  rpc UpdateWatchProgress(UpdateWatchProgressRequest) returns (UpdateWatchProgressResponse);
   rpc DeleteWatchHistory(DeleteWatchHistoryRequest) returns (DeleteWatchHistoryResponse);
 }
 
@@ -32,13 +31,6 @@ message GetWatchHistoryRequest {
 
 message ListWatchHistoryRequest {
   string profile_id = 1;
-}
-
-message UpdateWatchProgressRequest {
-  string id = 1;
-  string profile_id = 2;
-  optional int32 last_position_seconds = 3;
-  optional bool is_completed = 4;
 }
 
 message DeleteWatchHistoryRequest {
@@ -85,10 +77,6 @@ message RecordWatchHistoryResponse {
 }
 
 message GetWatchHistoryResponse {
-  WatchHistory watch_history = 1;
-}
-
-message UpdateWatchProgressResponse {
   WatchHistory watch_history = 1;
 }
 

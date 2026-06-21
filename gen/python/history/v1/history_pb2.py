@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from common.v1 import common_pb2 as common_dot_v1_dot_common__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18history/v1/history.proto\x12\nhistory.v1\x1a\x16\x63ommon/v1/common.proto\"\xc1\x02\n\x19RecordWatchHistoryRequest\x12\x1d\n\nprofile_id\x18\x01 \x01(\tR\tprofileId\x12\x19\n\x08genre_id\x18\x02 \x01(\x05R\x07genreId\x12\x1e\n\x08movie_id\x18\x03 \x01(\tH\x00R\x07movieId\x88\x01\x01\x12\"\n\nepisode_id\x18\x04 \x01(\tH\x01R\tepisodeId\x88\x01\x01\x12\x37\n\x15last_position_seconds\x18\x05 \x01(\x05H\x02R\x13lastPositionSeconds\x88\x01\x01\x12&\n\x0cis_completed\x18\x06 \x01(\x08H\x03R\x0bisCompleted\x88\x01\x01\x42\x0b\n\t_movie_idB\r\n\x0b_episode_idB\x18\n\x16_last_position_secondsB\x0f\n\r_is_completed\"G\n\x16GetWatchHistoryRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n\nprofile_id\x18\x02 \x01(\tR\tprofileId\"8\n\x17ListWatchHistoryRequest\x12\x1d\n\nprofile_id\x18\x01 \x01(\tR\tprofileId\"\xd7\x01\n\x1aUpdateWatchProgressRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n\nprofile_id\x18\x02 \x01(\tR\tprofileId\x12\x37\n\x15last_position_seconds\x18\x03 \x01(\x05H\x00R\x13lastPositionSeconds\x88\x01\x01\x12&\n\x0cis_completed\x18\x04 \x01(\x08H\x01R\x0bisCompleted\x88\x01\x01\x42\x18\n\x16_last_position_secondsB\x0f\n\r_is_completed\"J\n\x19\x44\x65leteWatchHistoryRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n\nprofile_id\x18\x02 \x01(\tR\tprofileId\"E\n\x15GetMostWatchedRequest\x12\x14\n\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n\x06offset\x18\x02 \x01(\x05R\x06offset\"h\n\x19GetRecentlyWatchedRequest\x12\x1d\n\nprofile_id\x18\x01 \x01(\tR\tprofileId\x12\x14\n\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n\x06offset\x18\x03 \x01(\x05R\x06offset\"6\n\x1a\x44\x65leteWatchHistoryResponse\x12\x18\n\x07success\x18\x01 \x01(\x08R\x07success\"\xae\x02\n\x0cWatchHistory\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n\nprofile_id\x18\x02 \x01(\tR\tprofileId\x12\x1e\n\x08movie_id\x18\x03 \x01(\tH\x00R\x07movieId\x88\x01\x01\x12\"\n\nepisode_id\x18\x04 \x01(\tH\x01R\tepisodeId\x88\x01\x01\x12\x1d\n\nwatched_at\x18\x05 \x01(\tR\twatchedAt\x12\x32\n\x15last_position_seconds\x18\x06 \x01(\x05R\x13lastPositionSeconds\x12!\n\x0cis_completed\x18\x07 \x01(\x08R\x0bisCompleted\x12\x19\n\x08genre_id\x18\x08 \x01(\x05R\x07genreIdB\x0b\n\t_movie_idB\r\n\x0b_episode_id\"R\n\x18ListWatchHistoryResponse\x12\x36\n\thistories\x18\x01 \x03(\x0b\x32\x18.history.v1.WatchHistoryR\thistories\"T\n\x1aGetRecentlyWatchedResponse\x12\x36\n\thistories\x18\x01 \x03(\x0b\x32\x18.history.v1.WatchHistoryR\thistories\"[\n\x1aRecordWatchHistoryResponse\x12=\n\rwatch_history\x18\x01 \x01(\x0b\x32\x18.history.v1.WatchHistoryR\x0cwatchHistory\"X\n\x17GetWatchHistoryResponse\x12=\n\rwatch_history\x18\x01 \x01(\x0b\x32\x18.history.v1.WatchHistoryR\x0cwatchHistory\"\\\n\x1bUpdateWatchProgressResponse\x12=\n\rwatch_history\x18\x01 \x01(\x0b\x32\x18.history.v1.WatchHistoryR\x0cwatchHistory\"\xa7\x01\n\x0fMostWatchedItem\x12\x1d\n\ncontent_id\x18\x01 \x01(\tR\tcontentId\x12\x39\n\x0c\x63ontent_type\x18\x02 \x01(\x0e\x32\x16.common.v1.ContentTypeR\x0b\x63ontentType\x12\x19\n\x08genre_id\x18\x03 \x01(\x05R\x07genreId\x12\x1f\n\x0bwatch_count\x18\x04 \x01(\x03R\nwatchCount\"K\n\x16GetMostWatchedResponse\x12\x31\n\x05items\x18\x01 \x03(\x0b\x32\x1b.history.v1.MostWatchedItemR\x05items2\xbb\x05\n\x0eHistoryService\x12\x63\n\x12RecordWatchHistory\x12%.history.v1.RecordWatchHistoryRequest\x1a&.history.v1.RecordWatchHistoryResponse\x12Z\n\x0fGetWatchHistory\x12\".history.v1.GetWatchHistoryRequest\x1a#.history.v1.GetWatchHistoryResponse\x12W\n\x0eGetMostWatched\x12!.history.v1.GetMostWatchedRequest\x1a\".history.v1.GetMostWatchedResponse\x12\x63\n\x12GetRecentlyWatched\x12%.history.v1.GetRecentlyWatchedRequest\x1a&.history.v1.GetRecentlyWatchedResponse\x12]\n\x10ListWatchHistory\x12#.history.v1.ListWatchHistoryRequest\x1a$.history.v1.ListWatchHistoryResponse\x12\x66\n\x13UpdateWatchProgress\x12&.history.v1.UpdateWatchProgressRequest\x1a\'.history.v1.UpdateWatchProgressResponse\x12\x63\n\x12\x44\x65leteWatchHistory\x12%.history.v1.DeleteWatchHistoryRequest\x1a&.history.v1.DeleteWatchHistoryResponseB\xb1\x01\n\x0e\x63om.history.v1B\x0cHistoryProtoP\x01ZHgithub.com/ecbDeveloper/netflix-architecture/gen/go/history/v1;historyv1\xa2\x02\x03HXX\xaa\x02\nHistory.V1\xca\x02\nHistory\\V1\xe2\x02\x16History\\V1\\GPBMetadata\xea\x02\x0bHistory::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18history/v1/history.proto\x12\nhistory.v1\x1a\x16\x63ommon/v1/common.proto\"\xc1\x02\n\x19RecordWatchHistoryRequest\x12\x1d\n\nprofile_id\x18\x01 \x01(\tR\tprofileId\x12\x19\n\x08genre_id\x18\x02 \x01(\x05R\x07genreId\x12\x1e\n\x08movie_id\x18\x03 \x01(\tH\x00R\x07movieId\x88\x01\x01\x12\"\n\nepisode_id\x18\x04 \x01(\tH\x01R\tepisodeId\x88\x01\x01\x12\x37\n\x15last_position_seconds\x18\x05 \x01(\x05H\x02R\x13lastPositionSeconds\x88\x01\x01\x12&\n\x0cis_completed\x18\x06 \x01(\x08H\x03R\x0bisCompleted\x88\x01\x01\x42\x0b\n\t_movie_idB\r\n\x0b_episode_idB\x18\n\x16_last_position_secondsB\x0f\n\r_is_completed\"G\n\x16GetWatchHistoryRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n\nprofile_id\x18\x02 \x01(\tR\tprofileId\"8\n\x17ListWatchHistoryRequest\x12\x1d\n\nprofile_id\x18\x01 \x01(\tR\tprofileId\"J\n\x19\x44\x65leteWatchHistoryRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n\nprofile_id\x18\x02 \x01(\tR\tprofileId\"E\n\x15GetMostWatchedRequest\x12\x14\n\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n\x06offset\x18\x02 \x01(\x05R\x06offset\"h\n\x19GetRecentlyWatchedRequest\x12\x1d\n\nprofile_id\x18\x01 \x01(\tR\tprofileId\x12\x14\n\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n\x06offset\x18\x03 \x01(\x05R\x06offset\"6\n\x1a\x44\x65leteWatchHistoryResponse\x12\x18\n\x07success\x18\x01 \x01(\x08R\x07success\"\xae\x02\n\x0cWatchHistory\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n\nprofile_id\x18\x02 \x01(\tR\tprofileId\x12\x1e\n\x08movie_id\x18\x03 \x01(\tH\x00R\x07movieId\x88\x01\x01\x12\"\n\nepisode_id\x18\x04 \x01(\tH\x01R\tepisodeId\x88\x01\x01\x12\x1d\n\nwatched_at\x18\x05 \x01(\tR\twatchedAt\x12\x32\n\x15last_position_seconds\x18\x06 \x01(\x05R\x13lastPositionSeconds\x12!\n\x0cis_completed\x18\x07 \x01(\x08R\x0bisCompleted\x12\x19\n\x08genre_id\x18\x08 \x01(\x05R\x07genreIdB\x0b\n\t_movie_idB\r\n\x0b_episode_id\"R\n\x18ListWatchHistoryResponse\x12\x36\n\thistories\x18\x01 \x03(\x0b\x32\x18.history.v1.WatchHistoryR\thistories\"T\n\x1aGetRecentlyWatchedResponse\x12\x36\n\thistories\x18\x01 \x03(\x0b\x32\x18.history.v1.WatchHistoryR\thistories\"[\n\x1aRecordWatchHistoryResponse\x12=\n\rwatch_history\x18\x01 \x01(\x0b\x32\x18.history.v1.WatchHistoryR\x0cwatchHistory\"X\n\x17GetWatchHistoryResponse\x12=\n\rwatch_history\x18\x01 \x01(\x0b\x32\x18.history.v1.WatchHistoryR\x0cwatchHistory\"\xa7\x01\n\x0fMostWatchedItem\x12\x1d\n\ncontent_id\x18\x01 \x01(\tR\tcontentId\x12\x39\n\x0c\x63ontent_type\x18\x02 \x01(\x0e\x32\x16.common.v1.ContentTypeR\x0b\x63ontentType\x12\x19\n\x08genre_id\x18\x03 \x01(\x05R\x07genreId\x12\x1f\n\x0bwatch_count\x18\x04 \x01(\x03R\nwatchCount\"K\n\x16GetMostWatchedResponse\x12\x31\n\x05items\x18\x01 \x03(\x0b\x32\x1b.history.v1.MostWatchedItemR\x05items2\xd3\x04\n\x0eHistoryService\x12\x63\n\x12RecordWatchHistory\x12%.history.v1.RecordWatchHistoryRequest\x1a&.history.v1.RecordWatchHistoryResponse\x12Z\n\x0fGetWatchHistory\x12\".history.v1.GetWatchHistoryRequest\x1a#.history.v1.GetWatchHistoryResponse\x12W\n\x0eGetMostWatched\x12!.history.v1.GetMostWatchedRequest\x1a\".history.v1.GetMostWatchedResponse\x12\x63\n\x12GetRecentlyWatched\x12%.history.v1.GetRecentlyWatchedRequest\x1a&.history.v1.GetRecentlyWatchedResponse\x12]\n\x10ListWatchHistory\x12#.history.v1.ListWatchHistoryRequest\x1a$.history.v1.ListWatchHistoryResponse\x12\x63\n\x12\x44\x65leteWatchHistory\x12%.history.v1.DeleteWatchHistoryRequest\x1a&.history.v1.DeleteWatchHistoryResponseB\xb1\x01\n\x0e\x63om.history.v1B\x0cHistoryProtoP\x01ZHgithub.com/ecbDeveloper/netflix-architecture/gen/go/history/v1;historyv1\xa2\x02\x03HXX\xaa\x02\nHistory.V1\xca\x02\nHistory\\V1\xe2\x02\x16History\\V1\\GPBMetadata\xea\x02\x0bHistory::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -39,32 +39,28 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETWATCHHISTORYREQUEST']._serialized_end=459
   _globals['_LISTWATCHHISTORYREQUEST']._serialized_start=461
   _globals['_LISTWATCHHISTORYREQUEST']._serialized_end=517
-  _globals['_UPDATEWATCHPROGRESSREQUEST']._serialized_start=520
-  _globals['_UPDATEWATCHPROGRESSREQUEST']._serialized_end=735
-  _globals['_DELETEWATCHHISTORYREQUEST']._serialized_start=737
-  _globals['_DELETEWATCHHISTORYREQUEST']._serialized_end=811
-  _globals['_GETMOSTWATCHEDREQUEST']._serialized_start=813
-  _globals['_GETMOSTWATCHEDREQUEST']._serialized_end=882
-  _globals['_GETRECENTLYWATCHEDREQUEST']._serialized_start=884
-  _globals['_GETRECENTLYWATCHEDREQUEST']._serialized_end=988
-  _globals['_DELETEWATCHHISTORYRESPONSE']._serialized_start=990
-  _globals['_DELETEWATCHHISTORYRESPONSE']._serialized_end=1044
-  _globals['_WATCHHISTORY']._serialized_start=1047
-  _globals['_WATCHHISTORY']._serialized_end=1349
-  _globals['_LISTWATCHHISTORYRESPONSE']._serialized_start=1351
-  _globals['_LISTWATCHHISTORYRESPONSE']._serialized_end=1433
-  _globals['_GETRECENTLYWATCHEDRESPONSE']._serialized_start=1435
-  _globals['_GETRECENTLYWATCHEDRESPONSE']._serialized_end=1519
-  _globals['_RECORDWATCHHISTORYRESPONSE']._serialized_start=1521
-  _globals['_RECORDWATCHHISTORYRESPONSE']._serialized_end=1612
-  _globals['_GETWATCHHISTORYRESPONSE']._serialized_start=1614
-  _globals['_GETWATCHHISTORYRESPONSE']._serialized_end=1702
-  _globals['_UPDATEWATCHPROGRESSRESPONSE']._serialized_start=1704
-  _globals['_UPDATEWATCHPROGRESSRESPONSE']._serialized_end=1796
-  _globals['_MOSTWATCHEDITEM']._serialized_start=1799
-  _globals['_MOSTWATCHEDITEM']._serialized_end=1966
-  _globals['_GETMOSTWATCHEDRESPONSE']._serialized_start=1968
-  _globals['_GETMOSTWATCHEDRESPONSE']._serialized_end=2043
-  _globals['_HISTORYSERVICE']._serialized_start=2046
-  _globals['_HISTORYSERVICE']._serialized_end=2745
+  _globals['_DELETEWATCHHISTORYREQUEST']._serialized_start=519
+  _globals['_DELETEWATCHHISTORYREQUEST']._serialized_end=593
+  _globals['_GETMOSTWATCHEDREQUEST']._serialized_start=595
+  _globals['_GETMOSTWATCHEDREQUEST']._serialized_end=664
+  _globals['_GETRECENTLYWATCHEDREQUEST']._serialized_start=666
+  _globals['_GETRECENTLYWATCHEDREQUEST']._serialized_end=770
+  _globals['_DELETEWATCHHISTORYRESPONSE']._serialized_start=772
+  _globals['_DELETEWATCHHISTORYRESPONSE']._serialized_end=826
+  _globals['_WATCHHISTORY']._serialized_start=829
+  _globals['_WATCHHISTORY']._serialized_end=1131
+  _globals['_LISTWATCHHISTORYRESPONSE']._serialized_start=1133
+  _globals['_LISTWATCHHISTORYRESPONSE']._serialized_end=1215
+  _globals['_GETRECENTLYWATCHEDRESPONSE']._serialized_start=1217
+  _globals['_GETRECENTLYWATCHEDRESPONSE']._serialized_end=1301
+  _globals['_RECORDWATCHHISTORYRESPONSE']._serialized_start=1303
+  _globals['_RECORDWATCHHISTORYRESPONSE']._serialized_end=1394
+  _globals['_GETWATCHHISTORYRESPONSE']._serialized_start=1396
+  _globals['_GETWATCHHISTORYRESPONSE']._serialized_end=1484
+  _globals['_MOSTWATCHEDITEM']._serialized_start=1487
+  _globals['_MOSTWATCHEDITEM']._serialized_end=1654
+  _globals['_GETMOSTWATCHEDRESPONSE']._serialized_start=1656
+  _globals['_GETMOSTWATCHEDRESPONSE']._serialized_end=1731
+  _globals['_HISTORYSERVICE']._serialized_start=1734
+  _globals['_HISTORYSERVICE']._serialized_end=2329
 # @@protoc_insertion_point(module_scope)

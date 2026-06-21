@@ -193,12 +193,6 @@ type UpdateUserInput struct {
 	Password *string `json:"password,omitempty"`
 }
 
-type UpdateWatchHistoryInput struct {
-	ID                  uuid.UUID `json:"id"`
-	LastPositionSeconds *int32    `json:"lastPositionSeconds,omitempty"`
-	IsCompleted         *bool     `json:"isCompleted,omitempty"`
-}
-
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	Email     string    `json:"email"`
