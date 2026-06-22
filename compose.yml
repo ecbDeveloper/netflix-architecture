@@ -46,6 +46,8 @@ services:
     env_file: ./apps/content_processing_ms/.env
     depends_on:
       - api
+      - rabbitmq
+      - s3
 
 include:
   - path: ./infra-compose.yml
