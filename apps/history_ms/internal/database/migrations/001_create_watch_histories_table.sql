@@ -4,7 +4,7 @@ CREATE TABLE watch_histories (
   profile_id UUID NOT NULL,
   movie_id UUID,
   episode_id UUID,
-  genre_id INT DEFAULT 0,
+  genre_id INT NOT NULL,
   watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   last_position_seconds INT DEFAULT 0,
   is_completed BOOLEAN DEFAULT FALSE,

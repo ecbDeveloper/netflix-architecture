@@ -1360,7 +1360,7 @@ input CreateWatchHistoryInput {
   episodeId: ID
   lastPositionSeconds: Int
   isCompleted: Boolean
-  genreId: Int
+  genreId: Int!
 }
 
 extend type Query {
@@ -8114,7 +8114,7 @@ func (ec *executionContext) unmarshalInputCreateWatchHistoryInput(ctx context.Co
 			it.IsCompleted = data
 		case "genreId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
-			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			data, err := ec.unmarshalNInt2int32(ctx, v)
 			if err != nil {
 				return it, err
 			}

@@ -86,7 +86,7 @@ type CreateWatchHistoryInput struct {
 	EpisodeID           *uuid.UUID `json:"episodeId,omitempty"`
 	LastPositionSeconds *int32     `json:"lastPositionSeconds,omitempty"`
 	IsCompleted         *bool      `json:"isCompleted,omitempty"`
-	GenreID             *int32     `json:"genreId,omitempty"`
+	GenreID             int32      `json:"genreId"`
 }
 
 type Episode struct {
@@ -117,8 +117,7 @@ type MostWatchedContent struct {
 	WatchCount  int32       `json:"watchCount"`
 }
 
-type Mutation struct {
-}
+type Mutation struct{}
 
 type PaginationInput struct {
 	Limit  *int32 `json:"limit,omitempty"`
@@ -134,8 +133,7 @@ type Profile struct {
 	UpdatedAt           string    `json:"updatedAt"`
 }
 
-type Query struct {
-}
+type Query struct{}
 
 type RecommendedContent struct {
 	ContentID   uuid.UUID   `json:"contentId"`

@@ -7,6 +7,7 @@ package resolvers
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/generated"
@@ -25,7 +26,7 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 
 	reqBody := &historyv1.RecordWatchHistoryRequest{
 		ProfileId: profileID.String(),
-		GenreId:   *input.GenreID,
+		GenreId:   input.GenreID,
 	}
 
 	if input.MovieID != nil {
@@ -48,6 +49,7 @@ func (r *mutationResolver) RecordWatchHistory(ctx context.Context, input model.C
 
 	resp, err := r.HistoryClient.RecordWatchHistory(ctx, reqBody)
 	if err != nil {
+
 		return nil, r.handleGRPCError(ctx, err)
 	}
 
