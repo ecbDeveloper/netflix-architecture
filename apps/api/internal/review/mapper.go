@@ -21,8 +21,8 @@ func toGraphQLModel(r sqlc.Review) *model.Review {
 		m.MovieID = r.MovieID.Bytes
 	}
 
-	if r.Comment.Valid {
-		m.Comment = &r.Comment.String
+	if r.Comment != nil {
+		m.Comment = r.Comment
 	}
 
 	return m

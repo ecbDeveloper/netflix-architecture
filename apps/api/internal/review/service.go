@@ -62,7 +62,7 @@ func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReview
 	}
 
 	if input.Comment != nil {
-		params.Comment = pgtype.Text{String: *input.Comment, Valid: true}
+		params.Comment = input.Comment
 	}
 
 	r, err := s.repo.CreateReview(ctx, params)
@@ -174,7 +174,7 @@ func (s *ServiceImpl) UpdateReview(ctx context.Context, id uuid.UUID, input mode
 		params.Rating = *input.Rating
 	}
 	if input.Comment != nil {
-		params.Comment = pgtype.Text{String: *input.Comment, Valid: true}
+		params.Comment = input.Comment
 	}
 
 	r, err := s.repo.UpdateReview(ctx, params)

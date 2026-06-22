@@ -166,8 +166,8 @@ type Episode struct {
 	Season          int32         `json:"season"`
 	EpisodeNumber   int32         `json:"episode_number"`
 	Title           string        `json:"title"`
-	DurationSeconds pgtype.Int4   `json:"duration_seconds"`
-	ContentUrl      pgtype.Text   `json:"content_url"`
+	DurationSeconds *int32        `json:"duration_seconds"`
+	ContentUrl      *string       `json:"content_url"`
 	CreatedAt       time.Time     `json:"created_at"`
 	UpdatedAt       time.Time     `json:"updated_at"`
 	Status          ContentStatus `json:"status"`
@@ -175,8 +175,8 @@ type Episode struct {
 
 type Movie struct {
 	ContentID       uuid.UUID     `json:"content_id"`
-	DurationSeconds pgtype.Int4   `json:"duration_seconds"`
-	ContentUrl      pgtype.Text   `json:"content_url"`
+	DurationSeconds *int32        `json:"duration_seconds"`
+	ContentUrl      *string       `json:"content_url"`
 	Status          ContentStatus `json:"status"`
 	CreatedAt       time.Time     `json:"created_at"`
 	UpdatedAt       time.Time     `json:"updated_at"`
@@ -197,7 +197,7 @@ type Review struct {
 	MovieID   pgtype.UUID `json:"movie_id"`
 	EpisodeID pgtype.UUID `json:"episode_id"`
 	Rating    int32       `json:"rating"`
-	Comment   pgtype.Text `json:"comment"`
+	Comment   *string     `json:"comment"`
 	CreatedAt time.Time   `json:"created_at"`
 	UpdatedAt time.Time   `json:"updated_at"`
 }

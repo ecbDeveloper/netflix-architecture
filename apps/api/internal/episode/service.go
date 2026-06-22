@@ -15,7 +15,6 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Service interface {
@@ -133,7 +132,7 @@ func (s *ServiceImpl) GetEpisode(ctx context.Context, id uuid.UUID, profileID uu
 		return nil, &apperror.ForbiddenError{Message: "this profile cannot access this content due to parental controls"}
 	}
 
-	return toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl), pgInt4ToInt32Ptr(ep.DurationSeconds)), nil
+	return toGraphQLModel(ep, ep.ContentUrl, ep.DurationSeconds), nil
 }
 
 func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID, profileID uuid.UUID, userID uuid.UUID) ([]*model.Episode, error) {
@@ -164,7 +163,7 @@ func (s *ServiceImpl) ListEpisodesBySeries(ctx context.Context, seriesID uuid.UU
 	for i, ep := range episodes {
 		entity := toEpisodeEntity(ep)
 		if entity.BelongsToSeries(seriesID) {
-			result[i] = toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl), pgInt4ToInt32Ptr(ep.DurationSeconds))
+			result[i] = toGraphQLModel(ep, ep.ContentUrl, ep.DurationSeconds)
 		}
 	}
 	return result, nil
@@ -221,12 +220,12 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 			return nil, fmt.Errorf("failed to update episode file content: %w", err)
 		}
 
-		params.ContentUrl = pgtype.Text{Valid: false}
+		params.ContentUrl = nil
 		params.Status = sqlc.ContentStatusPENDING
-		params.DurationSeconds = pgtype.Int4{Valid: false}
+		params.DurationSeconds = nil
 
-		if current.ContentUrl.Valid && current.ContentUrl.String != "" {
-			oldURL = current.ContentUrl.String
+		if current.ContentUrl != nil && *current.ContentUrl != "" {
+			oldURL = *current.ContentUrl
 		}
 	}
 
@@ -255,7 +254,7 @@ func (s *ServiceImpl) UpdateEpisode(ctx context.Context, id uuid.UUID, input mod
 		}
 	}
 
-	return toGraphQLModel(ep, pgTextToStringPtr(ep.ContentUrl), pgInt4ToInt32Ptr(ep.DurationSeconds)), nil
+	return toGraphQLModel(ep, ep.ContentUrl, ep.DurationSeconds), nil
 }
 
 func (s *ServiceImpl) DeleteEpisode(ctx context.Context, id uuid.UUID) error {

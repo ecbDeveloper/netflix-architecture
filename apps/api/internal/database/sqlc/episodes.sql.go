@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createEpisode = `-- name: CreateEpisode :one
@@ -128,8 +127,8 @@ type UpdateEpisodeParams struct {
 	Season          int32         `json:"season"`
 	EpisodeNumber   int32         `json:"episode_number"`
 	Title           string        `json:"title"`
-	DurationSeconds pgtype.Int4   `json:"duration_seconds"`
-	ContentUrl      pgtype.Text   `json:"content_url"`
+	DurationSeconds *int32        `json:"duration_seconds"`
+	ContentUrl      *string       `json:"content_url"`
 	Status          ContentStatus `json:"status"`
 }
 

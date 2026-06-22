@@ -16,7 +16,6 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -324,12 +323,12 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 				return nil, fmt.Errorf("failed to upload content file: %w", err)
 			}
 
-			updateMovieParams.ContentUrl = pgtype.Text{Valid: false}
+			updateMovieParams.ContentUrl = nil
 			updateMovieParams.Status = sqlc.ContentStatusPENDING
-			updateMovieParams.DurationSeconds = pgtype.Int4{Valid: true, Int32: 0}
+			updateMovieParams.DurationSeconds = nil
 
-			if currentMovie.ContentUrl.Valid && currentMovie.ContentUrl.String != "" {
-				oldURL = currentMovie.ContentUrl.String
+			if currentMovie.ContentUrl != nil && *currentMovie.ContentUrl != "" {
+				oldURL = *currentMovie.ContentUrl
 			}
 		}
 
@@ -367,7 +366,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 			return nil, fmt.Errorf("faiiled to parse content status: %w", err)
 		}
 
-		return toGraphQlModel(content, pgTextToStringPtr(updatedMovie.ContentUrl), pgInt4ToInt32Ptr(updatedMovie.DurationSeconds), parsedStatus), nil
+		return toGraphQlModel(content, updatedMovie.ContentUrl, updatedMovie.DurationSeconds, parsedStatus), nil
 	}
 
 	return toGraphQlModel(content, nil, nil, nil), nil
@@ -412,8 +411,8 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 	}
 
 	if contentEntity.IsMovie() {
-		if movie.ContentUrl.Valid && movie.ContentUrl.String != "" {
-			if err := s.storage.DeleteFile(context.Background(), movie.ContentUrl.String); err != nil {
+		if movie.ContentUrl != nil && *movie.ContentUrl != "" {
+			if err := s.storage.DeleteFile(context.Background(), *movie.ContentUrl); err != nil {
 				return fmt.Errorf("failed to delete movie file: %w", err)
 			}
 		}
@@ -421,8 +420,8 @@ func (s *ServiceImpl) DeleteContent(ctx context.Context, id uuid.UUID) error {
 
 	if contentEntity.IsSeries() {
 		for _, episode := range episodes {
-			if episode.ContentUrl.Valid && episode.ContentUrl.String != "" {
-				if err := s.storage.DeleteFile(context.Background(), movie.ContentUrl.String); err != nil {
+			if episode.ContentUrl != nil && *episode.ContentUrl != "" {
+				if err := s.storage.DeleteFile(context.Background(), *episode.ContentUrl); err != nil {
 					return fmt.Errorf("failed to delete movie file: %w", err)
 				}
 			}
@@ -465,7 +464,7 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, use
 				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
 			}
 
-			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), pgInt4ToInt32Ptr(movie.DurationSeconds), parsedStatus)
+			result[i] = toGraphQlModel(c, movie.ContentUrl, movie.DurationSeconds, parsedStatus)
 		}
 		if entity.IsSeries() {
 			result[i] = toGraphQlModel(c, nil, nil, nil)
@@ -508,7 +507,7 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
 			}
 
-			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), pgInt4ToInt32Ptr(movie.DurationSeconds), parsedStatus)
+			result[i] = toGraphQlModel(c, movie.ContentUrl, movie.DurationSeconds, parsedStatus)
 		}
 		if entity.IsSeries() {
 			result[i] = toGraphQlModel(c, nil, nil, nil)
@@ -568,7 +567,7 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
 			}
 
-			result[i] = toGraphQlModel(c, pgTextToStringPtr(movie.ContentUrl), pgInt4ToInt32Ptr(movie.DurationSeconds), parsedStatus)
+			result[i] = toGraphQlModel(c, movie.ContentUrl, movie.DurationSeconds, parsedStatus)
 		}
 		if entity.IsSeries() {
 			result[i] = toGraphQlModel(c, nil, nil, nil)
@@ -608,7 +607,7 @@ func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uu
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse content status: %w", err)
 		}
-		return toGraphQlModel(content, pgTextToStringPtr(movie.ContentUrl), pgInt4ToInt32Ptr(movie.DurationSeconds), parsedStatus), nil
+		return toGraphQlModel(content, movie.ContentUrl, movie.DurationSeconds, parsedStatus), nil
 	}
 
 	return toGraphQlModel(content, nil, nil, nil), nil

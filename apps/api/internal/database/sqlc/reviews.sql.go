@@ -23,7 +23,7 @@ type CreateReviewParams struct {
 	MovieID   pgtype.UUID `json:"movie_id"`
 	EpisodeID pgtype.UUID `json:"episode_id"`
 	Rating    int32       `json:"rating"`
-	Comment   pgtype.Text `json:"comment"`
+	Comment   *string     `json:"comment"`
 }
 
 func (q *Queries) CreateReview(ctx context.Context, arg CreateReviewParams) (Review, error) {
@@ -184,9 +184,9 @@ RETURNING id, profile_id, movie_id, episode_id, rating, comment, created_at, upd
 `
 
 type UpdateReviewParams struct {
-	ID      uuid.UUID   `json:"id"`
-	Rating  int32       `json:"rating"`
-	Comment pgtype.Text `json:"comment"`
+	ID      uuid.UUID `json:"id"`
+	Rating  int32     `json:"rating"`
+	Comment *string   `json:"comment"`
 }
 
 func (q *Queries) UpdateReview(ctx context.Context, arg UpdateReviewParams) (Review, error) {

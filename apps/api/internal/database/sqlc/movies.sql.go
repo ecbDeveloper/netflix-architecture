@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createMovie = `-- name: CreateMovie :one
@@ -47,9 +46,9 @@ type GetMovieRow struct {
 	ID              uuid.UUID      `json:"id"`
 	Title           string         `json:"title"`
 	Description     string         `json:"description"`
-	DurationSeconds pgtype.Int4    `json:"duration_seconds"`
+	DurationSeconds *int32         `json:"duration_seconds"`
 	ReleaseDate     time.Time      `json:"release_date"`
-	ContentUrl      pgtype.Text    `json:"content_url"`
+	ContentUrl      *string        `json:"content_url"`
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
 	MaturityRating  MaturityRating `json:"maturity_rating"`
@@ -85,8 +84,8 @@ RETURNING content_id, duration_seconds, content_url, status, created_at, updated
 
 type UpdateMovieParams struct {
 	ContentID       uuid.UUID     `json:"content_id"`
-	DurationSeconds pgtype.Int4   `json:"duration_seconds"`
-	ContentUrl      pgtype.Text   `json:"content_url"`
+	DurationSeconds *int32        `json:"duration_seconds"`
+	ContentUrl      *string       `json:"content_url"`
 	Status          ContentStatus `json:"status"`
 }
 
