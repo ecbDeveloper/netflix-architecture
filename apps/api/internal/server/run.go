@@ -27,6 +27,7 @@ import (
 	historyv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
 	recommendationv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/recommendation/v1"
 	"github.com/go-chi/chi/v5"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/gomodule/redigo/redis"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rabbitmq/amqp091-go"
@@ -95,7 +96,7 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 	graphServer := buildGraphQLServer(graphConfig, cfg, logger)
 
 	router := chi.NewRouter()
-	router.Use(session.LoadAndSave, middleware.RequestID)
+	router.Use(session.LoadAndSave, chimiddleware.Recoverer, middleware.RequestID)
 
 	router.Handle("/query", graphServer)
 
