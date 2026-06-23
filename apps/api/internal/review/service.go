@@ -47,7 +47,9 @@ func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReview
 		return nil, &apperror.ValidationError{Field: "movieId/episodeId", Message: "provide only movie or episode, not both"}
 	}
 
+	reviewID := uuid.New()
 	params := sqlc.CreateReviewParams{
+		ID:     reviewID,
 		Rating: input.Rating,
 	}
 

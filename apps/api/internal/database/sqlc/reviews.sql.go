@@ -13,12 +13,13 @@ import (
 )
 
 const createReview = `-- name: CreateReview :one
-INSERT INTO reviews (profile_id, movie_id, episode_id, rating, comment)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO reviews (id, profile_id, movie_id, episode_id, rating, comment)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id, profile_id, movie_id, episode_id, rating, comment, created_at, updated_at
 `
 
 type CreateReviewParams struct {
+	ID        uuid.UUID   `json:"id"`
 	ProfileID uuid.UUID   `json:"profile_id"`
 	MovieID   pgtype.UUID `json:"movie_id"`
 	EpisodeID pgtype.UUID `json:"episode_id"`
@@ -28,6 +29,7 @@ type CreateReviewParams struct {
 
 func (q *Queries) CreateReview(ctx context.Context, arg CreateReviewParams) (Review, error) {
 	row := q.db.QueryRow(ctx, createReview,
+		arg.ID,
 		arg.ProfileID,
 		arg.MovieID,
 		arg.EpisodeID,

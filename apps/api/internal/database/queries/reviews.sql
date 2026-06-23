@@ -1,6 +1,6 @@
 -- name: CreateReview :one
-INSERT INTO reviews (profile_id, movie_id, episode_id, rating, comment)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO reviews (id, profile_id, movie_id, episode_id, rating, comment)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: GetReview :one
