@@ -48,6 +48,21 @@ func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReview
 		return nil, &apperror.ValidationError{Field: "movieId/episodeId", Message: "provide only movie or episode, not both"}
 	}
 
+	profileReviews, err := s.ListReviewsByProfile(ctx, profileID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get reviews from profile %v to create a review: %w", profileID, err)
+	}
+
+	for _, review := range profileReviews {
+		if input.MovieID != nil && review.MovieID == *input.MovieID {
+			return nil, &apperror.UnprocessableEntityError{Message: "you can't review some content more than one time"}
+		}
+
+		if input.EpisodeID != nil && review.EpisodeID == *input.EpisodeID {
+			return nil, &apperror.UnprocessableEntityError{Message: "you can't review some content more than one time"}
+		}
+	}
+
 	reviewID := uuid.New()
 	params := sqlc.CreateReviewParams{
 		ID:     reviewID,
