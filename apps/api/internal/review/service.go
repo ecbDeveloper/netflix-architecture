@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
@@ -63,7 +64,7 @@ func (s *ServiceImpl) CreateReview(ctx context.Context, input model.CreateReview
 		params.EpisodeID = pgtype.UUID{Bytes: *input.EpisodeID, Valid: true}
 	}
 
-	if input.Comment != nil {
+	if input.Comment != nil && strings.TrimSpace(*input.Comment) != "" {
 		params.Comment = input.Comment
 	}
 
