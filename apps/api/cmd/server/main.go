@@ -5,6 +5,8 @@ import (
 	"encoding/gob"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/config"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/server"
@@ -31,7 +33,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctx := context.Background()
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer cancel()
 
 	server.Run(ctx, logger, cfg)
 }

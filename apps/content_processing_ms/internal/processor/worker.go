@@ -68,7 +68,6 @@ func (w *Worker) Start(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			w.logger.Info("Worker shutting down...")
 			return
 		case d, ok := <-msgs:
 			if !ok {

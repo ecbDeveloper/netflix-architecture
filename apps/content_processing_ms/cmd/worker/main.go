@@ -22,7 +22,11 @@ func main() {
 
 	cfg := config.LoadConfig(logger)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
 	defer cancel()
 
 	repo, err := database.NewRepository(ctx, cfg)
@@ -70,15 +74,7 @@ func main() {
 
 	worker := processor.NewWorker(repo, s3Client, transcoderService, rabbitMQCh, cfg.ContentQueueName, logger)
 
-	go func() {
-		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-		<-sigChan
-		slog.Info("Received shutdown signal")
-		cancel()
-	}()
-
+	logger.Info("Starting worker...")
 	worker.Start(ctx)
-
-	slog.Info("Exited gracefully")
+	logger.Info("Worker stoped gracefully")
 }

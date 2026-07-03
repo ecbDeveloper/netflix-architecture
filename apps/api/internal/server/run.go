@@ -104,12 +104,30 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 		router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	}
 
-	logger.Info("server initialized successfully", slog.String("url", "http://localhost:"+cfg.APIPort+"/query"))
-
-	if err := http.ListenAndServe(":"+cfg.APIPort, router); err != nil {
-		logger.Error("failed to start server", slog.Any("error", err))
-		os.Exit(1)
+	srv := http.Server{
+		Addr:    ":" + cfg.APIPort,
+		Handler: router,
 	}
+
+	go func() {
+		logger.Info("server initialized successfully", slog.String("url", "http://localhost:"+cfg.APIPort+"/query"))
+
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error("failed to start server", slog.Any("error", err))
+			os.Exit(1)
+		}
+	}()
+
+	<-ctx.Done()
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		logger.Error("server forced to shutdown", slog.Any("error", err))
+	}
+
+	logger.Info("Server stoped gracefully")
 }
 
 func initializeDependencies(

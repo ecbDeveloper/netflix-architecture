@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/history"
@@ -17,8 +19,6 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
-
 	loggerHandler := slog.NewJSONHandler(os.Stdout, nil)
 	logger := slog.New(loggerHandler)
 
@@ -32,6 +32,13 @@ func main() {
 		grpcPort = "50051"
 	}
 
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer cancel()
+
 	pool, err := initializeDatabaseConnection(ctx)
 	if err != nil {
 		logger.Error("failed to initialize db pool", slog.Any("error", err))
@@ -44,6 +51,7 @@ func main() {
 		logger.Error("failed to listen", slog.Any("error", err))
 		os.Exit(1)
 	}
+	defer listener.Close()
 
 	queries := sqlc.New(pool)
 	server := history.NewServer(queries)
@@ -54,11 +62,18 @@ func main() {
 		reflection.Register(grpcServer)
 	}
 
-	logger.Info("history microservice started", slog.String("port", grpcPort))
-	if err := grpcServer.Serve(listener); err != nil {
-		logger.Error("failed to serve", slog.Any("error", err))
-		os.Exit(1)
-	}
+	go func() {
+		logger.Info("history microservice started", slog.String("port", grpcPort))
+		if err := grpcServer.Serve(listener); err != nil {
+			logger.Error("failed to serve", slog.Any("error", err))
+			os.Exit(1)
+		}
+	}()
+
+	<-ctx.Done()
+
+	grpcServer.GracefulStop()
+	logger.Info("History grpc server stoped gracefully")
 }
 
 func initializeDatabaseConnection(ctx context.Context) (*pgxpool.Pool, error) {
