@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/middleware"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type LogContextHandler struct {
@@ -12,9 +12,15 @@ type LogContextHandler struct {
 }
 
 func (h *LogContextHandler) Handle(ctx context.Context, r slog.Record) error {
-	if id := middleware.GetRequestID(ctx); id != "" {
-		r.AddAttrs(slog.String("request_id", id))
+	spanCtx := trace.SpanFromContext(ctx).SpanContext()
+
+	if spanCtx.IsValid() {
+		r.AddAttrs(
+			slog.String("trace_id", spanCtx.TraceID().String()),
+			slog.String("span_id", spanCtx.SpanID().String()),
+		)
 	}
+
 	return h.Handler.Handle(ctx, r)
 }
 
