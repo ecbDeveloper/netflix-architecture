@@ -36,35 +36,35 @@ import (
 	otelchimetric "github.com/riandyrn/otelchi/metric"
 )
 
-func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
-	db, err := infra.InitializeDatabase(ctx, cfg)
+func Run(ctx context.Context, logger *slog.Logger, appConfig *config.Config) {
+	db, err := infra.InitializeDatabase(ctx, appConfig)
 	if err != nil {
 		logger.Error("failed to initialize database", slog.Any("error", err))
 		os.Exit(1)
 	}
 	defer db.Close()
 
-	redisPool, err := infra.InitializeRedis(cfg)
+	redisPool, err := infra.InitializeRedis(appConfig)
 	if err != nil {
 		logger.Error("failed to initialize redis", slog.Any("error", err))
 		os.Exit(1)
 	}
 	defer redisPool.Close()
 
-	s3Client, err := infra.InitializeS3Client(cfg)
+	s3Client, err := infra.InitializeS3Client(appConfig)
 	if err != nil {
 		logger.Error("failed to initialize s3 client", slog.Any("error", err))
 		os.Exit(1)
 	}
 
-	historyClient, recClient, cleanup, err := infra.InitializeGRPC(cfg)
+	historyClient, recClient, cleanup, err := infra.InitializeGRPC(appConfig)
 	if err != nil {
 		logger.Error("failed to initialize grpc clients", slog.Any("error", err))
 		os.Exit(1)
 	}
 	defer cleanup()
 
-	rabbitMQConn, err := infra.InitializeRabbitMQ(cfg)
+	rabbitMQConn, err := infra.InitializeRabbitMQ(appConfig)
 	if err != nil {
 		logger.Error("failed to initialize rabbitMQ", slog.Any("error", err))
 		os.Exit(1)
@@ -78,7 +78,7 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 	}
 	defer rabbitMQCh.Close()
 
-	if err := infra.DeclareContentQueue(cfg, rabbitMQCh); err != nil {
+	if err := infra.DeclareContentQueue(appConfig, rabbitMQCh); err != nil {
 		logger.Error("failed to declare content queue", slog.Any("error", err))
 		os.Exit(1)
 	}
@@ -98,7 +98,7 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 	)
 
 	resolver, session := initializeDependencies(
-		cfg,
+		appConfig,
 		db,
 		redisPool,
 		logger,
@@ -107,10 +107,9 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 		s3Client,
 		rabbitMQCh,
 	)
-	resolver.Logger = logger
 
 	graphConfig := initializeGraphQLConfig(resolver, session)
-	graphServer := buildGraphQLServer(graphConfig, cfg, logger)
+	graphServer := buildGraphQLServer(graphConfig, appConfig, logger)
 
 	router := chi.NewRouter()
 	router.Use(
@@ -125,17 +124,17 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 
 	router.Handle("/query", graphServer)
 
-	if cfg.IsDevelopment() {
+	if appConfig.IsDevelopment() {
 		router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	}
 
 	srv := http.Server{
-		Addr:    ":" + cfg.APIPort,
+		Addr:    ":" + appConfig.APIPort,
 		Handler: router,
 	}
 
 	go func() {
-		logger.Info("server initialized successfully", slog.String("url", "http://localhost:"+cfg.APIPort+"/query"))
+		logger.Info("server initialized successfully", slog.String("url", "http://localhost:"+appConfig.APIPort+"/query"))
 
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Error("failed to start server", slog.Any("error", err))
