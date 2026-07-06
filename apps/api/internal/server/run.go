@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
@@ -20,9 +21,9 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/infra"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/infra/queue"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/infra/storage"
-	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/middleware"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/profile"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/review"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/user"
 	historyv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
 	recommendationv1 "github.com/ecbDeveloper/netflix-architecture/gen/go/recommendation/v1"
@@ -31,6 +32,8 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rabbitmq/amqp091-go"
+	"github.com/riandyrn/otelchi"
+	otelchimetric "github.com/riandyrn/otelchi/metric"
 )
 
 func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
@@ -80,6 +83,20 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 		os.Exit(1)
 	}
 
+	meterProvider, otelShutdown, err := infra.SetupOTelSDK(ctx)
+	if err != nil {
+		logger.Error("failed to initialize open telemetry sdk", slog.Any("error", err))
+		os.Exit(1)
+	}
+	defer func() {
+		err = errors.Join(err, otelShutdown(context.Background()))
+	}()
+
+	otelConfig := otelchimetric.NewBaseConfig(
+		shared.ServerName,
+		otelchimetric.WithMeterProvider(meterProvider),
+	)
+
 	resolver, session := initializeDependencies(
 		cfg,
 		db,
@@ -96,7 +113,15 @@ func Run(ctx context.Context, logger *slog.Logger, cfg *config.Config) {
 	graphServer := buildGraphQLServer(graphConfig, cfg, logger)
 
 	router := chi.NewRouter()
-	router.Use(session.LoadAndSave, chimiddleware.Recoverer, middleware.RequestID)
+	router.Use(
+		session.LoadAndSave,
+		chimiddleware.Recoverer,
+		otelchi.Middleware(shared.ServerName, otelchi.WithChiRoutes(router)),
+		otelchimetric.NewServerRequestDuration(otelConfig),
+		otelchimetric.NewServerActiveRequests(otelConfig),
+		otelchimetric.NewServerRequestBodySize(otelConfig),
+		otelchimetric.NewServerResponseBodySize(otelConfig),
+	)
 
 	router.Handle("/query", graphServer)
 

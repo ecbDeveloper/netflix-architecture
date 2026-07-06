@@ -14,4 +14,6 @@ const (
 
 	MaxUploadSize = 100 * 1 << 20
 	MaxMemory     = 20 * 1 << 20
+
+	ServerName = "netflix"
 )
