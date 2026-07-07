@@ -13,8 +13,8 @@ services:
       - rabbitmq_log:/var/log/rabbitmq
 
   kafka:
-    image: apache/kafka
     container_name: kafka
+    image: apache/kafka
     ports:
       - ${KAFKA_PORT}:9092
     environment:
@@ -30,8 +30,8 @@ services:
       - kafka_data:/var/lib/kafka/data
 
   kafka_connect:
-    image: quay.io/debezium/connect
     container_name: kafka_connect
+    image: quay.io/debezium/connect
     ports:
       - ${KAFKA_CONNECT_PORT}:8083
     environment:
@@ -44,8 +44,8 @@ services:
       - kafka
 
   debezium_init:
-    image: curlimages/curl
     container_name: debezium_init
+    image: curlimages/curl
     depends_on:
       - kafka_connect
     volumes:
