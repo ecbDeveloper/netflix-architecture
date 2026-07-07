@@ -1,8 +1,6 @@
 services:
   api:
     container_name: api
-    ports:
-      - ${API_PORT}:${API_PORT}
     build:
       context: .
       dockerfile: apps/api/Dockerfile
@@ -53,3 +51,4 @@ include:
   - path: ./infra/queue-compose.yaml
   - path: ./infra/storage-compose.yaml
   - path: ./infra/monitoring/compose.yaml
+  - path: ./infra/kong/compose.yaml

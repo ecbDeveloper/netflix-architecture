@@ -1,0 +1,18 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: api-service
+    url: http://api:8080
+    connect_timeout: 10000
+    write_timeout: 30000
+    read_timeout: 30000
+    routes:
+      - name: api-route
+        paths:
+          - /
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 60
+          policy: local
