@@ -22,13 +22,12 @@ def get_recommendations(
     limit: int,
     top_rated_contents: list,
     db_pool,
-    history_client,
 ) -> list:
     if not top_rated_contents:
         logger.info("no candidates provided", extra={"profile_id": profile_id})
         return []
 
-    watch_history = _fetch_watch_history(profile_id, history_client)
+    watch_history = _fetch_watch_history(profile_id, db_pool)
     genre_profile = _build_genre_profile(watch_history)
     watched_content_ids = _extract_watched_content_ids(watch_history)
     recently_watched_ids = _extract_recently_watched_ids(
@@ -84,21 +83,37 @@ def get_recommendations(
     return recommendations
 
 
-def _fetch_watch_history(profile_id: str, history_client) -> list:
+class LocalHistoryItem:
+    def __init__(self, row):
+        self.movie_id = row[0]
+        self.episode_id = row[1]
+        self.genre_id = row[2]
+        self.watched_at = row[3] # stored as BIGINT (epoch microseconds) from Debezium
+        self.is_completed = row[4]
+
+def _fetch_watch_history(profile_id: str, db_pool) -> list:
+    conn = None
     try:
-        request = history_pb2.GetRecentlyWatchedRequest(
-            profile_id=profile_id,
-            limit=HISTORY_FETCH_LIMIT,
-            offset=HISTORY_FETCH_OFFSET,
-        )
-        response = history_client.GetRecentlyWatched(request)
-        return list(response.histories)
+        conn = db_pool.getconn()
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT movie_id, episode_id, genre_id, watched_at, is_completed
+                FROM recommendation_history
+                WHERE profile_id = %s
+                ORDER BY watched_at DESC
+                LIMIT %s
+            """, (profile_id, HISTORY_FETCH_LIMIT))
+            rows = cur.fetchall()
+            return [LocalHistoryItem(r) for r in rows]
     except Exception as exc:
         logger.warning(
             "failed to fetch watch history, falling back to rating-only",
             extra={"profile_id": profile_id, "error": str(exc)},
         )
         return []
+    finally:
+        if conn:
+            db_pool.putconn(conn)
 
 
 def _build_genre_profile(watch_history: list) -> dict[int, float]:
@@ -134,7 +149,8 @@ def _extract_recently_watched_ids(watch_history: list, days: int) -> set[str]:
 
     for item in watch_history:
         try:
-            watched_ts = _parse_timestamp(item.watched_at)
+            # Debezium Postgres TIMESTAMP defaults to microseconds since epoch
+            watched_ts = item.watched_at / 1000000.0 if item.watched_at else 0
         except Exception:
             continue
 

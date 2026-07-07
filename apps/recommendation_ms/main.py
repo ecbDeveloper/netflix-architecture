@@ -19,7 +19,6 @@ from recommendation.v1.recommendation_pb2_grpc import (  # type: ignore
     RecommendationServiceServicer,
     add_RecommendationServiceServicer_to_server,
 )
-from history.v1.history_pb2_grpc import HistoryServiceStub  # type: ignore
 
 from recommendation_service import get_recommendations  # type: ignore
 
@@ -32,9 +31,8 @@ logger = logging.getLogger("recommendation_ms")
 
 
 class RecommendationService(RecommendationServiceServicer):
-    def __init__(self, db_pool, history_client):
+    def __init__(self, db_pool):
         self.db_pool = db_pool
-        self.history_client = history_client
 
     def GetRecommendations(self, request, context):
         try:
@@ -43,7 +41,6 @@ class RecommendationService(RecommendationServiceServicer):
                 limit=request.limit,
                 top_rated_contents=request.top_rated_contents,
                 db_pool=self.db_pool,
-                history_client=self.history_client,
             )
 
             recommendations = []
@@ -101,16 +98,13 @@ def main():
 
     db_pool = initialize_database_connection()
 
-    history_host = os.getenv("HISTORY_GRPC_HOST", "history_ms")
-    history_port = os.getenv("HISTORY_GRPC_PORT", "50051")
-    history_addr = f"{history_host}:{history_port}"
-
-    history_channel = grpc.insecure_channel(history_addr)
-    history_client = HistoryServiceStub(history_channel)
+    import threading
+    from kafka_consumer import start_kafka_consumer
+    threading.Thread(target=start_kafka_consumer, args=(db_pool,), daemon=True).start()
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     add_RecommendationServiceServicer_to_server(
-        RecommendationService(db_pool, history_client), server
+        RecommendationService(db_pool), server
     )
 
     if os.getenv("ENV") == "development":
