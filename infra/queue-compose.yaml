@@ -29,7 +29,7 @@ services:
       - kafka_data:/bitnami/kafka
 
   kafka_connect:
-    image: quay.io/debezium/connect:2.5
+    image: quay.io/debezium/connect
     container_name: kafka_connect
     ports:
       - ${KAFKA_CONNECT_PORT}:8083
@@ -43,7 +43,7 @@ services:
       - kafka
 
   debezium_init:
-    image: curlimages/curl:latest
+    image: curlimages/curl
     container_name: debezium_init
     depends_on:
       - kafka_connect
