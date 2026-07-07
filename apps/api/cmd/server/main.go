@@ -10,8 +10,11 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/config"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/server"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
+	slogmulti "github.com/samber/slog-multi"
+	"go.opentelemetry.io/contrib/bridges/otelslog"
 )
 
 func init() {
@@ -20,7 +23,11 @@ func init() {
 
 func main() {
 	jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
-	loggerHandler := config.NewLogContextHandler(jsonHandler)
+	otelHandler := otelslog.NewHandler(shared.ServerName)
+
+	multiHandler := slogmulti.Fanout(otelHandler, jsonHandler)
+
+	loggerHandler := config.NewLogContextHandler(multiHandler)
 	logger := slog.New(loggerHandler)
 
 	if err := godotenv.Load(); err != nil {
