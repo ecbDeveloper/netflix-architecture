@@ -71,7 +71,7 @@ func newPropagator() propagation.TextMapPropagator {
 }
 
 func newTracerProvider() (*trace.TracerProvider, error) {
-	traceExporter, err := otlptracegrpc.New(context.Background())
+	traceExporter, err := otlptracegrpc.New(context.Background(), otlptracegrpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func newTracerProvider() (*trace.TracerProvider, error) {
 }
 
 func newMeterProvider() (*metric.MeterProvider, error) {
-	metricExporter, err := otlpmetricgrpc.New(context.Background())
+	metricExporter, err := otlpmetricgrpc.New(context.Background(), otlpmetricgrpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func newMeterProvider() (*metric.MeterProvider, error) {
 }
 
 func newLoggerProvider() (*log.LoggerProvider, error) {
-	logExporter, err := otlploggrpc.New(context.Background())
+	logExporter, err := otlploggrpc.New(context.Background(), otlploggrpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
