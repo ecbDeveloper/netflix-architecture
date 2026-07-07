@@ -52,3 +52,4 @@ services:
 include:
   - path: ./infra/queue-compose.yaml
   - path: ./infra/storage-compose.yaml
+  - path: ./infra/monitoring/compose.yaml
