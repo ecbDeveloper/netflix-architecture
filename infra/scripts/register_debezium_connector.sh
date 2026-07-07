@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# The script is executed by the init container.
-# It expects the environment variables below to be injected.
-
 echo "Waiting for Kafka Connect to be ready at ${KAFKA_CONNECT_HOST:-localhost}:${KAFKA_CONNECT_PORT:-8083}..."
 sleep 15
 

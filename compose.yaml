@@ -50,4 +50,5 @@ services:
       - s3
 
 include:
-  - path: ./infra-compose.yml
+  - path: ./infra/queue-compose.yaml
+  - path: ./infra/storage-compose.yaml
