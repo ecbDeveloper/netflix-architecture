@@ -17,13 +17,11 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	queries     *sqlc.Queries
 	userService user.Service
 }
 
-func NewService(queries *sqlc.Queries, us user.Service) Service {
+func NewService(us user.Service) Service {
 	return &ServiceImpl{
-		queries:     queries,
 		userService: us,
 	}
 }
