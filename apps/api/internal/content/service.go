@@ -31,7 +31,6 @@ type Service interface {
 
 type ServiceImpl struct {
 	repo           Repository
-	queries        *sqlc.Queries
 	pool           *pgxpool.Pool
 	storage        storage.Service
 	profileService profile.Service
@@ -39,15 +38,14 @@ type ServiceImpl struct {
 }
 
 func NewService(
-	queries *sqlc.Queries,
+	repo Repository,
 	pool *pgxpool.Pool,
 	storage storage.Service,
 	ps profile.Service,
 	publisher queue.Publisher,
 ) Service {
 	return &ServiceImpl{
-		repo:           queries,
-		queries:        queries,
+		repo:           repo,
 		pool:           pool,
 		storage:        storage,
 		profileService: ps,
@@ -121,7 +119,7 @@ func (s *ServiceImpl) CreateContent(ctx context.Context, input model.CreateConte
 	}
 	defer tx.Rollback(ctx)
 
-	qtx := s.queries.WithTx(tx)
+	qtx := s.repo.WithTx(tx)
 	contentID := uuid.New()
 
 	createContentParams := sqlc.CreateContentParams{
@@ -258,7 +256,7 @@ func (s *ServiceImpl) UpdateContent(ctx context.Context, id uuid.UUID, input mod
 	}
 	defer tx.Rollback(ctx)
 
-	qtx := s.queries.WithTx(tx)
+	qtx := s.repo.WithTx(tx)
 
 	updateContentParams := sqlc.UpdateContentParams{
 		ID:             id,

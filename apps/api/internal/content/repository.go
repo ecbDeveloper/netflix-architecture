@@ -5,6 +5,7 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type Repository interface {
@@ -28,4 +29,5 @@ type Repository interface {
 	ListEpisodesBySeries(ctx context.Context, seriesID uuid.UUID) ([]sqlc.Episode, error)
 
 	ListContentGenres(ctx context.Context) ([]sqlc.ContentGenre, error)
+	WithTx(tx pgx.Tx) *sqlc.Queries
 }
