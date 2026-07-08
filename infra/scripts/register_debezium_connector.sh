@@ -1,7 +1,11 @@
 #!/bin/sh
 
 echo "Waiting for Kafka Connect to be ready at ${KAFKA_CONNECT_HOST:-localhost}:${KAFKA_CONNECT_PORT:-8083}..."
-sleep 15
+until curl -s -o /dev/null -w "%{http_code}" "http://${KAFKA_CONNECT_HOST:-localhost}:${KAFKA_CONNECT_PORT:-8083}/connectors" | grep -E "^(200|409)$" > /dev/null; do
+  echo "Kafka Connect is not ready yet. Retrying in 3 seconds..."
+  sleep 3
+done
+echo "Kafka Connect is ready! Registering Debezium connector..."
 
 curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" \
   "http://${KAFKA_CONNECT_HOST:-localhost}:${KAFKA_CONNECT_PORT:-8083}/connectors/" \
