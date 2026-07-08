@@ -29,10 +29,16 @@ def start_kafka_consumer(db_pool):
             if msg.error():
                 if msg.error().code() == KafkaError._PARTITION_EOF:
                     continue
+                elif msg.error().code() == KafkaError.UNKNOWN_TOPIC_OR_PART:
+                    # Ignore and continue, the topic will be auto-created when messages are published
+                    continue
                 else:
                     logger.error("Kafka error: %s", msg.error())
-                    break
+                    import time
+                    time.sleep(2)
+                    continue
 
+            conn = None
             try:
                 val = json.loads(msg.value().decode("utf-8"))
 
@@ -54,7 +60,8 @@ def start_kafka_consumer(db_pool):
                         is_completed = after.get("is_completed")
 
                         if profile_id and record_id:
-                            with db_pool.getconn() as conn:
+                            try:
+                                conn = db_pool.getconn()
                                 with conn.cursor() as cur:
                                     cur.execute(
                                         """
@@ -79,25 +86,40 @@ def start_kafka_consumer(db_pool):
                                         ),
                                     )
                                 conn.commit()
-                                db_pool.putconn(conn)
-                            logger.info(
-                                f"Processed upsert for profile {profile_id}, record {record_id}"
-                            )
+                                logger.info(
+                                    f"Processed upsert for profile {profile_id}, record {record_id}"
+                                )
+                            except Exception as db_err:
+                                if conn:
+                                    conn.rollback()
+                                raise db_err
+                            finally:
+                                if conn:
+                                    db_pool.putconn(conn)
+                                    conn = None
 
                 elif op == "d":
                     before = payload.get("before")
                     if before:
                         record_id = before.get("id")
                         if record_id:
-                            with db_pool.getconn() as conn:
+                            try:
+                                conn = db_pool.getconn()
                                 with conn.cursor() as cur:
                                     cur.execute(
                                         "DELETE FROM recommendation_history WHERE id = %s",
                                         (record_id,),
                                     )
                                 conn.commit()
-                                db_pool.putconn(conn)
-                            logger.info(f"Processed delete for record {record_id}")
+                                logger.info(f"Processed delete for record {record_id}")
+                            except Exception as db_err:
+                                if conn:
+                                    conn.rollback()
+                                raise db_err
+                            finally:
+                                if conn:
+                                    db_pool.putconn(conn)
+                                    conn = None
 
                 consumer.commit(msg)
 
