@@ -32,7 +32,12 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id uuid.UUID, input m
 		return nil, r.handleError(ctx, err)
 	}
 
-	if sessionUserID != id {
+	sessionRoleID, err := r.getUserRoleIDFromSession(ctx)
+	if err != nil {
+		return nil, r.handleError(ctx, err)
+	}
+
+	if sessionUserID != id && sessionRoleID != shared.DBRoleAdmin {
 		return nil, r.handleError(ctx, &apperror.ForbiddenError{Message: "you can't update others users"})
 	}
 
