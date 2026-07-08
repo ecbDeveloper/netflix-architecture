@@ -64,11 +64,11 @@ services:
     container_name: s3
     image: rustfs/rustfs:latest
     ports:
-      - ${RUSTFS_PORT}:${RUSTFS_PORT}
-      - ${RUSTFS_CONSOLE_PORT}:${RUSTFS_CONSOLE_PORT}
+      - ${RUSTFS_PORT}:9100
+      - ${RUSTFS_CONSOLE_PORT}:9101
     environment:
-      - RUSTFS_ADDRESS=0.0.0.0:${RUSTFS_PORT}
-      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:${RUSTFS_CONSOLE_PORT}
+      - RUSTFS_ADDRESS=0.0.0.0:9100
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9101
     volumes:
       - rustfs-data:/rustfs/data
 
