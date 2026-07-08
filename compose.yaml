@@ -6,12 +6,18 @@ services:
       dockerfile: apps/api/Dockerfile
     env_file: ./apps/api/.env
     depends_on:
-      - api_db
-      - redis
-      - history_ms
-      - recommendation_ms
-      - rabbitmq
-      - s3
+      api_db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      history_ms:
+        condition: service_started
+      recommendation_ms:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      s3:
+        condition: service_started
 
   history_ms:
     container_name: history_ms
@@ -22,7 +28,8 @@ services:
       dockerfile: apps/history_ms/Dockerfile
     env_file: ./apps/history_ms/.env
     depends_on:
-      - history_db
+      history_db:
+        condition: service_healthy
 
   recommendation_ms:
     container_name: recommendation_ms
@@ -33,8 +40,10 @@ services:
       dockerfile: apps/recommendation_ms/Dockerfile
     env_file: ./apps/recommendation_ms/.env
     depends_on:
-      - recommendation_db
-      - history_ms
+      recommendation_db:
+        condition: service_healthy
+      history_ms:
+        condition: service_started
 
   content_processing_ms:
     container_name: content_processing_ms

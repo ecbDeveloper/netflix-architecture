@@ -8,6 +8,11 @@ services:
       POSTGRES_DB: ${API_DB_NAME}
       POSTGRES_USER: ${API_DB_USER}
       POSTGRES_PASSWORD: ${API_DB_PASS}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - api-postgres-data:/var/lib/postgresql/18/data
 
@@ -21,6 +26,11 @@ services:
       POSTGRES_DB: ${HISTORY_DB_NAME}
       POSTGRES_USER: ${HISTORY_DB_USER}
       POSTGRES_PASSWORD: ${HISTORY_DB_PASS}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - history-postgres-data:/var/lib/postgresql/18/data
 
@@ -33,6 +43,11 @@ services:
       POSTGRES_DB: ${RECOMMENDATION_DB_NAME}
       POSTGRES_USER: ${RECOMMENDATION_DB_USER}
       POSTGRES_PASSWORD: ${RECOMMENDATION_DB_PASS}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - recommendation-postgres-data:/var/lib/postgresql/18/data
 
