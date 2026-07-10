@@ -115,7 +115,10 @@ func Run(ctx context.Context, logger *slog.Logger, appConfig *config.Config) {
 	router.Use(
 		session.LoadAndSave,
 		chimiddleware.Recoverer,
-		otelchi.Middleware(shared.ServerName, otelchi.WithChiRoutes(router)),
+		otelchi.Middleware(
+			shared.ServerName,
+			otelchi.WithChiRoutes(router),
+		),
 		otelchimetric.NewServerRequestDuration(otelConfig),
 		otelchimetric.NewServerActiveRequests(otelConfig),
 		otelchimetric.NewServerRequestBodySize(otelConfig),

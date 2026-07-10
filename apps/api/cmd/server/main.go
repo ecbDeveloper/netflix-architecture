@@ -25,10 +25,11 @@ func main() {
 	jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
 	otelHandler := otelslog.NewHandler(shared.ServerName)
 
-	multiHandler := slogmulti.Fanout(otelHandler, jsonHandler)
+	loggerHandler := config.NewLogContextHandler(jsonHandler)
 
-	loggerHandler := config.NewLogContextHandler(multiHandler)
-	logger := slog.New(loggerHandler)
+	multiHandler := slogmulti.Fanout(otelHandler, loggerHandler)
+
+	logger := slog.New(multiHandler)
 
 	if err := godotenv.Load(); err != nil {
 		logger.Warn("failed to load .env file", slog.Any("error", err))
