@@ -38,36 +38,6 @@ func (r *Repository) Close() {
 	r.pool.Close()
 }
 
-func (r *Repository) GetNextPendingContent(ctx context.Context) (*PendingContent, error) {
-	movieQuery := `
-		SELECT content_id 
-		FROM movies 
-		WHERE status = 'PENDING' 
-		   OR (status = 'PROCESSING' AND updated_at < NOW() - INTERVAL '2 hours')
-		LIMIT 1 FOR UPDATE SKIP LOCKED;
-	`
-	var movieID uuid.UUID
-	err := r.pool.QueryRow(ctx, movieQuery).Scan(&movieID)
-	if err == nil {
-		return &PendingContent{ID: movieID, Type: TypeMovie}, nil
-	}
-
-	episodeQuery := `
-		SELECT id 
-		FROM episodes 
-		WHERE status = 'PENDING' 
-		   OR (status = 'PROCESSING' AND updated_at < NOW() - INTERVAL '2 hours')
-		LIMIT 1 FOR UPDATE SKIP LOCKED;
-	`
-	var episodeID uuid.UUID
-	err = r.pool.QueryRow(ctx, episodeQuery).Scan(&episodeID)
-	if err == nil {
-		return &PendingContent{ID: episodeID, Type: TypeEpisode}, nil
-	}
-
-	return nil, nil
-}
-
 func (r *Repository) UpdateContent(ctx context.Context, id uuid.UUID, contentType ContentType, status string, url *string, durationSeconds int) error {
 	var query string
 
