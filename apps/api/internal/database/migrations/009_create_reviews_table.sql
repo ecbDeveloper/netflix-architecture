@@ -7,7 +7,10 @@ CREATE TABLE reviews (
   rating     INT         NOT NULL,
   comment    TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE (profile_id, movie_id),
+  UNIQUE (profile_id, episode_id)
 );
 ---- create above / drop below ----
 DROP TABLE IF EXISTS reviews;
