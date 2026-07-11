@@ -97,13 +97,16 @@ func (r *queryResolver) GetWatchHistory(ctx context.Context, id uuid.UUID) (*mod
 // MostWatchedContents is the resolver for the mostWatchedContents field.
 func (r *queryResolver) MostWatchedContents(ctx context.Context, input *model.PaginationInput) ([]*model.MostWatchedContent, error) {
 	var limit int32 = 10
-	if input.Limit != nil {
-		limit = *input.Limit
-	}
-
 	var offset int32 = 0
-	if input.Offset != nil {
-		offset = *input.Offset
+
+	if input != nil {
+		if input.Limit != nil {
+			limit = *input.Limit
+		}
+
+		if input.Offset != nil {
+			offset = *input.Offset
+		}
 	}
 
 	reqBody := &historyv1.GetMostWatchedRequest{
