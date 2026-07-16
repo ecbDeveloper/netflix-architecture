@@ -23,6 +23,7 @@ type Repository interface {
 	CreateMovie(ctx context.Context, contentID uuid.UUID) (sqlc.Movie, error)
 	GetMovie(ctx context.Context, contentID uuid.UUID) (sqlc.GetMovieRow, error)
 	UpdateMovie(ctx context.Context, params sqlc.UpdateMovieParams) (sqlc.Movie, error)
+	GetMoviesFromContents(ctx context.Context, contentIds []uuid.UUID) ([]sqlc.GetMoviesFromContentsRow, error)
 
 	CreateSeries(ctx context.Context, contentID uuid.UUID) (uuid.UUID, error)
 

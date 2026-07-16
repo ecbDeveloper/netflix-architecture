@@ -448,28 +448,7 @@ func (s *ServiceImpl) ListContents(ctx context.Context, profileID uuid.UUID, use
 		}
 	}
 
-	result := make([]*model.Content, len(contents))
-	for i, c := range contents {
-		entity := toContentEntity(c)
-		if entity.IsMovie() {
-			movie, err := s.repo.GetMovie(ctx, c.ID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get movie from database: %w", err)
-			}
-
-			parsedStatus, err := parseContentStatus(movie.Status)
-			if err != nil {
-				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
-			}
-
-			result[i] = toGraphQlModel(c, movie.ContentUrl, movie.DurationSeconds, parsedStatus)
-		}
-		if entity.IsSeries() {
-			result[i] = toGraphQlModel(c, nil, nil, nil)
-		}
-	}
-
-	return result, nil
+	return s.loadContentDetails(ctx, contents)
 }
 
 func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUID, userID uuid.UUID, contentType model.ContentType) ([]*model.Content, error) {
@@ -491,28 +470,7 @@ func (s *ServiceImpl) ListContentsByType(ctx context.Context, profileID uuid.UUI
 		}
 	}
 
-	result := make([]*model.Content, len(contents))
-	for i, c := range contents {
-		entity := toContentEntity(c)
-		if entity.IsMovie() {
-			movie, err := s.repo.GetMovie(ctx, c.ID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get movie from database: %w", err)
-			}
-
-			parsedStatus, err := parseContentStatus(movie.Status)
-			if err != nil {
-				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
-			}
-
-			result[i] = toGraphQlModel(c, movie.ContentUrl, movie.DurationSeconds, parsedStatus)
-		}
-		if entity.IsSeries() {
-			result[i] = toGraphQlModel(c, nil, nil, nil)
-		}
-	}
-
-	return result, nil
+	return s.loadContentDetails(ctx, contents)
 }
 
 func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UUID, userID uuid.UUID, genreID int32) ([]*model.Content, error) {
@@ -551,28 +509,7 @@ func (s *ServiceImpl) ListContentsByGenre(ctx context.Context, profileID uuid.UU
 		}
 	}
 
-	result := make([]*model.Content, len(contents))
-	for i, c := range contents {
-		entity := toContentEntity(c)
-		if entity.IsMovie() {
-			movie, err := s.repo.GetMovie(ctx, c.ID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get movie from database: %w", err)
-			}
-
-			parsedStatus, err := parseContentStatus(movie.Status)
-			if err != nil {
-				return nil, fmt.Errorf("faiiled to parse content status: %w", err)
-			}
-
-			result[i] = toGraphQlModel(c, movie.ContentUrl, movie.DurationSeconds, parsedStatus)
-		}
-		if entity.IsSeries() {
-			result[i] = toGraphQlModel(c, nil, nil, nil)
-		}
-	}
-
-	return result, nil
+	return s.loadContentDetails(ctx, contents)
 }
 
 func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uuid.UUID, userID uuid.UUID) (*model.Content, error) {
@@ -609,4 +546,46 @@ func (s *ServiceImpl) GetContent(ctx context.Context, id uuid.UUID, profileID uu
 	}
 
 	return toGraphQlModel(content, nil, nil, nil), nil
+}
+
+func (s *ServiceImpl) loadContentDetails(ctx context.Context, contents []sqlc.Content) ([]*model.Content, error) {
+	var moviesContentIds []uuid.UUID
+	for _, c := range contents {
+		entity := toContentEntity(c)
+
+		if entity.IsMovie() {
+			moviesContentIds = append(moviesContentIds, entity.ID)
+		}
+	}
+
+	var movies []sqlc.GetMoviesFromContentsRow
+	if len(moviesContentIds) > 0 {
+		var err error
+		movies, err = s.repo.GetMoviesFromContents(ctx, moviesContentIds)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get movies by content ids from database: %w", err)
+		}
+	}
+
+	moviesFromContent := make(map[uuid.UUID]sqlc.GetMoviesFromContentsRow, len(movies))
+	for _, m := range movies {
+		moviesFromContent[m.ID] = m
+	}
+
+	result := make([]*model.Content, len(contents))
+	for i, c := range contents {
+		m, ok := moviesFromContent[c.ID]
+		if !ok {
+			result[i] = toGraphQlModel(c, nil, nil, nil)
+			continue
+		}
+
+		parsedStatus, err := parseContentStatus(m.Status)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse content status: %w", err)
+		}
+
+		result[i] = toGraphQlModel(c, m.ContentUrl, m.DurationSeconds, parsedStatus)
+	}
+	return result, nil
 }

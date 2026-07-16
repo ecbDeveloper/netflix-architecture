@@ -75,6 +75,61 @@ func (q *Queries) GetMovie(ctx context.Context, id uuid.UUID) (GetMovieRow, erro
 	return i, err
 }
 
+const getMoviesFromContents = `-- name: GetMoviesFromContents :many
+SELECT
+  c.id, c.title, c.description, m.duration_seconds, c.release_date,
+  m.content_url, c.created_at, c.updated_at, c.maturity_rating, c.genre_id, m.status
+FROM contents c
+JOIN movies m ON m.content_id = c.id
+WHERE c.id = ANY($1::UUID[])
+`
+
+type GetMoviesFromContentsRow struct {
+	ID              uuid.UUID      `json:"id"`
+	Title           string         `json:"title"`
+	Description     string         `json:"description"`
+	DurationSeconds *int32         `json:"duration_seconds"`
+	ReleaseDate     time.Time      `json:"release_date"`
+	ContentUrl      *string        `json:"content_url"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	MaturityRating  MaturityRating `json:"maturity_rating"`
+	GenreID         int32          `json:"genre_id"`
+	Status          ContentStatus  `json:"status"`
+}
+
+func (q *Queries) GetMoviesFromContents(ctx context.Context, contentIds []uuid.UUID) ([]GetMoviesFromContentsRow, error) {
+	rows, err := q.db.Query(ctx, getMoviesFromContents, contentIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMoviesFromContentsRow
+	for rows.Next() {
+		var i GetMoviesFromContentsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.DurationSeconds,
+			&i.ReleaseDate,
+			&i.ContentUrl,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.MaturityRating,
+			&i.GenreID,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateMovie = `-- name: UpdateMovie :one
 UPDATE movies
 SET duration_seconds = $2, content_url = $3, status = $4
