@@ -170,7 +170,7 @@ func initializeDependencies(
 	queries := sqlc.New(pool)
 
 	storageService := storage.NewService(s3Client, cfg.S3BucketName, cfg.S3EndPointURL)
-	userService := user.NewService(queries)
+	userService := user.NewService(queries, pool)
 	profileService := profile.NewService(queries)
 	authService := auth.NewService(userService)
 

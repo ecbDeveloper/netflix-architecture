@@ -5,6 +5,7 @@ import (
 
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type Repository interface {
@@ -14,4 +15,6 @@ type Repository interface {
 	ListUsers(ctx context.Context) ([]sqlc.User, error)
 	UpdateUser(ctx context.Context, params sqlc.UpdateUserParams) (sqlc.User, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) error
+
+	WithTx(tx pgx.Tx) *sqlc.Queries
 }

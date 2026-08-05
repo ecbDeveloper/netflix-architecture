@@ -8,6 +8,7 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/apperror"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/graph/model"
+	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -24,11 +25,13 @@ type Service interface {
 
 type ServiceImpl struct {
 	repo Repository
+	pool shared.DBPool
 }
 
-func NewService(repo Repository) Service {
+func NewService(repo Repository, pool shared.DBPool) Service {
 	return &ServiceImpl{
 		repo: repo,
+		pool: pool,
 	}
 }
 
@@ -46,14 +49,22 @@ func (s *ServiceImpl) CreateUser(ctx context.Context, input model.CreateUserInpu
 		return nil, &apperror.ValidationError{Field: "name", Message: "name is required"}
 	}
 
-	userID := uuid.New()
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	user, err := s.repo.CreateUser(ctx, sqlc.CreateUserParams{
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := s.repo.WithTx(tx)
+
+	userID := uuid.New()
+
+	user, err := qtx.CreateUser(ctx, sqlc.CreateUserParams{
 		ID:       userID,
 		Email:    input.Email,
 		Name:     input.Name,
@@ -66,6 +77,35 @@ func (s *ServiceImpl) CreateUser(ctx context.Context, input model.CreateUserInpu
 			return nil, &apperror.ConflictError{Field: field}
 		}
 		return nil, fmt.Errorf("failed to insert user on database: %w", err)
+
+	}
+
+	normalProfileID := uuid.New()
+
+	_, err = qtx.CreateProfile(ctx, sqlc.CreateProfileParams{
+		ID:                  normalProfileID,
+		UserID:              userID,
+		Name:                input.Name,
+		HasParentalControls: false,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert user normal profile on database: %w", err)
+	}
+
+	kidsProfileID := uuid.New()
+
+	_, err = qtx.CreateProfile(ctx, sqlc.CreateProfileParams{
+		ID:                  kidsProfileID,
+		UserID:              userID,
+		Name:                "Kids",
+		HasParentalControls: true,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert user kids profile on database: %w", err)
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit user creation transaction: %w", err)
 	}
 
 	return toGraphQLModel(user), nil
