@@ -16,7 +16,6 @@ import (
 	"github.com/ecbDeveloper/netflix-architecture/apps/api/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Service interface {
@@ -31,7 +30,7 @@ type Service interface {
 
 type ServiceImpl struct {
 	repo           Repository
-	pool           *pgxpool.Pool
+	pool           shared.DBPool
 	storage        storage.Service
 	profileService profile.Service
 	publisher      queue.Publisher
@@ -39,7 +38,7 @@ type ServiceImpl struct {
 
 func NewService(
 	repo Repository,
-	pool *pgxpool.Pool,
+	pool shared.DBPool,
 	storage storage.Service,
 	ps profile.Service,
 	publisher queue.Publisher,
