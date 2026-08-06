@@ -9,11 +9,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/config"
 	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/database/sqlc"
 	"github.com/ecbDeveloper/netflix-architecture/apps/history_ms/internal/history"
 	historypb "github.com/ecbDeveloper/netflix-architecture/gen/go/history/v1"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -22,14 +22,10 @@ func main() {
 	loggerHandler := slog.NewJSONHandler(os.Stdout, nil)
 	logger := slog.New(loggerHandler)
 
-	err := godotenv.Load()
+	cfg, err := config.Load()
 	if err != nil {
-		logger.Warn("failed to load .env file", slog.Any("error", err))
-	}
-
-	grpcPort := os.Getenv("GRPC_PORT")
-	if grpcPort == "" {
-		grpcPort = "50051"
+		logger.Error("failed to load application configs", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	ctx, cancel := signal.NotifyContext(
@@ -39,12 +35,14 @@ func main() {
 	)
 	defer cancel()
 
-	pool, err := initializeDatabaseConnection(ctx)
+	pool, err := initializeDatabaseConnection(ctx, cfg)
 	if err != nil {
 		logger.Error("failed to initialize db pool", slog.Any("error", err))
 		os.Exit(1)
 	}
 	defer pool.Close()
+
+	grpcPort := cfg.GRPCPort
 
 	listener, err := net.Listen("tcp", ":"+grpcPort)
 	if err != nil {
@@ -76,17 +74,8 @@ func main() {
 	logger.Info("History grpc server stoped gracefully")
 }
 
-func initializeDatabaseConnection(ctx context.Context) (*pgxpool.Pool, error) {
-	connStr := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASS"),
-		os.Getenv("DB_NAME"),
-	)
-
-	pool, err := pgxpool.New(ctx, connStr)
+func initializeDatabaseConnection(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, error) {
+	pool, err := pgxpool.New(ctx, cfg.DSN())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new db pool: %w", err)
 	}

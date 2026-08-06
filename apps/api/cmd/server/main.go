@@ -37,7 +37,7 @@ func main() {
 
 	cfg, err := config.Load()
 	if err != nil {
-		logger.Error("invalid configuration", slog.Any("error", err))
+		logger.Error("failed to load application configs", slog.Any("error", err))
 		os.Exit(1)
 	}
 

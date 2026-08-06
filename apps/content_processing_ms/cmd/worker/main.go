@@ -20,7 +20,11 @@ func main() {
 	loggerHandler := slog.NewJSONHandler(os.Stdout, nil)
 	logger := slog.New(loggerHandler)
 
-	cfg := config.LoadConfig(logger)
+	cfg, err := config.Load()
+	if err != nil {
+		logger.Error("failed to load application configs", slog.Any("error", err))
+		os.Exit(1)
+	}
 
 	ctx, cancel := signal.NotifyContext(
 		context.Background(),

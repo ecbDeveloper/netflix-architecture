@@ -3,54 +3,40 @@ package config
 import (
 	"fmt"
 	"log/slog"
-	"os"
 
+	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Env              string
-	S3Region         string
-	S3AccessKeyID    string
-	S3SecretKey      string
-	S3EndpointURL    string
-	S3BucketName     string
-	RabbitMQHost     string
-	RabbitMQPort     string
-	RabbitMQUser     string
-	RabbitMQPass     string
-	ContentQueueName string
-	DBName           string
-	DBUser           string
-	DBPass           string
-	DBPort           string
-	DBHost           string
+	S3Region         string `env:"S3_REGION,notEmpty"`
+	S3AccessKeyID    string `env:"S3_ACCESS_KEY_ID,notEmpty"`
+	S3SecretKey      string `env:"S3_SECRET_ACCESS_KEY,notEmpty"`
+	S3EndpointURL    string `env:"S3_ENDPOINT_URL,notEmpty"`
+	S3BucketName     string `env:"S3_BUCKET_NAME,notEmpty"`
+	RabbitMQHost     string `env:"RABBITMQ_HOST,notEmpty"`
+	RabbitMQPort     string `env:"RABBITMQ_PORT,notEmpty"`
+	RabbitMQUser     string `env:"RABBITMQ_USER,notEmpty"`
+	RabbitMQPass     string `env:"RABBITMQ_PASS,notEmpty"`
+	ContentQueueName string `env:"CONTENT_QUEUE_NAME,notEmpty"`
+	DBName           string `env:"DB_NAME,notEmpty"`
+	DBUser           string `env:"DB_USER,notEmpty"`
+	DBPass           string `env:"DB_PASS,notEmpty"`
+	DBPort           string `env:"DB_PORT,notEmpty"`
+	DBHost           string `env:"DB_HOST,notEmpty"`
 }
 
-func LoadConfig(logger *slog.Logger) *Config {
-	err := godotenv.Load()
-	if err != nil {
-		logger.Info("No .env file found, using OS environment variables")
+func Load() (*Config, error) {
+	if err := godotenv.Load(); err != nil {
+		slog.Info("No .env file found, loading config from environment variables")
 	}
 
-	return &Config{
-		Env:              os.Getenv("ENV"),
-		DBName:           os.Getenv("DB_NAME"),
-		DBUser:           os.Getenv("DB_USER"),
-		DBPass:           os.Getenv("DB_PASS"),
-		DBPort:           os.Getenv("DB_PORT"),
-		DBHost:           os.Getenv("DB_HOST"),
-		S3Region:         os.Getenv("S3_REGION"),
-		S3AccessKeyID:    os.Getenv("S3_ACCESS_KEY_ID"),
-		S3SecretKey:      os.Getenv("S3_SECRET_ACCESS_KEY"),
-		S3EndpointURL:    os.Getenv("S3_ENDPOINT_URL"),
-		S3BucketName:     os.Getenv("S3_BUCKET_NAME"),
-		RabbitMQHost:     os.Getenv("RABBITMQ_HOST"),
-		RabbitMQPort:     os.Getenv("RABBITMQ_PORT"),
-		RabbitMQUser:     os.Getenv("RABBITMQ_USER"),
-		RabbitMQPass:     os.Getenv("RABBITMQ_PASS"),
-		ContentQueueName: os.Getenv("CONTENT_QUEUE_NAME"),
+	var cfg Config
+	if err := env.Parse(&cfg); err != nil {
+		return nil, err
 	}
+
+	return &cfg, nil
 }
 
 func (c *Config) DSN() string {

@@ -54,7 +54,13 @@ func main() {
 
 func seedUsers(ctx context.Context, queries *sqlc.Queries, pool *pgxpool.Pool) []sqlc.User {
 	log.Println("Seeding users...")
-	passHash, _ := bcrypt.GenerateFromPassword([]byte("Senha@123"), bcrypt.DefaultCost)
+
+	password := os.Getenv("ADMIN_PASSWORD")
+	adminEmail := os.Getenv("ADMIN_EMAIL")
+	passHash, _ := bcrypt.GenerateFromPassword(
+		[]byte(password),
+		bcrypt.DefaultCost,
+	)
 
 	usersData := []struct {
 		email string
@@ -62,14 +68,13 @@ func seedUsers(ctx context.Context, queries *sqlc.Queries, pool *pgxpool.Pool) [
 		cpf   string
 		role  int
 	}{
-		{"admin@netflix.com", "João Administrador", "11122233344", 1},
+		{adminEmail, "João Administrador", "11122233344", 1},
 		{"maria@gmail.com", "Maria Silva", "55566677788", 2},
 		{"carlos@hotmail.com", "Carlos Pereira", "99988877766", 2},
 	}
 
 	var createdUsers []sqlc.User
 	for _, ud := range usersData {
-		// Use raw query for role_id update or check if it already exists
 		var existingUser sqlc.User
 		err := pool.QueryRow(ctx, "SELECT id, email, name, cpf, role_id FROM users WHERE email = $1", ud.email).Scan(
 			&existingUser.ID, &existingUser.Email, &existingUser.Name, &existingUser.Cpf, &existingUser.RoleID,
@@ -191,7 +196,7 @@ func seedContents(ctx context.Context, queries *sqlc.Queries, profiles []sqlc.Pr
 		ID:             series1ID,
 		Title:          "Breaking Bad",
 		ContentType:    sqlc.ContentTypeSERIES,
-		GenreID:        3, // Drama
+		GenreID:        3,
 		Description:    "Um professor de química com câncer terminal se une a um ex-aluno para fabricar e vender metanfetamina para garantir o futuro de sua família.",
 		ReleaseDate:    time.Date(2008, 1, 20, 0, 0, 0, 0, time.UTC),
 		MaturityRating: sqlc.MaturityRating18,
